@@ -44,6 +44,7 @@ CREATE TABLE Empresa(
 CREATE TABLE Curriculum(
     curriculum_id INT PRIMARY KEY AUTO_INCREMENT,
     curriculum_nombre VARCHAR(100),
+    categoria_interes VARCHAR(100),
     habilidades TEXT,
     experiencia TEXT,
     formacion TEXT,
@@ -62,6 +63,7 @@ CREATE TABLE Vacante(
     vacante_id INT PRIMARY KEY AUTO_INCREMENT,
     vacante_nombre VARCHAR(100) NOT NULL,
     vacante_descripcion TEXT,
+    habilidades_requeridas TEXT,
     categoria VARCHAR(100),
     salario DECIMAL(10,2),
     ubicacion VARCHAR(100),
@@ -81,6 +83,7 @@ CREATE TABLE Postulacion(
     postulacion_id INT PRIMARY KEY AUTO_INCREMENT,
     usuario_id INT,
     vacante_id INT,
+    porcentaje_compatibilidad INT DEFAULT 0,
     fecha_postulacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     estado ENUM('Pendiente','En Revision','Aceptado','Rechazado')
         DEFAULT 'Pendiente',
@@ -111,9 +114,11 @@ CREATE TABLE Historial(
 CREATE TABLE BancoPreguntas(
     pregunta_id INT PRIMARY KEY AUTO_INCREMENT,
     pregunta VARCHAR(255),
+    opciones JSON,
+    categoria VARCHAR(255),
     respuesta_correcta VARCHAR(255),
     categoria VARCHAR(100),
-    nivel ENUM('Basico','Intermedio','Avanzado')
+0    nivel ENUM('Basico','Intermedio','Avanzado')
 );
  
 -- ==========================
@@ -124,9 +129,13 @@ CREATE TABLE Evaluacion(
     evaluacion_nombre VARCHAR(100),
     categoria VARCHAR(100),
     empresa_id INT,
+    pregunta_id INT,
     FOREIGN KEY(empresa_id)
         REFERENCES Empresa(empresa_id)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY(pregunta_id)
+    REFERENCES BancoPreguntas(pregunta_id)
+    ON DELETE CASCADE
 );
  
 -- ==========================
@@ -136,17 +145,13 @@ CREATE TABLE RespuestaEvaluacion(
     respuesta_id INT PRIMARY KEY AUTO_INCREMENT,
     usuario_id INT,
     evaluacion_id INT,
-    pregunta_id INT,
-    respuesta_usuario VARCHAR(255),
-    correcta BOOLEAN,
+    nota_final DECIMAL(10,2) DEFAULT 0.00,
+    fecha_realizacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(usuario_id)
         REFERENCES Usuario(usuario_id)
         ON DELETE CASCADE,
     FOREIGN KEY(evaluacion_id)
         REFERENCES Evaluacion(evaluacion_id)
-        ON DELETE CASCADE,
-    FOREIGN KEY(pregunta_id)
-        REFERENCES BancoPreguntas(pregunta_id)
         ON DELETE CASCADE
 );
  

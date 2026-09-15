@@ -118,7 +118,7 @@ CREATE TABLE BancoPreguntas(
     categoria VARCHAR(255),
     respuesta_correcta VARCHAR(255),
     categoria VARCHAR(100),
-0    nivel ENUM('Basico','Intermedio','Avanzado')
+    nivel ENUM('Basico','Intermedio','Avanzado')
 );
  
 -- ==========================

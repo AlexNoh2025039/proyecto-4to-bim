@@ -10,7 +10,7 @@ import postulacionesRoutes from './routes/PostulacionesRouter.js';
 import historialRoutes from './routes/HistorialRouter.js';
 import bancoPreguntasRoutes from './routes/BancoPreguntasRouter.js';
 import evaluacionRoutes from './routes/EvaluacionRouter.js';
-import respuestaEvaluacionRoutes from './routes/RespuestaEvaluacion.js';
+import respuestaEvaluacionRoutes from './routes/RespuestaEvaluacionRouter.js';
 import notificacionRoutes from './routes/NotificacionesRouter.js';
 
 const app = express();
@@ -48,4 +48,12 @@ const port = process.env.PORT || 3000;
 
 export const server = app.listen(port, () => {
   console.log(`Servidor TalentBridge ejecutándose en http://localhost:${port}`);
+});
+
+app.get('/api/ping', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: '¡Conexión establecida con éxito, sujeto de pruebas!', 
+    timestamp: new Date().toISOString() 
+  });
 });

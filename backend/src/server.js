@@ -2,17 +2,16 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
-import authRoutes from './routes/auth.js';
-import usuarioRoutes from './routes/usuario.js';
-import empresaRoutes from './routes/empresa.js';
-import curriculumRoutes from './routes/curriculum.js';
-import vacantesRoutes from './routes/vacante.js';
-import postulacionesRoutes from './routes/postulacion.js';
-import historialRoutes from './routes/historial.js';
-import bancoPreguntasRoutes from './routes/bancoPreguntas.js';
-import evaluacionRoutes from './routes/evaluacion.js';
-import respuestaEvaluacionRoutes from './routes/respuestaEvaluacion.js';
-import notificacionRoutes from './routes/notificacion.js';
+import usuarioRoutes from './routes/UsuarioRouter.js';
+import empresaRoutes from './routes/EmpresaRouter.js';
+import curriculumRoutes from './routes/CurriculumRouter.js';
+import vacantesRoutes from './routes/VacantesRouter.js';
+import postulacionesRoutes from './routes/PostulacionesRouter.js';
+import historialRoutes from './routes/HistorialRouter.js';
+import bancoPreguntasRoutes from './routes/BancoPreguntasRouter.js';
+import evaluacionRoutes from './routes/EvaluacionRouter.js';
+import respuestaEvaluacionRoutes from './routes/RespuestaEvaluacion.js';
+import notificacionRoutes from './routes/NotificacionesRouter.js';
 
 const app = express();
 
@@ -27,7 +26,6 @@ app.use((_req, res, next) => {
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/empresas', empresaRoutes);
 app.use('/api/curriculums', curriculumRoutes);
@@ -42,8 +40,7 @@ app.use('/api/notificaciones', notificacionRoutes);
 app.get('/api/health', (_req, res) => {
   res.json({ 
     status: 'ok', 
-    service: 'TalentBridge-Backend', 
-    timestamp: new Date() 
+    service: 'TalentBridge-Backend'
   });
 });
 

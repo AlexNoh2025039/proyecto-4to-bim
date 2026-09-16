@@ -5,9 +5,8 @@ const { Client } = pg;
 
 async function main() {
   const dbName = 'TalentBridge';
-  const baseUrl = process.env.DATABASE_URL.substring(0, process.env.DATABASE_URL.lastIndexOf('/'));
   
-  const admin = new Client({ connectionString: `${baseUrl}/postgres` });
+  const admin = new Client({ connectionString: process.env.DATABASE_URL.replace('/TalentBridge', '/postgres') });
   await admin.connect();
   
   const database = await admin.query(
@@ -22,7 +21,7 @@ async function main() {
 
   await admin.end();
 
-  const db = new Client({ connectionString: `${baseUrl}/${dbName}` });
+  const db = new Client({ connectionString: process.env.DATABASE_URL });
   await db.connect();
   const schemaQuery = `
     -- Crear Tipos ENUM

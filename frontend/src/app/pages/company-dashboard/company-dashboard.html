@@ -1,0 +1,85 @@
+<div class="dashboard-container">
+  <h2>Panel de Control - Gestion de Vacantes</h2>
+
+  <div class="dashboard-content">
+    <section class="form-section">
+      <h3>{{ isEditing ? 'Editar Vacante' : 'Publicar Nueva Vacante' }}</h3>
+      
+      <form [formGroup]="vacanteForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="vacante_nombre">Titulo de la Vacante</label>
+          <input id="vacante_nombre" type="text" formControlName="vacante_nombre" placeholder="Ej. Desarrollador Web">
+        </div>
+
+        <div class="form-group">
+          <label for="categoria">Categoria</label>
+          <input id="categoria" type="text" formControlName="categoria" placeholder="Ej. Tecnologia">
+        </div>
+
+        <div class="form-group">
+          <label for="salario">Salario (Q)</label>
+          <input id="salario" type="number" formControlName="salario" placeholder="Ej. 5000">
+        </div>
+
+        <div class="form-group">
+          <label for="ubicacion">Ubicacion</label>
+          <input id="ubicacion" type="text" formControlName="ubicacion" placeholder="Ej. Ciudad de Guatemala">
+        </div>
+
+        <div class="form-group">
+          <label for="tipo_jornada">Tipo de Jornada</label>
+          <select id="tipo_jornada" formControlName="tipo_jornada">
+            <option value="Tiempo Completo">Tiempo Completo</option>
+            <option value="Medio Tiempo">Medio Tiempo</option>
+            <option value="Freelance">Freelance</option>
+            <option value="Temporal">Temporal</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="habilidades_requeridas">Habilidades Requeridas</label>
+          <textarea id="habilidades_requeridas" rows="2" formControlName="habilidades_requeridas" placeholder="Ej. Angular, PostgreSQL, Spring Boot..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="vacante_descripcion">Descripcion General</label>
+          <textarea id="vacante_descripcion" rows="3" formControlName="vacante_descripcion" placeholder="Detalles del puesto..."></textarea>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label for="estado">
+            <input id="estado" type="checkbox" formControlName="estado">
+            Vacante Activa
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="vacanteForm.invalid" class="btn btn-primary">
+            {{ isEditing ? 'Guardar Cambios' : 'Crear Vacante' }}
+          </button>
+          <button type="button" *ngIf="isEditing" (click)="resetForm()" class="btn btn-secondary">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="list-section">
+      <h3>Tus Vacantes Publicadas</h3>
+      
+      <div class="cards-grid" *ngIf="vacantes.length > 0; else noData">
+        <app-job-card 
+          *ngFor="let v of vacantes" 
+          [vacante]="v" 
+          [isCompanyOwner]="true"
+          (edit)="onEdit($event)"
+          (delete)="onDelete($event)">
+        </app-job-card>
+      </div>
+
+      <ng-template #noData>
+        <p class="empty-state">No se han registrado vacantes todavia.</p>
+      </ng-template>
+    </section>
+  </div>
+</div>

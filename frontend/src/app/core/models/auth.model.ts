@@ -40,7 +40,7 @@ export interface RegisterRequest {
   usuario_correo: string;
   usuario_password: string;
 
-  usuario_dpi?: string;
+  usuario_dpi: string;
   usuario_telefono?: string;
   usuario_profesion?: string;
 }

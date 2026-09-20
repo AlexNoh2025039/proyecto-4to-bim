@@ -1,5 +1,5 @@
 export interface Historial {
-    historial_id: number;
+    historial_id?: number;
     descripcion: string;
     fecha: string;
     postulacion_id: number;

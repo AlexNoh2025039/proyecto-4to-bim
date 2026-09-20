@@ -1,5 +1,5 @@
 export interface Postulacion {
-    postulacion_id: number;
+    postulacion_id?: number;
     usuario_id: number;
     vacante_id: number;
     porcentaje_compatibilidad: number;

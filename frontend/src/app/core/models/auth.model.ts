@@ -39,8 +39,7 @@ export interface RegisterRequest {
   usuario_apellido: string;
   usuario_correo: string;
   usuario_password: string;
-
-  usuario_dpi?: string;
+  usuario_dpi: string;
   usuario_telefono?: string;
   usuario_profesion?: string;
 }
@@ -61,7 +60,7 @@ export interface ActualizarUsuarioRequest {
   usuario_apellido: string;
   usuario_correo: string;
   usuario_telefono: string | null;
-  usuario_dpi: string | null;
+  usuario_dpi: string;
   usuario_profesion: string | null;
 }
 

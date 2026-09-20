@@ -31,7 +31,7 @@ export interface RegisterRequest {
     usuario_rol: RolUsuario;
     usuario_dpi: string;
     usuario_telefono?: string;
-    usuario_profesion?: string;
+     usuario_profesion?: string;
 }
 
 export interface LoginResponse {

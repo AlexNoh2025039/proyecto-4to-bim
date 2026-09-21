@@ -34,9 +34,10 @@ export class LoginComponent {
       next: () => {
         this.router.navigateByUrl('/home');
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Error al iniciar sesión. Verifica tus credenciales.');
+        console.error('Error en login:', err);
+        this.errorMessage.set(err.error?.message || 'Correo o contraseña incorrectos.');
       }
     });
   }

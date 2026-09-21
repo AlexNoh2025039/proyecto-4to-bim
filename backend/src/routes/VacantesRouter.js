@@ -36,8 +36,8 @@ function validateVacante({ vacante_nombre, salario, tipo_jornada, empresa_id }) 
 
 router.get('/', async (_req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM Vacante ORDER BY vacante_id ASC');
-    res.json({ vacantes: rows });
+    const result = await pool.query('SELECT * FROM Vacante ORDER BY vacante_id ASC');
+    res.json({ vacantes: result.rows });
   } catch (error) {
     console.error('Error al obtener la lista de vacantes:', error);
     res.status(500).json({ message: 'No fue posible consultar las vacantes' });
@@ -45,15 +45,20 @@ router.get('/', async (_req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  const { id } = req.params;
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ message: 'El ID de la vacante no es válido' });
+  }
+
   try {
-    const [rows] = await pool.query('SELECT * FROM Vacante WHERE vacante_id = ?', [id]);
+    const result = await pool.query('SELECT * FROM Vacante WHERE vacante_id = $1', [id]);
     
-    if (rows.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontró la vacante solicitada' });
     }
 
-    res.json({ vacante: rows[0] });
+    res.json({ vacante: result.rows[0] });
   } catch (error) {
     console.error('Error al consultar la vacante:', error);
     res.status(500).json({ message: 'Ocurrió un error al buscar la vacante' });
@@ -69,22 +74,30 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const [result] = await pool.query(
+    const result = await pool.query(
       `INSERT INTO Vacante (vacante_nombre, vacante_descripcion, categoria, salario, ubicacion, tipo_jornada, empresa_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING *`,
       [vacante_nombre.trim(), vacante_descripcion, categoria, salario, ubicacion, tipo_jornada, empresa_id]
     );
 
-    const [newVacante] = await pool.query('SELECT * FROM Vacante WHERE vacante_id = ?', [result.insertId]);
-    res.status(201).json({ vacante: newVacante[0] });
+    res.status(201).json({ vacante: result.rows[0] });
   } catch (error) {
     console.error('Error al registrar la vacante:', error);
+    if (error.code === '23503') {
+      return res.status(400).json({ message: 'La empresa especificada no existe' });
+    }
     res.status(500).json({ message: 'No se pudo crear la vacante' });
   }
 });
 
 router.put('/:id', async (req, res) => {
-  const { id } = req.params;
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ message: 'El ID de la vacante no es válido' });
+  }
+
   const { vacante_nombre, vacante_descripcion, categoria, salario, ubicacion, tipo_jornada, estado, empresa_id } = req.body;
 
   const validationError = validateVacante({ vacante_nombre, salario, tipo_jornada, empresa_id });
@@ -93,19 +106,19 @@ router.put('/:id', async (req, res) => {
   }
 
   try {
-    const [result] = await pool.query(
+    const result = await pool.query(
       `UPDATE Vacante 
-       SET vacante_nombre = ?, vacante_descripcion = ?, categoria = ?, salario = ?, ubicacion = ?, tipo_jornada = ?, estado = ?
-       WHERE vacante_id = ?`,
-      [vacante_nombre.trim(), vacante_descripcion, categoria, salario, ubicacion, tipo_jornada, estado, id]
+       SET vacante_nombre = $1, vacante_descripcion = $2, categoria = $3, salario = $4, ubicacion = $5, tipo_jornada = $6, estado = $7
+       WHERE vacante_id = $8
+       RETURNING *`,
+      [vacante_nombre.trim(), vacante_descripcion, categoria, salario, ubicacion, tipo_jornada, estado ?? true, id]
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontró la vacante para actualizar' });
     }
 
-    const [updated] = await pool.query('SELECT * FROM Vacante WHERE vacante_id = ?', [id]);
-    res.json({ vacante: updated[0] });
+    res.json({ vacante: result.rows[0] });
   } catch (error) {
     console.error('Error al actualizar la vacante:', error);
     res.status(500).json({ message: 'No se pudo guardar la actualización de la vacante' });
@@ -113,11 +126,16 @@ router.put('/:id', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ message: 'El ID de la vacante no es válido' });
+  }
+
   try {
-    const [result] = await pool.query('DELETE FROM Vacante WHERE vacante_id = ?', [id]);
+    const result = await pool.query('DELETE FROM Vacante WHERE vacante_id = $1 RETURNING vacante_id', [id]);
     
-    if (result.affectedRows === 0) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontró la vacante a eliminar' });
     }
 

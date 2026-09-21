@@ -1,1 +1,68 @@
-<p>job-detail works!</p>
+<div class="detail-container">
+  <div *ngIf="loading" class="state-message">
+    <p>Cargando informacion de la oferta...</p>
+  </div>
+
+  <div *ngIf="errorMsg" class="state-message error">
+    <p>{{ errorMsg }}</p>
+    <a routerLink="/home" class="btn btn-secondary">Volver al inicio</a>
+  </div>
+
+  <div *ngIf="!loading && !errorMsg && vacante" class="detail-content">
+    <div class="back-navigation">
+      <a routerLink="/home" class="back-link">Regresar a vacantes</a>
+    </div>
+
+    <header class="detail-header">
+      <div>
+        <h1 class="title">{{ vacante.vacante_nombre }}</h1>
+        <h2 class="company" *ngIf="empresa">{{ empresa.empresa_nombre }}</h2>
+      </div>
+      <span class="badge" [ngClass]="{'active': vacante.estado, 'inactive': !vacante.estado}">
+        {{ vacante.estado ? 'Disponible' : 'Cerrada' }}
+      </span>
+    </header>
+
+    <div class="metadata-grid">
+      <div class="meta-item" *ngIf="vacante.ubicacion">
+        <span class="meta-label">Ubicacion</span>
+        <span class="meta-value">{{ vacante.ubicacion }}</span>
+      </div>
+      <div class="meta-item" *ngIf="vacante.tipo_jornada">
+        <span class="meta-label">Jornada</span>
+        <span class="meta-value">{{ vacante.tipo_jornada }}</span>
+      </div>
+      <div class="meta-item" *ngIf="vacante.salario">
+        <span class="meta-label">Salario ofrecido</span>
+        <span class="meta-value">Q{{ vacante.salario | number:'1.2-2' }}</span>
+      </div>
+      <div class="meta-item" *ngIf="vacante.categoria">
+        <span class="meta-label">Categoria</span>
+        <span class="meta-value">{{ vacante.categoria }}</span>
+      </div>
+    </div>
+
+    <section class="section" *ngIf="vacante.habilidades_requeridas">
+      <h3>Habilidades requeridas</h3>
+      <p class="description-text">{{ vacante.habilidades_requeridas }}</p>
+    </section>
+
+    <section class="section">
+      <h3>Descripcion del puesto</h3>
+      <p class="description-text">
+        {{ vacante.vacante_descripcion || 'Sin descripcion disponible.' }}
+      </p>
+    </section>
+
+    <section class="section company-info" *ngIf="empresa">
+      <h3>Sobre la empresa</h3>
+      <p *ngIf="empresa.empresa_descripcion">{{ empresa.empresa_descripcion }}</p>
+      <div class="contact-details">
+        <p *ngIf="empresa.empresa_correo">Correo: {{ empresa.empresa_correo }}</p>
+        <p *ngIf="empresa.empresa_telefono">Telefono: {{ empresa.empresa_telefono }}</p>
+        <p *ngIf="empresa.empresa_direccion">Direccion: {{ empresa.empresa_direccion }}</p>
+        <p *ngIf="empresa.empresa_nit">NIT: {{ empresa.empresa_nit }}</p>
+      </div>
+    </section>
+  </div>
+</div>

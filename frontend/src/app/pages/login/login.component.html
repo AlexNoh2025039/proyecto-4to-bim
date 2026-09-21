@@ -1,1 +1,25 @@
-<p>login.component works!</p>
+<div class="container">
+  <h2>Iniciar Sesión</h2>
+  
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label for="correo">Correo Electrónico:</label>
+      <input id="correo" type="email" formControlName="usuario_correo" placeholder="ejemplo@correo.com">
+    </div>
+
+    <div>
+      <label for="password">Contraseña:</label>
+      <input id="password" type="password" formControlName="usuario_password" placeholder="Mínimo 6 caracteres">
+    </div>
+
+    <div *ngIf="errorMessage()" class="alert error">
+      {{ errorMessage() }}
+    </div>
+
+    <button type="submit" [disabled]="loginForm.invalid || isLoading()">
+      {{ isLoading() ? 'Ingresando...' : 'Ingresar' }}
+    </button>
+  </form>
+
+  <p>¿No tienes una cuenta? <a routerLink="/register">Regístrate aquí</a></p>
+</div>

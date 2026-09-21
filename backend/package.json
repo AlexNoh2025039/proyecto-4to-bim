@@ -15,7 +15,8 @@
   "packageManager": "pnpm@10.29.2",
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^26.5.0"
+    "@types/node": "^26.5.0",
+    "typescript": "^7.0.2"
   },
   "dependencies": {
     "cors": "^2.8.6",

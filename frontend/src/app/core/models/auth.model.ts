@@ -29,13 +29,8 @@ export interface RegisterRequest {
     usuario_correo: string;
     usuario_password: string;
     usuario_rol: RolUsuario;
-<<<<<<< HEAD
-     usuario_telefono?: string;
-    usuario_dpi?: string;
-=======
     usuario_dpi: string;
     usuario_telefono?: string;
->>>>>>> a129bb5 (Funcionalidad de login y register)
     usuario_profesion?: string;
 }
 

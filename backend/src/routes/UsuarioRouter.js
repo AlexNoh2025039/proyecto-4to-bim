@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
 import { requireAuth } from '../middlewares/auth.js';
+import jwt from 'jsonwebtoken'
 
 const router = Router();
 
@@ -89,6 +90,59 @@ router.post('/', async (req, res) => {
     res.status(500).json({ message: 'No se pudo crear el usuario' });
   }
 });
+
+router.post('/login', async (req, res) => {
+  const { usuario_correo, usuario_password } = req.body;
+
+  if (!usuario_correo || !usuario_password) {
+    return res.status(400).json({ message: 'Por favor, ingrese correo y contraseña' });
+  }
+
+  try {
+    // 1. Buscar el usuario en la base de datos
+    const result = await pool.query(
+      `SELECT * FROM Usuario WHERE usuario_correo = $1`,
+      [usuario_correo]
+    );
+
+    const usuario = result.rows[0];
+
+    if (!usuario) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    // 2. Validar contraseña (Ajusta si usas bcrypt.compare)
+    if (usuario.usuario_password !== usuario_password) {
+      return res.status(401).json({ message: 'Credenciales inválidas' });
+    }
+
+    // 3. Generar JWT (Ajusta la clave secreta según las variables de entorno)
+    const secretKey = process.env.JWT_SECRET || 'mi_secreto_super_seguro';
+    const token = jwt.sign(
+      { 
+        usuario_id: usuario.usuario_id, 
+        usuario_correo: usuario.usuario_correo, 
+        usuario_rol: usuario.usuario_rol 
+      },
+      secretKey,
+      { expiresIn: '8h' }
+    );
+
+    // Omitir la contraseña en la respuesta final
+    delete usuario.usuario_password;
+
+    res.json({
+      message: 'Inicio de sesión exitoso',
+      token,
+      usuario
+    });
+
+  } catch (error) {
+    console.error('Error en el login:', error);
+    res.status(500).json({ message: 'Error interno en el servidor' });
+  }
+});
+
 
 // A partir de aquí, todas las siguientes rutas SÍ requieren estar autenticado
 router.use(requireAuth);

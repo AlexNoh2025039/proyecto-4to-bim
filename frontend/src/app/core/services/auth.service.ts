@@ -38,7 +38,7 @@ export class AuthService {
 
         return this.http
             .post<LoginResponse>(
-                `${environment.apiUrl}/auth/login`,
+                `${environment.apiUrl}/usuarios/login`,
                 body
             )
             .pipe(
@@ -56,7 +56,7 @@ export class AuthService {
             usuario_password: data.usuario_password,
             usuario_rol: data.usuario_rol,
             usuario_telefono: data.usuario_telefono?.trim(),
-            usuario_dpi: data.usuario_dpi?.trim(),
+            usuario_dpi: data.usuario_dpi.trim(),
             usuario_profesion: data.usuario_profesion?.trim(),
         };
 

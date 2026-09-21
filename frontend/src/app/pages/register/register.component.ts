@@ -27,7 +27,7 @@ export class RegisterComponent {
     usuario_password: ['', [Validators.required, Validators.minLength(6)]],
     usuario_rol: ['Candidato' as RolUsuario, Validators.required], // Tipado exacto según tu modelo
     usuario_telefono: ['', Validators.maxLength(20)],
-    usuario_dpi: ['', Validators.maxLength(20)],
+    usuario_dpi: ['', Validators.maxLength(13)],
     usuario_profesion: ['', Validators.maxLength(100)]
   });
 

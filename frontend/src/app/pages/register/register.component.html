@@ -30,6 +30,15 @@
       </div>
     </div>
 
+      <div>
+      <label>DPI:</label>
+      <input type="text" formControlName="usuario_dpi" placeholder="Número de DPI">
+      <div *ngIf="registerForm.get('usuario_dpi')?.invalid && (registerForm.get('usuario_dpi')?.dirty || registerForm.get('usuario_dpi')?.touched)" class="alert error">
+        <small *ngIf="registerForm.get('usuario_password')?.errors?.['required']">El DPI es obligatoria.</small>
+        <small *ngIf="registerForm.get('usuario_dpi')?.errors?.['maxlength']">Máximo 20 caracteres.</small>
+      </div>
+    </div>
+
     <div>
       <label>Contraseña:</label>
       <input type="password" formControlName="usuario_password" placeholder="Mínimo 6 caracteres">
@@ -52,14 +61,6 @@
       <input type="text" formControlName="usuario_telefono" placeholder="Número de teléfono">
       <div *ngIf="registerForm.get('usuario_telefono')?.invalid && (registerForm.get('usuario_telefono')?.dirty || registerForm.get('usuario_telefono')?.touched)" class="alert error">
         <small *ngIf="registerForm.get('usuario_telefono')?.errors?.['maxlength']">Máximo 20 caracteres.</small>
-      </div>
-    </div>
-
-    <div>
-      <label>DPI (Opcional):</label>
-      <input type="text" formControlName="usuario_dpi" placeholder="Número de DPI">
-      <div *ngIf="registerForm.get('usuario_dpi')?.invalid && (registerForm.get('usuario_dpi')?.dirty || registerForm.get('usuario_dpi')?.touched)" class="alert error">
-        <small *ngIf="registerForm.get('usuario_dpi')?.errors?.['maxlength']">Máximo 20 caracteres.</small>
       </div>
     </div>
 

@@ -7,7 +7,7 @@ const router = Router();
 router.use(requireAuth);
 
 
-function validateUsuario({ usuario_nombre, usuario_apellido, usuario_correo, usuario_contrasena, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol }) {
+function validateUsuario({ usuario_nombre, usuario_apellido, usuario_correo, usuario_password, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol }) {
   if (!usuario_nombre || usuario_nombre.length > 50) {
     return 'El nombre del usuario no puede estar vacío ni superar los 50 caracteres';
   }
@@ -21,7 +21,7 @@ function validateUsuario({ usuario_nombre, usuario_apellido, usuario_correo, usu
     return 'Debe proporcionar un correo electrónico válido (máximo 100 caracteres)';
   }
 
-  if (!usuario_contrasena || usuario_contrasena.length < 6) {
+  if (!usuario_password || usuario_password.length < 6) {
     return 'La contraseña es obligatoria y debe tener al menos 6 caracteres';
   }
 
@@ -59,7 +59,6 @@ router.get('/', async (_req, res) => {
   }
 });
 
-// GET: Obtener un usuario por ID
 router.get('/:id', async (req, res) => {
   const id = Number(req.params.id);
 
@@ -91,7 +90,7 @@ router.post('/', async (req, res) => {
     usuario_nombre, 
     usuario_apellido, 
     usuario_correo, 
-    usuario_contrasena, 
+    usuario_password, 
     usuario_perfil = null, 
     usuario_telefono = null, 
     usuario_dpi = null, 
@@ -103,7 +102,7 @@ router.post('/', async (req, res) => {
     usuario_nombre, 
     usuario_apellido, 
     usuario_correo, 
-    usuario_contrasena, 
+    usuario_password, 
     usuario_telefono, 
     usuario_dpi, 
     usuario_profesion, 
@@ -116,10 +115,10 @@ router.post('/', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO Usuario (usuario_nombre, usuario_apellido, usuario_correo, usuario_contrasena, usuario_perfil, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol)
+      `INSERT INTO Usuario (usuario_nombre, usuario_apellido, usuario_correo, usuario_password, usuario_perfil, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING usuario_id, usuario_nombre, usuario_apellido, usuario_correo, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol, fecha_registro, estado`,
-      [usuario_nombre, usuario_apellido, usuario_correo, usuario_contrasena, usuario_perfil, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol]
+      [usuario_nombre, usuario_apellido, usuario_correo, usuario_password, usuario_perfil, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol]
     );
 
     res.status(201).json({ usuario: result.rows[0] });
@@ -144,7 +143,7 @@ router.put('/:id', async (req, res) => {
     usuario_nombre, 
     usuario_apellido, 
     usuario_correo, 
-    usuario_contrasena, 
+    usuario_password, 
     usuario_perfil, 
     usuario_telefono, 
     usuario_dpi, 
@@ -157,7 +156,7 @@ router.put('/:id', async (req, res) => {
     usuario_nombre, 
     usuario_apellido, 
     usuario_correo, 
-    usuario_contrasena, 
+    usuario_password, 
     usuario_telefono, 
     usuario_dpi, 
     usuario_profesion, 
@@ -171,12 +170,12 @@ router.put('/:id', async (req, res) => {
   try {
     const result = await pool.query(
       `UPDATE Usuario
-       SET usuario_nombre = $1, usuario_apellido = $2, usuario_correo = $3, usuario_contrasena = $4, 
+       SET usuario_nombre = $1, usuario_apellido = $2, usuario_correo = $3, usuario_password = $4, 
            usuario_perfil = $5, usuario_telefono = $6, usuario_dpi = $7, usuario_profesion = $8, 
            usuario_rol = $9, estado = COALESCE($10, estado)
        WHERE usuario_id = $11
        RETURNING usuario_id, usuario_nombre, usuario_apellido, usuario_correo, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol, fecha_registro, estado`,
-      [usuario_nombre, usuario_apellido, usuario_correo, usuario_contrasena, usuario_perfil, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol, estado, id]
+      [usuario_nombre, usuario_apellido, usuario_correo, usuario_password, usuario_perfil, usuario_telefono, usuario_dpi, usuario_profesion, usuario_rol, estado, id]
     );
 
     if (!result.rows[0]) {

@@ -1,1 +1,84 @@
-<p>register.component works!</p>
+<div class="container">
+  <h2>Crear Cuenta</h2>
+  
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <div>
+      <label>Nombre:</label>
+      <input type="text" formControlName="usuario_nombre" placeholder="Tu nombre">
+      <div *ngIf="registerForm.get('usuario_nombre')?.invalid && (registerForm.get('usuario_nombre')?.dirty || registerForm.get('usuario_nombre')?.touched)" class="alert error">
+        <small *ngIf="registerForm.get('usuario_nombre')?.errors?.['required']">El nombre es obligatorio.</small>
+        <small *ngIf="registerForm.get('usuario_nombre')?.errors?.['maxlength']">Máximo 50 caracteres.</small>
+      </div>
+    </div>
+
+    <div>
+      <label>Apellido:</label>
+      <input type="text" formControlName="usuario_apellido" placeholder="Tu apellido">
+      <div *ngIf="registerForm.get('usuario_apellido')?.invalid && (registerForm.get('usuario_apellido')?.dirty || registerForm.get('usuario_apellido')?.touched)" class="alert error">
+        <small *ngIf="registerForm.get('usuario_apellido')?.errors?.['required']">El apellido es obligatorio.</small>
+        <small *ngIf="registerForm.get('usuario_apellido')?.errors?.['maxlength']">Máximo 50 caracteres.</small>
+      </div>
+    </div>
+
+    <div>
+      <label>Correo Electrónico:</label>
+      <input type="email" formControlName="usuario_correo" placeholder="ejemplo@correo.com">
+      <div *ngIf="registerForm.get('usuario_correo')?.invalid && (registerForm.get('usuario_correo')?.dirty || registerForm.get('usuario_correo')?.touched)" class="alert error">
+        <small *ngIf="registerForm.get('usuario_correo')?.errors?.['required']">El correo es obligatorio.</small>
+        <small *ngIf="registerForm.get('usuario_correo')?.errors?.['email']">Formato de correo inválido.</small>
+        <small *ngIf="registerForm.get('usuario_correo')?.errors?.['maxlength']">Máximo 100 caracteres.</small>
+      </div>
+    </div>
+
+    <div>
+      <label>Contraseña:</label>
+      <input type="password" formControlName="usuario_password" placeholder="Mínimo 6 caracteres">
+      <div *ngIf="registerForm.get('usuario_password')?.invalid && (registerForm.get('usuario_password')?.dirty || registerForm.get('usuario_password')?.touched)" class="alert error">
+        <small *ngIf="registerForm.get('usuario_password')?.errors?.['required']">La contraseña es obligatoria.</small>
+        <small *ngIf="registerForm.get('usuario_password')?.errors?.['minlength']">Debe tener al menos 6 caracteres.</small>
+      </div>
+    </div>
+
+    <div>
+      <label>Rol:</label>
+      <select formControlName="usuario_rol">
+        <option value="Candidato">Candidato</option>
+        <option value="Empresa">Empresa</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Teléfono (Opcional):</label>
+      <input type="text" formControlName="usuario_telefono" placeholder="Número de teléfono">
+      <div *ngIf="registerForm.get('usuario_telefono')?.invalid && (registerForm.get('usuario_telefono')?.dirty || registerForm.get('usuario_telefono')?.touched)" class="alert error">
+        <small *ngIf="registerForm.get('usuario_telefono')?.errors?.['maxlength']">Máximo 20 caracteres.</small>
+      </div>
+    </div>
+
+    <div>
+      <label>DPI (Opcional):</label>
+      <input type="text" formControlName="usuario_dpi" placeholder="Número de DPI">
+      <div *ngIf="registerForm.get('usuario_dpi')?.invalid && (registerForm.get('usuario_dpi')?.dirty || registerForm.get('usuario_dpi')?.touched)" class="alert error">
+        <small *ngIf="registerForm.get('usuario_dpi')?.errors?.['maxlength']">Máximo 20 caracteres.</small>
+      </div>
+    </div>
+
+    <div>
+      <label>Profesión (Opcional):</label>
+      <input type="text" formControlName="usuario_profesion" placeholder="Tu profesión">
+      <div *ngIf="registerForm.get('usuario_profesion')?.invalid && (registerForm.get('usuario_profesion')?.dirty || registerForm.get('usuario_profesion')?.touched)" class="alert error">
+        <small *ngIf="registerForm.get('usuario_profesion')?.errors?.['maxlength']">Máximo 100 caracteres.</small>
+      </div>
+    </div>
+
+    <div *ngIf="errorMessage()" class="alert error">
+      {{ errorMessage() }}
+    </div>
+
+    <button type="submit" [disabled]="registerForm.invalid || isLoading()">
+      {{ isLoading() ? 'Registrando...' : 'Registrarse' }}
+    </button>
+  </form>
+
+  <p>¿Ya tienes una cuenta? <a routerLink="/login">Inicia sesión</a></p>
+</div>

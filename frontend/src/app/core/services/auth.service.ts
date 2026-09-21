@@ -49,7 +49,7 @@ export class AuthService {
             usuario_apellido: data.usuario_apellido.trim(),
             usuario_correo: data.usuario_correo.trim().toLowerCase(),
             usuario_password: data.usuario_password,
-            usuarip_rol: data.usuarip_rol,
+            usuario_rol: data.usuario_rol,
             usuario_telefono: data.usuario_telefono?.trim(),
             usuario_dpi: data.usuario_dpi?.trim(),
             usuario_profesion: data.usuario_profesion?.trim(),

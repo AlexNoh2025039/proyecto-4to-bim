@@ -28,7 +28,7 @@ export interface RegisterRequest {
     usuario_apellido: string;
     usuario_correo: string;
     usuario_password: string;
-    usuarip_rol: RolUsuario;
+    usuario_rol: RolUsuario;
     usuario_telefono?: string;
     usuario_dpi?: string;
     usuario_profesion?: string;

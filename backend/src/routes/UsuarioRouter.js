@@ -143,7 +143,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-
 // A partir de aquí, todas las siguientes rutas SÍ requieren estar autenticado
 router.use(requireAuth);
 

@@ -1,13 +1,52 @@
-<div class="home-container">
-  <ng-container *ngIf="usuario() as user">
-    
-    <header class="navbar">
-      <h1>TalentBridge</h1>
-      <button (click)="onLogout()" class="btn-logout">Cerrar Sesión</button>
-    </header>
+<div class="home-container" *ngIf="usuario() as user">
 
-    <main class="content">
-    </main>
+  <nav class="navbar">
+    <h1>TalentBridge</h1>
+    <button class="btn-logout" (click)="authService.logout()">Cerrar Sesión</button>
+  </nav>
 
-  </ng-container>
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="content">
+    <h2>Bienvenido, {{ user.usuario_nombre }}</h2>
+
+    <!-- VISTA CANDIDATO -->
+    <ng-container *ngIf="user.usuario_rol === 'Candidato'">
+      <div class="profile-card">
+        <h3>Portal del Candidato</h3>
+        <ul>
+          <li><strong>Nombre Completo:</strong> {{ user.usuario_nombre }} {{ user.usuario_apellido }}</li>
+          <li><strong>Correo Electrónico:</strong> {{ user.usuario_correo }}</li>
+          <li><strong>Profesión:</strong> {{ user.usuario_profesion || 'No especificada' }}</li>
+          <li><strong>Rol de Usuario:</strong> {{ user.usuario_rol }}</li>
+        </ul>
+      </div>
+    </ng-container>
+
+    <!-- VISTA EMPRESA -->
+    <ng-container *ngIf="user.usuario_rol === 'Empresa'">
+      <div class="profile-card">
+        <h3>Portal de Empresa</h3>
+        <ul>
+          <li><strong>Representante:</strong> {{ user.usuario_nombre }} {{ user.usuario_apellido }}</li>
+          <li><strong>Correo de Contacto:</strong> {{ user.usuario_correo }}</li>
+          <li><strong>Teléfono:</strong> {{ user.usuario_telefono || 'No especificado' }}</li>
+          <li><strong>Rol de Usuario:</strong> {{ user.usuario_rol }}</li>
+        </ul>
+      </div>
+    </ng-container>
+
+    <!-- VISTA ADMINISTRADOR -->
+    <ng-container *ngIf="user.usuario_rol === 'Administrador'">
+      <div class="profile-card">
+        <h3>Panel de Administración</h3>
+        <ul>
+          <li><strong>Administrador:</strong> {{ user.usuario_nombre }} {{ user.usuario_apellido }}</li>
+          <li><strong>Correo Institucional:</strong> {{ user.usuario_correo }}</li>
+          <li><strong>Nivel de Acceso:</strong> Global</li>
+          <li><strong>Rol de Usuario:</strong> {{ user.usuario_rol }}</li>
+        </ul>
+      </div>
+    </ng-container>
+  </main>
+
 </div>

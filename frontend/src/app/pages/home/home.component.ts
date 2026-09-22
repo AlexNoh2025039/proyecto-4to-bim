@@ -1,23 +1,50 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
+
 import { AuthService } from '../../core/services/auth.service';
+import { VacanteService } from '../../core/services/vacante.service';
+import { Vacante } from '../../core/models/vacante.model';
+
+// Componente reutilizable del paquete compartido
+import { JobCardComponent } from '../../shared/components/job-card/job-card';
 
 @Component({
-  imports: [CommonModule],
-  selector: 'app-home.component',
-  styleUrl: './home.component.css',
+  selector: 'app-home',
+  standalone: true,
+  imports: [CommonModule, RouterLink, JobCardComponent],
   templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
 })
+export class HomeComponent implements OnInit {
+  protected readonly authService = inject(AuthService);
+  private readonly vacanteService = inject(VacanteService);
 
-export class HomeComponent {
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-
+  // Obtiene el signal del usuario actual desde AuthService
   readonly usuario = this.authService.currentUsuario;
 
-  onLogout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+  readonly vacantes = signal<Vacante[]>([]);
+  readonly loadingVacantes = signal<boolean>(false);
+
+  ngOnInit(): void {
+    const role = this.usuario()?.usuario_rol;
+
+    if (role === 'Candidato') {
+      this.cargarVacantes();
+    }
+  }
+
+  private cargarVacantes(): void {
+    this.loadingVacantes.set(true);
+    this.vacanteService.getVacantes().subscribe({
+      next: (data) => {
+        this.vacantes.set(data.vacantes);
+        this.loadingVacantes.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar vacantes:', err);
+        this.loadingVacantes.set(false);
+      }
+    });
   }
 }

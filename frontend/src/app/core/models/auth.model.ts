@@ -35,53 +35,14 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  usuario_nombre: string;
-  usuario_apellido: string;
-  usuario_correo: string;
-  usuario_password: string;
-
-  usuario_dpi: string;
-  usuario_telefono?: string;
-  usuario_profesion?: string;
-}
-
-export interface RegisterEmpresaRequest
-  extends RegisterRequest {
-
-  empresa_nombre: string;
-  empresa_descripcion?: string;
-  empresa_correo: string;
-  empresa_telefono?: string;
-  empresa_nit?: string;
-  empresa_direccion?: string;
-}
-
-export interface ActualizarUsuarioRequest {
-  usuario_nombre: string;
-  usuario_apellido: string;
-  usuario_correo: string;
-  usuario_telefono: string | null;
-  usuario_dpi: string | null;
-  usuario_profesion: string | null;
-}
-
-export interface CambiarPasswordRequest {
-  usuario_password_actual: string;
-  usuario_password_nueva: string;
-}
-
-export interface ActualizarUsuarioAdminRequest
-  extends ActualizarUsuarioRequest {
-  usuario_rol: RolUsuario;
-  estado?: boolean;
-}
-
-export interface CambiarEstadoUsuarioRequest {
-  estado: boolean;
-}
-
-export interface CambiarPasswordAdminRequest {
-  usuario_password_nueva: string;
+    usuario_nombre: string;
+    usuario_apellido: string;
+    usuario_correo: string;
+    usuario_password: string;
+    usuario_rol: RolUsuario;
+    usuario_dpi: string;
+    usuario_telefono?: string;
+     usuario_profesion?: string;
 }
 
 export interface LoginResponse {

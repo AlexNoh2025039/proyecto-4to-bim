@@ -1,56 +1,62 @@
-<<<<<<< HEAD
-import { Component, inject, OnInit } from '@angular/core';
-=======
 import { Component, OnInit, inject, signal } from '@angular/core';
->>>>>>> c64110f124ed8e2453d4905e724ab3e37170253c
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
+// Servicios
 import { AuthService } from '../../core/services/auth.service';
-<<<<<<< HEAD
 import { NotificacionService } from '../../core/services/notificacion.service';
-import { Notificacion } from '../../core/models/notificacion.model';
-import { NotificationCardComponent } from '../../shared/components/notification-card/notification-card';
-
-@Component({
-  imports: [CommonModule, NotificationCardComponent],
-  selector: 'app-home.component',
-  styleUrl: './home.component.css',
-=======
 import { VacanteService } from '../../core/services/vacante.service';
+
+// Modelos
+import { Notificacion } from '../../core/models/notificacion.model';
 import { Vacante } from '../../core/models/vacante.model';
 
-// Componente reutilizable del paquete compartido
+// Componentes
+import { NotificationCardComponent } from '../../shared/components/notification-card/notification-card';
 import { JobCardComponent } from '../../shared/components/job-card/job-card';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, JobCardComponent],
->>>>>>> c64110f124ed8e2453d4905e724ab3e37170253c
+  imports: [
+    CommonModule,
+    RouterLink,
+    NotificationCardComponent,
+    JobCardComponent
+  ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-<<<<<<< HEAD
-  private readonly authService = inject(AuthService);
+  protected readonly authService = inject(AuthService);
   private readonly notificacionService = inject(NotificacionService);
+  private readonly vacanteService = inject(VacanteService);
   private readonly router = inject(Router);
 
-=======
-  protected readonly authService = inject(AuthService);
-  private readonly vacanteService = inject(VacanteService);
-
-  // Obtiene el signal del usuario actual desde AuthService
->>>>>>> c64110f124ed8e2453d4905e724ab3e37170253c
   readonly usuario = this.authService.currentUsuario;
+
+  // Estado para notificaciones
   notificaciones: Notificacion[] = [];
+
+  // Estado para vacantes
+  readonly vacantes = signal<Vacante[]>([]);
+  readonly loadingVacantes = signal<boolean>(false);
 
   ngOnInit(): void {
     const user = this.usuario();
+
     if (user?.usuario_id) {
       this.loadNotificaciones(user.usuario_id);
     }
+
+    if (user?.usuario_rol === 'Candidato') {
+      this.cargarVacantes();
+    }
+  }
+
+  onLogout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   loadNotificaciones(usuarioId: number): void {
@@ -91,17 +97,6 @@ export class HomeComponent implements OnInit {
           console.error('Error al actualizar la notificación', err);
         }
       });
-  }
-
-  readonly vacantes = signal<Vacante[]>([]);
-  readonly loadingVacantes = signal<boolean>(false);
-
-  ngOnInit(): void {
-    const role = this.usuario()?.usuario_rol;
-
-    if (role === 'Candidato') {
-      this.cargarVacantes();
-    }
   }
 
   private cargarVacantes(): void {

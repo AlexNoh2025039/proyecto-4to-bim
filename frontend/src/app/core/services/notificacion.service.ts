@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
@@ -16,7 +16,11 @@ export class NotificacionService {
     private readonly apiUrl = `${environment.apiUrl}/notificaciones`;
 
     getNotificaciones(usuarioId?: number): Observable<NotificacionesResponse> {
-        const params = usuarioId ? { usuario_id: usuarioId.toString() } : {};
+        let params = new HttpParams();
+        if (usuarioId !== undefined && usuarioId !== null) {
+            params = params.set('usuario_id', usuarioId.toString());
+        }
+
         return this.http.get<NotificacionesResponse>(this.apiUrl, { params });
     }
 

@@ -1,1 +1,74 @@
+<<<<<<< HEAD
 <p>admin-vacancies-form works!</p>
+=======
+<form [formGroup]="vacancyForm" (ngSubmit)="onSubmit()" class="form-container">
+  <h2>{{ vacanteToEdit ? 'Editar Vacante' : 'Nueva Vacante' }}</h2>
+
+  <div class="form-group">
+    <label for="empresa_id">Empresa Perteneciente *</label>
+    <select id="empresa_id" formControlName="empresa_id">
+      <option [ngValue]="null" disabled>Seleccione una empresa</option>
+      <option *ngFor="let emp of empresasList" [value]="emp.empresa_id">
+        {{ emp.empresa_nombre }}
+      </option>
+    </select>
+    <span class="error" *ngIf="vacancyForm.get('empresa_id')?.touched && vacancyForm.get('empresa_id')?.invalid">
+      Debe seleccionar una empresa.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label for="vacante_nombre">Título de la Vacante *</label>
+    <input id="vacante_nombre" type="text" formControlName="vacante_nombre" placeholder="Ej. Desarrollador Fullstack" />
+    <span class="error" *ngIf="vacancyForm.get('vacante_nombre')?.touched && vacancyForm.get('vacante_nombre')?.invalid">
+      El título es obligatorio.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label for="tipo_jornada">Tipo de Jornada *</label>
+    <select id="tipo_jornada" formControlName="tipo_jornada">
+      <option value="Tiempo Completo">Tiempo Completo</option>
+      <option value="Medio Tiempo">Medio Tiempo</option>
+      <option value="Remoto">Remoto</option>
+      <option value="Híbrido">Híbrido</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="salario">Salario (Q)</label>
+    <input id="salario" type="number" formControlName="salario" placeholder="Ej. 7500.00" />
+  </div>
+
+  <div class="form-group">
+    <label for="ubicacion">Ubicación</label>
+    <input id="ubicacion" type="text" formControlName="ubicacion" placeholder="Ej. Guatemala, Zona 10" />
+  </div>
+
+  <div class="form-group">
+    <label for="categoria">Categoría</label>
+    <input id="categoria" type="text" formControlName="categoria" placeholder="Ej. Tecnología / Informática" />
+  </div>
+
+  <div class="form-group">
+    <label for="habilidades_requeridas">Habilidades Requeridas</label>
+    <textarea id="habilidades_requeridas" formControlName="habilidades_requeridas" rows="2" placeholder="Ej. Java, Spring Boot, Angular, PostgreSQL"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="vacante_descripcion">Descripción del Puesto</label>
+    <textarea id="vacante_descripcion" formControlName="vacante_descripcion" rows="3" placeholder="Detalles de las responsabilidades"></textarea>
+  </div>
+
+  <div class="form-group checkbox-group">
+    <label>
+      <input type="checkbox" formControlName="estado" /> Vacante Activa
+    </label>
+  </div>
+
+  <div class="form-actions">
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+    <button type="submit" class="btn btn-primary" [disabled]="vacancyForm.invalid">Guardar</button>
+  </div>
+</form>
+>>>>>>> b24d88345a03181cacb5d7e9b09288bf6491a786

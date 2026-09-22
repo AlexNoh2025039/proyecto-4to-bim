@@ -1,13 +1,28 @@
 <div class="home-container">
   <ng-container *ngIf="usuario() as user">
-    
     <header class="navbar">
       <h1>TalentBridge</h1>
       <button (click)="onLogout()" class="btn-logout">Cerrar Sesión</button>
     </header>
 
     <main class="content">
-    </main>
+      <section class="notifications-panel">
+        <div class="section-header">
+          <h2>Notificaciones</h2>
+          <span class="badge">{{ notificaciones.length }}</span>
+        </div>
 
+        <div class="notifications-list" *ngIf="notificaciones.length > 0; else noNotifications">
+          <app-notification-card *ngFor="let item of notificaciones" [notificacion]="item"
+            (markRead)="toggleRead($event)"></app-notification-card>
+        </div>
+
+        <ng-template #noNotifications>
+          <div class="empty-state">
+            No tienes notificaciones por el momento.
+          </div>
+        </ng-template>
+      </section>
+    </main>
   </ng-container>
 </div>

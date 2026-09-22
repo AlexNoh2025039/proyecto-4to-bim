@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EmpresaService } from '../../../../core/services/empresa.service';
+import { Empresa } from '../../../../core/models/empresa.model';
 
 @Component({
   selector: 'app-admin-companies-form',
@@ -11,13 +11,13 @@ import { EmpresaService } from '../../../../core/services/empresa.service';
   styleUrls: ['./admin-companies-form.css']
 })
 export class AdminCompaniesFormComponent implements OnInit {
-  @Input() empresaToEdit: EmpresaService | null = null;
-  @Output() saveEmpresa = new EventEmitter<EmpresaService>();
+  private readonly fb = inject(FormBuilder);
+
+  @Input() empresaToEdit: Empresa | null = null;
+  @Output() saveEmpresa = new EventEmitter<Empresa>();
   @Output() cancel = new EventEmitter<void>();
 
   companyForm!: FormGroup;
-
-  constructor(private fb: FormBuilder) {}
 
   ngOnInit(): void {
     this.initForm();
@@ -34,7 +34,8 @@ export class AdminCompaniesFormComponent implements OnInit {
       empresa_direccion: [''],
       empresa_telefono: ['', [Validators.pattern('^[0-9+ ]{8,15}$')]],
       empresa_correo: ['', [Validators.required, Validators.email]],
-      empresa_nit: ['', [Validators.required]]
+      empresa_nit: ['', [Validators.required]],
+      usuario_admin: [1, Validators.required]
     });
   }
 

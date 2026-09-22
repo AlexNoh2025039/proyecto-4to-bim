@@ -1,18 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { VacanteService } from '../../../../core/services/vacante.service';
-
-export interface Empresa {
-  empresa_id: number;
-  empresa_nombre: string;
-  empresa_descripcion?: string;
-  empresa_correo?: string;
-  empresa_telefono?: string;
-  empresa_nit?: string;
-  empresa_direccion?: string;
-  usuario_admin?: number;
-}
+import { Vacante } from '../../../../core/models/vacante.model';
 
 @Component({
   selector: 'app-companies-vacancies-form',
@@ -22,44 +11,44 @@ export interface Empresa {
   styleUrls: ['./companies-vacancies-form.css']
 })
 export class CompaniesVacanciesFormComponent implements OnInit {
-  @Input() vacanteToEdit: VacanteService | null = null;
+  private readonly fb = inject(FormBuilder);
 
-  @Input() empresasList: Empresa[] = [];
-  
-  @Output() saveVacante = new EventEmitter<any>();
+  @Input() vacanteToEdit: Vacante | null = null;
+  @Input() empresaId!: number;
+  @Output() saveVacante = new EventEmitter<Vacante>();
   @Output() cancel = new EventEmitter<void>();
 
-  vacancyForm!: FormGroup;
-
-  constructor(private fb: FormBuilder) {}
+  vacanteForm!: FormGroup;
 
   ngOnInit(): void {
     this.initForm();
     if (this.vacanteToEdit) {
-      this.vacancyForm.patchValue(this.vacanteToEdit);
+      this.vacanteForm.patchValue(this.vacanteToEdit);
+    } else if (this.empresaId) {
+      this.vacanteForm.patchValue({ empresa_id: this.empresaId });
     }
   }
 
   initForm(): void {
-    this.vacancyForm = this.fb.group({
+    this.vacanteForm = this.fb.group({
       vacante_id: [null],
-      empresa_id: [null, [Validators.required]],
-      vacante_nombre: ['', [Validators.required, Validators.maxLength(100)]],
+      vacante_nombre: ['', [Validators.required, Validators.maxLength(150)]],
       vacante_descripcion: [''],
-      ubicacion: [''],
-      tipo_jornada: ['Tiempo Completo', [Validators.required]],
-      salario: [null, [Validators.min(0)]],
-      categoria: [''],
       habilidades_requeridas: [''],
-      estado: [true]
+      categoria: [''],
+      salario: [null, [Validators.min(0)]],
+      ubicacion: [''],
+      tipo_jornada: ['Tiempo Completo', Validators.required],
+      estado: [true],
+      empresa_id: [this.empresaId, Validators.required]
     });
   }
 
   onSubmit(): void {
-    if (this.vacancyForm.valid) {
-      this.saveVacante.emit(this.vacancyForm.value);
+    if (this.vacanteForm.valid) {
+      this.saveVacante.emit(this.vacanteForm.value);
     } else {
-      this.vacancyForm.markAllAsTouched();
+      this.vacanteForm.markAllAsTouched();
     }
   }
 

@@ -1,68 +1,115 @@
 <div class="detail-container">
   <div *ngIf="loading" class="state-message">
-    <p>Cargando informacion de la oferta...</p>
+    <p>Cargando información de la empresa...</p>
   </div>
 
   <div *ngIf="errorMsg" class="state-message error">
     <p>{{ errorMsg }}</p>
-    <a routerLink="/home" class="btn btn-secondary">Volver al inicio</a>
+    <button (click)="errorMsg = ''" class="btn btn-secondary">Cerrar alerta</button>
   </div>
 
-  <div *ngIf="!loading && !errorMsg && vacante" class="detail-content">
+  <div *ngIf="successMsg" class="state-message success">
+    <p>{{ successMsg }}</p>
+  </div>
+
+  <div *ngIf="!loading && empresa" class="detail-content">
     <div class="back-navigation">
-      <a routerLink="/home" class="back-link">Regresar a vacantes</a>
+      <a routerLink="/home" class="back-link">Regresar al inicio</a>
     </div>
 
     <header class="detail-header">
       <div>
-        <h1 class="title">{{ vacante.vacante_nombre }}</h1>
-        <h2 class="company" *ngIf="empresa">{{ empresa.empresa_nombre }}</h2>
+        <h1 class="title">{{ empresa.empresa_nombre }}</h1>
+        <p class="company" *ngIf="empresa.empresa_nit">NIT: {{ empresa.empresa_nit }}</p>
       </div>
-      <span class="badge" [ngClass]="{'active': vacante.estado, 'inactive': !vacante.estado}">
-        {{ vacante.estado ? 'Disponible' : 'Cerrada' }}
-      </span>
+      <div class="action-buttons">
+        <button class="btn btn-primary" (click)="openUpdateForm(empresa)">Editar Empresa</button>
+        <button class="btn btn-danger" (click)="deleteEmpresa(empresa.empresa_id)">Eliminar</button>
+      </div>
     </header>
 
-    <div class="metadata-grid">
-      <div class="meta-item" *ngIf="vacante.ubicacion">
-        <span class="meta-label">Ubicacion</span>
-        <span class="meta-value">{{ vacante.ubicacion }}</span>
-      </div>
-      <div class="meta-item" *ngIf="vacante.tipo_jornada">
-        <span class="meta-label">Jornada</span>
-        <span class="meta-value">{{ vacante.tipo_jornada }}</span>
-      </div>
-      <div class="meta-item" *ngIf="vacante.salario">
-        <span class="meta-label">Salario ofrecido</span>
-        <span class="meta-value">Q{{ vacante.salario | number:'1.2-2' }}</span>
-      </div>
-      <div class="meta-item" *ngIf="vacante.categoria">
-        <span class="meta-label">Categoria</span>
-        <span class="meta-value">{{ vacante.categoria }}</span>
-      </div>
-    </div>
-
-    <section class="section" *ngIf="vacante.habilidades_requeridas">
-      <h3>Habilidades requeridas</h3>
-      <p class="description-text">{{ vacante.habilidades_requeridas }}</p>
-    </section>
-
     <section class="section">
-      <h3>Descripcion del puesto</h3>
-      <p class="description-text">
-        {{ vacante.vacante_descripcion || 'Sin descripcion disponible.' }}
-      </p>
+      <h3>Descripción</h3>
+      <p class="description-text">{{ empresa.empresa_descripcion || 'Sin descripción disponible.' }}</p>
     </section>
 
-    <section class="section company-info" *ngIf="empresa">
-      <h3>Sobre la empresa</h3>
-      <p *ngIf="empresa.empresa_descripcion">{{ empresa.empresa_descripcion }}</p>
+    <section class="section company-info">
+      <h3>Datos de Contacto</h3>
       <div class="contact-details">
-        <p *ngIf="empresa.empresa_correo">Correo: {{ empresa.empresa_correo }}</p>
-        <p *ngIf="empresa.empresa_telefono">Telefono: {{ empresa.empresa_telefono }}</p>
-        <p *ngIf="empresa.empresa_direccion">Direccion: {{ empresa.empresa_direccion }}</p>
-        <p *ngIf="empresa.empresa_nit">NIT: {{ empresa.empresa_nit }}</p>
+        <p><strong>Correo:</strong> {{ empresa.empresa_correo || 'No especificado' }}</p>
+        <p><strong>Teléfono:</strong> {{ empresa.empresa_telefono || 'No especificado' }}</p>
+        <p><strong>Dirección:</strong> {{ empresa.empresa_direccion || 'No especificada' }}</p>
       </div>
     </section>
+  </div>
+
+  <div class="crud-actions-bar" *ngIf="activeFormMode === 'none'">
+    <button class="btn btn-success" (click)="openCreateForm()">+ Registrar Nueva Empresa</button>
+  </div>
+
+  <div class="inline-form-card" *ngIf="activeFormMode !== 'none'">
+    <h3 class="form-title">
+      {{ activeFormMode === 'create' ? 'Registrar Nueva Empresa' : 'Actualizar Datos de Empresa' }}
+    </h3>
+
+    <form [formGroup]="empresaForm" (ngSubmit)="activeFormMode === 'create' ? createEmpresa() : updateEmpresa()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nombre de la Empresa *</label>
+          <input type="text" formControlName="empresa_nombre" class="form-control" placeholder="Ej. Tech Solutions">
+        </div>
+
+        <div class="form-group">
+          <label>Correo Electrónico *</label>
+          <input type="email" formControlName="empresa_correo" class="form-control" placeholder="contacto@empresa.com">
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="text" formControlName="empresa_telefono" class="form-control" placeholder="5555-5555">
+        </div>
+
+        <div class="form-group">
+          <label>NIT</label>
+          <input type="text" formControlName="empresa_nit" class="form-control" placeholder="123456-7">
+        </div>
+
+        <div class="form-group">
+          <label>Usuario Admin *</label>
+          <input type="number" formControlName="usuario_admin" class="form-control" placeholder="1">
+        </div>
+
+        <div class="form-group full-width">
+          <label>Dirección</label>
+          <input type="text" formControlName="empresa_direccion" class="form-control" placeholder="Ciudad, Zona 10">
+        </div>
+
+        <div class="form-group full-width">
+          <label>Descripción</label>
+          <textarea formControlName="empresa_descripcion" class="form-control" rows="3" placeholder="Breve descripción..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit" class="btn btn-primary" [disabled]="empresaForm.invalid">
+          {{ activeFormMode === 'create' ? 'Guardar Empresa' : 'Guardar Cambios' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="general-list-section" *ngIf="empresas.length > 0">
+    <h3>Otras Empresas Registradas</h3>
+    <ul class="empresa-mini-list">
+      <li *ngFor="let emp of empresas">
+        <span>{{ emp.empresa_nombre }}</span>
+        <div>
+          <a [routerLink]="['/empresas', emp.empresa_id]" class="btn-link">Ver</a>
+          <button class="btn-link edit" (click)="openUpdateForm(emp)">Editar</button>
+          <button class="btn-link delete" (click)="deleteEmpresa(emp.empresa_id)">Eliminar</button>
+        </div>
+      </li>
+    </ul>
   </div>
 </div>

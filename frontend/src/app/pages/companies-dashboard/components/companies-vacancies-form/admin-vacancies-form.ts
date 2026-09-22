@@ -2,7 +2,17 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { VacanteService } from '../../../../core/services/vacante.service';
-import { EmpresaService } from '../../../../core/services/empresa.service';
+
+export interface Empresa {
+  empresa_id: number;
+  empresa_nombre: string;
+  empresa_descripcion?: string;
+  empresa_correo?: string;
+  empresa_telefono?: string;
+  empresa_nit?: string;
+  empresa_direccion?: string;
+  usuario_admin?: number;
+}
 
 @Component({
   selector: 'app-admin-vacancies-form',
@@ -13,8 +23,10 @@ import { EmpresaService } from '../../../../core/services/empresa.service';
 })
 export class AdminVacanciesFormComponent implements OnInit {
   @Input() vacanteToEdit: VacanteService | null = null;
-  @Input() empresasList: EmpresaService[] = [];
-  @Output() saveVacante = new EventEmitter<VacanteService>();
+
+  @Input() empresasList: Empresa[] = [];
+  
+  @Output() saveVacante = new EventEmitter<any>();
   @Output() cancel = new EventEmitter<void>();
 
   vacancyForm!: FormGroup;

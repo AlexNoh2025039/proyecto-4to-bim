@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import { Component } from '@angular/core';
-
-@Component({
-  imports: [],
-  selector: 'app-admin-companies-form',
-  styleUrl: './admin-companies-form.css',
-  templateUrl: './admin-companies-form.html',
-})
-export class AdminCompaniesForm {}
-=======
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -61,4 +50,3 @@ export class AdminCompaniesFormComponent implements OnInit {
     this.cancel.emit();
   }
 }
->>>>>>> b24d88345a03181cacb5d7e9b09288bf6491a786

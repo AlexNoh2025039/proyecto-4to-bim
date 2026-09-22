@@ -42,7 +42,11 @@ export const routes: Routes = [
 
   // --- RUTAS DE CANDIDATO ---
   {
+<<<<<<< HEAD
     path: 'candidato',
+=======
+    path: 'user-dashboard',
+>>>>>>> 92159d7 (Home y rutas para pruebas)
     canActivate: [authGuard, roleGuard(['Candidato'])],
     children: [
       {

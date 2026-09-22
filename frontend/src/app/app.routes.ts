@@ -42,11 +42,7 @@ export const routes: Routes = [
 
   // --- RUTAS DE CANDIDATO ---
   {
-<<<<<<< HEAD
     path: 'candidato',
-=======
-    path: 'user-dashboard',
->>>>>>> 92159d7 (Home y rutas para pruebas)
     canActivate: [authGuard, roleGuard(['Candidato'])],
     children: [
       {
@@ -88,7 +84,6 @@ export const routes: Routes = [
       {
         path: 'empresas/nueva',
         loadComponent: () =>
-
           import('./pages/admin-dashboard/components/admin-companies-form/admin-companies-form').then(m => m.AdminCompaniesFormComponent)
       },
       {

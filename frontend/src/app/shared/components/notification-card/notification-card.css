@@ -1,0 +1,63 @@
+.notification-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+}
+
+.notification-card.is-read {
+    opacity: 0.75;
+    border-color: #d1d5db;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.notification-type {
+    display: inline-block;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #2563eb;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.notification-card h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #111827;
+}
+
+.notification-description {
+    margin: 12px 0 0;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.notification-footer {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.checkbox-read {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #374151;
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+.checkbox-read input {
+    accent-color: #2563eb;
+    width: 16px;
+    height: 16px;
+}

@@ -1,1 +1,34 @@
-<p>notifications-form works!</p>
+<form class="notification-form" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="field">
+        <label for="usuario_id_empresa">ID del usuario</label>
+        <input id="usuario_id_empresa" type="number" formControlName="usuario_id" placeholder="Ej. 12">
+    </div>
+
+    <div class="field">
+        <label for="titulo_empresa">Título</label>
+        <input id="titulo_empresa" type="text" formControlName="titulo" placeholder="Ej. Faltan conocimientos">
+    </div>
+
+    <div class="field">
+        <label for="tipo_empresa">Tipo</label>
+        <input id="tipo_empresa" type="text" formControlName="tipo" placeholder="Ej. Requisito">
+    </div>
+
+    <div class="field">
+        <label for="descripcion_empresa">Descripción</label>
+        <textarea id="descripcion_empresa" rows="4" formControlName="descripcion"
+            placeholder="Ej. Te faltan Angular y SQL para esta vacante."></textarea>
+    </div>
+
+    <label class="checkbox-row">
+        <input type="checkbox" formControlName="estado" />
+        Marcar como leída
+    </label>
+
+    <button type="submit" class="btn-primary" [disabled]="sending || form.invalid">
+        {{ sending ? 'Enviando...' : 'Enviar notificación' }}
+    </button>
+
+    <p class="message success" *ngIf="successMessage">{{ successMessage }}</p>
+    <p class="message error" *ngIf="errorMessage">{{ errorMessage }}</p>
+</form>

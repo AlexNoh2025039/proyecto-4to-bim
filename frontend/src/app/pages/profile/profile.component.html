@@ -1,39 +1,70 @@
 <div class="profile-page">
 
+  <!-- ================================================= -->
+  <!-- ENCABEZADO -->
+  <!-- ================================================= -->
+
   <div class="profile-header">
 
     <div>
+
       <h1>Mi perfil</h1>
+
       <p>
         Administra tu información personal y la seguridad de tu cuenta.
       </p>
+
     </div>
+
+
+    <button
+      type="button"
+      class="btn primary"
+      (click)="irAHome()"
+    >
+      Regresar al Home
+    </button>
 
   </div>
 
 
+  <!-- ================================================= -->
+  <!-- MENSAJES -->
+  <!-- ================================================= -->
+
   @if (mensaje) {
+
     <div class="alert success">
       {{ mensaje }}
     </div>
+
   }
 
+
   @if (error) {
+
     <div class="alert error">
       {{ error }}
     </div>
+
   }
 
 
+  <!-- ================================================= -->
+  <!-- CONTENIDO -->
+  <!-- ================================================= -->
+
   <div class="profile-grid">
 
-    <!-- ========================================= -->
+
+    <!-- =============================================== -->
     <!-- FOTO -->
-    <!-- ========================================= -->
+    <!-- =============================================== -->
 
     <section class="card photo-card">
 
       <h2>Foto de perfil</h2>
+
 
       <div class="photo-container">
 
@@ -55,6 +86,7 @@
 
       </div>
 
+
       <input
         #fotoInput
         type="file"
@@ -63,7 +95,11 @@
         (change)="seleccionarFoto($event)"
       >
 
+
       <div class="photo-actions">
+
+
+        <!-- SELECCIONAR FOTO -->
 
         <button
           type="button"
@@ -73,7 +109,16 @@
           Seleccionar imagen
         </button>
 
-        @if (fotoPreview) {
+
+        <!--
+          GUARDAR FOTO
+
+          Solo aparece cuando:
+          1. Existe una imagen
+          2. La imagen todavía no ha sido guardada
+        -->
+
+        @if (fotoPreview && !fotoGuardada) {
 
           <button
             type="button"
@@ -81,8 +126,19 @@
             [disabled]="guardandoFoto"
             (click)="guardarFoto()"
           >
-            {{ guardandoFoto ? 'Guardando...' : 'Guardar foto' }}
+            {{
+              guardandoFoto
+                ? 'Guardando...'
+                : 'Guardar foto'
+            }}
           </button>
+
+        }
+
+
+        <!-- ELIMINAR FOTO -->
+
+        @if (fotoPreview && fotoGuardada) {
 
           <button
             type="button"
@@ -90,12 +146,17 @@
             [disabled]="guardandoFoto"
             (click)="eliminarFoto()"
           >
-            Eliminar foto
+            {{
+              guardandoFoto
+                ? 'Eliminando...'
+                : 'Eliminar foto'
+            }}
           </button>
 
         }
 
       </div>
+
 
       <small>
         PNG, JPG, GIF o WEBP. Máximo 5 MB.
@@ -104,23 +165,33 @@
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- =============================================== -->
     <!-- DATOS PERSONALES -->
-    <!-- ========================================= -->
+    <!-- =============================================== -->
 
     <section class="card">
 
       <div class="card-title">
+
         <div>
+
           <h2>Información personal</h2>
-          <p>Actualiza tus datos de contacto.</p>
+
+          <p>
+            Actualiza tus datos de contacto.
+          </p>
+
         </div>
 
+
         @if (usuario) {
+
           <span class="role-badge">
             {{ usuario.usuario_rol }}
           </span>
+
         }
+
       </div>
 
 
@@ -130,6 +201,7 @@
       >
 
         <div class="form-grid">
+
 
           <div class="form-field">
 
@@ -148,9 +220,11 @@
               perfilForm.controls.usuario_nombre.touched &&
               perfilForm.controls.usuario_nombre.invalid
             ) {
+
               <small class="field-error">
                 El nombre es obligatorio y no puede superar 50 caracteres.
               </small>
+
             }
 
           </div>
@@ -173,9 +247,11 @@
               perfilForm.controls.usuario_apellido.touched &&
               perfilForm.controls.usuario_apellido.invalid
             ) {
+
               <small class="field-error">
                 El apellido es obligatorio y no puede superar 50 caracteres.
               </small>
+
             }
 
           </div>
@@ -198,9 +274,11 @@
               perfilForm.controls.usuario_correo.touched &&
               perfilForm.controls.usuario_correo.invalid
             ) {
+
               <small class="field-error">
                 Ingresa un correo electrónico válido.
               </small>
+
             }
 
           </div>
@@ -263,11 +341,13 @@
             class="btn primary"
             [disabled]="guardandoPerfil"
           >
+
             {{
               guardandoPerfil
                 ? 'Guardando...'
                 : 'Guardar cambios'
             }}
+
           </button>
 
         </div>
@@ -277,9 +357,9 @@
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- =============================================== -->
     <!-- CONTRASEÑA -->
-    <!-- ========================================= -->
+    <!-- =============================================== -->
 
     <section class="card security-card">
 
@@ -326,9 +406,11 @@
             passwordForm.controls.usuario_password_nueva.touched &&
             passwordForm.controls.usuario_password_nueva.invalid
           ) {
+
             <small class="field-error">
               La contraseña debe tener al menos 6 caracteres.
             </small>
+
           }
 
         </div>
@@ -356,11 +438,13 @@
             class="btn primary"
             [disabled]="cambiandoPassword"
           >
+
             {{
               cambiandoPassword
                 ? 'Actualizando...'
                 : 'Cambiar contraseña'
             }}
+
           </button>
 
         </div>
@@ -370,9 +454,9 @@
     </section>
 
 
-    <!-- ========================================= -->
+    <!-- =============================================== -->
     <!-- CUENTA -->
-    <!-- ========================================= -->
+    <!-- =============================================== -->
 
     <section class="card danger-card">
 
@@ -383,17 +467,20 @@
         relacionados por las reglas de eliminación de la base de datos.
       </p>
 
+
       <button
         type="button"
         class="btn danger"
         [disabled]="eliminandoCuenta"
         (click)="eliminarCuenta()"
       >
+
         {{
           eliminandoCuenta
             ? 'Eliminando...'
             : 'Eliminar mi cuenta'
         }}
+
       </button>
 
     </section>

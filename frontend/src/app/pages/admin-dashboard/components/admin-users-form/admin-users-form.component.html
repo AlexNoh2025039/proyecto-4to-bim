@@ -10,19 +10,27 @@
       </p>
     </div>
 
+    <div class="header-actions">
+
+      <button type="button" class="btn primary" (click)="irAHome()">
+        Regresar al Home
+      </button>
+
+    </div>
+
   </div>
 
 
   @if (mensaje) {
-    <div class="alert success">
-      {{ mensaje }}
-    </div>
+  <div class="alert success">
+    {{ mensaje }}
+  </div>
   }
 
   @if (error) {
-    <div class="alert error">
-      {{ error }}
-    </div>
+  <div class="alert error">
+    {{ error }}
+  </div>
   }
 
 
@@ -40,12 +48,7 @@
           Buscar
         </label>
 
-        <input
-          id="busqueda"
-          type="text"
-          [(ngModel)]="busqueda"
-          placeholder="Nombre, apellido, correo o DPI"
-        >
+        <input id="busqueda" type="text" [(ngModel)]="busqueda" placeholder="Nombre, apellido, correo o DPI">
 
       </div>
 
@@ -56,10 +59,7 @@
           Rol
         </label>
 
-        <select
-          id="rol"
-          [(ngModel)]="filtroRol"
-        >
+        <select id="rol" [(ngModel)]="filtroRol">
 
           <option value="">
             Todos los roles
@@ -67,9 +67,9 @@
 
           @for (rol of roles; track rol) {
 
-            <option [value]="rol">
-              {{ rol }}
-            </option>
+          <option [value]="rol">
+            {{ rol }}
+          </option>
 
           }
 
@@ -84,10 +84,7 @@
           Estado
         </label>
 
-        <select
-          id="estado"
-          [(ngModel)]="filtroEstado"
-        >
+        <select id="estado" [(ngModel)]="filtroEstado">
 
           <option value="">
             Todos
@@ -108,11 +105,7 @@
 
       <div class="filter-actions">
 
-        <button
-          type="button"
-          class="btn secondary"
-          (click)="limpiarFiltros()"
-        >
+        <button type="button" class="btn secondary" (click)="limpiarFiltros()">
           Limpiar
         </button>
 
@@ -150,212 +143,186 @@
 
       @if (cargando) {
 
-        <div class="loading">
-          Cargando usuarios...
-        </div>
+      <div class="loading">
+        Cargando usuarios...
+      </div>
 
       } @else if (usuariosFiltrados.length === 0) {
 
-        <div class="empty-state">
+      <div class="empty-state">
 
-          <div class="empty-icon">
-            👥
-          </div>
-
-          <h3>
-            No se encontraron usuarios
-          </h3>
-
-          <p>
-            Prueba cambiando los filtros de búsqueda.
-          </p>
-
+        <div class="empty-icon">
+          👥
         </div>
+
+        <h3>
+          No se encontraron usuarios
+        </h3>
+
+        <p>
+          Prueba cambiando los filtros de búsqueda.
+        </p>
+
+      </div>
 
       } @else {
 
-        <div class="table-wrapper">
+      <div class="table-wrapper">
 
-          <table>
+        <table>
 
-            <thead>
+          <thead>
 
-              <tr>
-                <th>ID</th>
-                <th>Usuario</th>
-                <th>Correo</th>
-                <th>Rol</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
+            <tr>
+              <th>ID</th>
+              <th>Usuario</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
 
-            </thead>
+          </thead>
 
 
-            <tbody>
+          <tbody>
 
-              @for (
-                usuario of usuariosFiltrados;
-                track usuario.usuario_id
-              ) {
+            @for (
+            usuario of usuariosFiltrados;
+            track usuario.usuario_id
+            ) {
 
-                <tr
-                  [class.selected-row]="
+            <tr [class.selected-row]="
                     usuarioSeleccionado?.usuario_id ===
                     usuario.usuario_id
-                  "
-                >
+                  ">
 
-                  <td>
-                    #{{ usuario.usuario_id }}
-                  </td>
-
-
-                  <td>
-
-                    <div class="user-cell">
-
-                      <div class="avatar">
-
-                        {{
-                          usuario.usuario_nombre.charAt(0)
-                        }}{{
-                          usuario.usuario_apellido.charAt(0)
-                        }}
-
-                      </div>
-
-                      <div>
-
-                        <strong>
-                          {{ obtenerNombreCompleto(usuario) }}
-                        </strong>
-
-                        @if (esMiUsuario(usuario)) {
-
-                          <span class="you-badge">
-                            Tú
-                          </span>
-
-                        }
-
-                      </div>
-
-                    </div>
-
-                  </td>
+              <td>
+                #{{ usuario.usuario_id }}
+              </td>
 
 
-                  <td>
-                    {{ usuario.usuario_correo }}
-                  </td>
+              <td>
 
+                <div class="user-cell">
 
-                  <td>
+                  <div class="avatar">
 
-                    <span
-                      class="role-badge"
-                      [class.admin]="
-                        usuario.usuario_rol === 'Administrador'
-                      "
-                      [class.empresa]="
-                        usuario.usuario_rol === 'Empresa'
-                      "
-                      [class.candidato]="
-                        usuario.usuario_rol === 'Candidato'
-                      "
-                    >
-                      {{ usuario.usuario_rol }}
+                    {{
+                    usuario.usuario_nombre.charAt(0)
+                    }}{{
+                    usuario.usuario_apellido.charAt(0)
+                    }}
+
+                  </div>
+
+                  <div>
+
+                    <strong>
+                      {{ obtenerNombreCompleto(usuario) }}
+                    </strong>
+
+                    @if (esMiUsuario(usuario)) {
+
+                    <span class="you-badge">
+                      Tú
                     </span>
-
-                  </td>
-
-
-                  <td>
-
-                    @if (usuario.estado) {
-
-                      <span class="status active">
-                        Activo
-                      </span>
-
-                    } @else {
-
-                      <span class="status inactive">
-                        Inactivo
-                      </span>
 
                     }
 
-                  </td>
+                  </div>
+
+                </div>
+
+              </td>
 
 
-                  <td>
-
-                    <div class="actions">
-
-                      <button
-                        type="button"
-                        class="icon-action"
-                        title="Editar"
-                        (click)="editarUsuario(usuario)"
-                      >
-                        ✏️
-                      </button>
+              <td>
+                {{ usuario.usuario_correo }}
+              </td>
 
 
-                      <button
-                        type="button"
-                        class="icon-action"
-                        title="Cambiar contraseña"
-                        (click)="mostrarCambiarPassword(usuario)"
-                      >
-                        🔑
-                      </button>
+              <td>
+
+                <span class="role-badge" [class.admin]="
+                        usuario.usuario_rol === 'Administrador'
+                      " [class.empresa]="
+                        usuario.usuario_rol === 'Empresa'
+                      " [class.candidato]="
+                        usuario.usuario_rol === 'Candidato'
+                      ">
+                  {{ usuario.usuario_rol }}
+                </span>
+
+              </td>
 
 
-                      @if (!esMiUsuario(usuario)) {
+              <td>
 
-                        <button
-                          type="button"
-                          class="icon-action"
-                          title="Cambiar estado"
-                          [disabled]="cambiandoEstado"
-                          (click)="cambiarEstado(usuario)"
-                        >
-                          {{
-                            usuario.estado
-                              ? '⛔'
-                              : '✅'
-                          }}
-                        </button>
+                @if (usuario.estado) {
+
+                <span class="status active">
+                  Activo
+                </span>
+
+                } @else {
+
+                <span class="status inactive">
+                  Inactivo
+                </span>
+
+                }
+
+              </td>
 
 
-                        <button
-                          type="button"
-                          class="icon-action delete"
-                          title="Eliminar"
-                          [disabled]="eliminando"
-                          (click)="eliminarUsuario(usuario)"
-                        >
-                          🗑️
-                        </button>
+              <td>
 
-                      }
+                <div class="actions">
 
-                    </div>
+                  <button type="button" class="icon-action" title="Editar" (click)="editarUsuario(usuario)">
+                    ✏️
+                  </button>
 
-                  </td>
 
-                </tr>
+                  <button type="button" class="icon-action" title="Cambiar contraseña"
+                    (click)="mostrarCambiarPassword(usuario)">
+                    🔑
+                  </button>
 
-              }
 
-            </tbody>
+                  @if (!esMiUsuario(usuario)) {
 
-          </table>
+                  <button type="button" class="icon-action" title="Cambiar estado" [disabled]="cambiandoEstado"
+                    (click)="cambiarEstado(usuario)">
+                    {{
+                    usuario.estado
+                    ? '⛔'
+                    : '✅'
+                    }}
+                  </button>
 
-        </div>
+
+                  <button type="button" class="icon-action delete" title="Eliminar" [disabled]="eliminando"
+                    (click)="eliminarUsuario(usuario)">
+                    🗑️
+                  </button>
+
+                  }
+
+                </div>
+
+              </td>
+
+            </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
 
       }
 
@@ -368,366 +335,296 @@
 
     @if (mostrarFormulario) {
 
-      <section class="card editor-card">
+    <section class="card editor-card">
 
-        <div class="card-header editor-header">
+      <div class="card-header editor-header">
 
-          <div>
+        <div>
 
-            <h2>
-              {{
-                mostrarPassword
-                  ? 'Cambiar contraseña'
-                  : 'Editar usuario'
-              }}
-            </h2>
+          <h2>
+            {{
+            mostrarPassword
+            ? 'Cambiar contraseña'
+            : 'Editar usuario'
+            }}
+          </h2>
 
-            @if (usuarioSeleccionado) {
+          @if (usuarioSeleccionado) {
 
-              <p>
-                {{ obtenerNombreCompleto(usuarioSeleccionado) }}
-              </p>
+          <p>
+            {{ obtenerNombreCompleto(usuarioSeleccionado) }}
+          </p>
+
+          }
+
+        </div>
+
+
+        <button type="button" class="close-button" (click)="cerrarFormulario()">
+          ×
+        </button>
+
+      </div>
+
+
+      <!-- ============================================= -->
+      <!-- PASSWORD -->
+      <!-- ============================================= -->
+
+      @if (mostrarPassword) {
+
+      <form [formGroup]="passwordForm" (ngSubmit)="guardarPassword()">
+
+        <div class="security-note">
+          Establece una nueva contraseña para el usuario seleccionado.
+        </div>
+
+
+        <div class="form-field">
+
+          <label for="password">
+            Nueva contraseña
+          </label>
+
+          <input id="password" type="password" formControlName="usuario_password_nueva">
+
+          @if (
+          passwordForm.controls.usuario_password_nueva.touched &&
+          passwordForm.controls.usuario_password_nueva.invalid
+          ) {
+
+          <small class="field-error">
+            La contraseña debe tener al menos 6 caracteres.
+          </small>
+
+          }
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label for="confirmPassword">
+            Confirmar contraseña
+          </label>
+
+          <input id="confirmPassword" type="password" formControlName="confirmar_password">
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button type="button" class="btn secondary" (click)="cerrarCambiarPassword()">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn primary" [disabled]="cambiandoPassword">
+            {{
+            cambiandoPassword
+            ? 'Actualizando...'
+            : 'Cambiar contraseña'
+            }}
+          </button>
+
+        </div>
+
+      </form>
+
+
+      } @else {
+
+
+      <!-- =========================================== -->
+      <!-- DATOS -->
+      <!-- =========================================== -->
+
+      <form [formGroup]="usuarioForm" (ngSubmit)="guardarUsuario()">
+
+        <div class="form-grid">
+
+          <div class="form-field">
+
+            <label for="nombre">
+              Nombre
+            </label>
+
+            <input id="nombre" type="text" maxlength="50" formControlName="usuario_nombre">
+
+            @if (
+            usuarioForm.controls.usuario_nombre.touched &&
+            usuarioForm.controls.usuario_nombre.invalid
+            ) {
+
+            <small class="field-error">
+              El nombre es obligatorio y no puede superar 50 caracteres.
+            </small>
 
             }
 
           </div>
 
 
-          <button
-            type="button"
-            class="close-button"
-            (click)="cerrarFormulario()"
-          >
-            ×
-          </button>
+          <div class="form-field">
+
+            <label for="apellido">
+              Apellido
+            </label>
+
+            <input id="apellido" type="text" maxlength="50" formControlName="usuario_apellido">
+
+            @if (
+            usuarioForm.controls.usuario_apellido.touched &&
+            usuarioForm.controls.usuario_apellido.invalid
+            ) {
+
+            <small class="field-error">
+              El apellido es obligatorio y no puede superar 50 caracteres.
+            </small>
+
+            }
+
+          </div>
+
+
+          <div class="form-field full">
+
+            <label for="correo">
+              Correo electrónico
+            </label>
+
+            <input id="correo" type="email" maxlength="100" formControlName="usuario_correo">
+
+            @if (
+            usuarioForm.controls.usuario_correo.touched &&
+            usuarioForm.controls.usuario_correo.invalid
+            ) {
+
+            <small class="field-error">
+              Debes introducir un correo válido.
+            </small>
+
+            }
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="telefono">
+              Teléfono
+            </label>
+
+            <input id="telefono" type="text" maxlength="20" formControlName="usuario_telefono">
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="dpi">
+              DPI
+            </label>
+
+            <input id="dpi" type="text" maxlength="20" formControlName="usuario_dpi">
+
+          </div>
+
+
+          <div class="form-field full">
+
+            <label for="profesion">
+              Profesión
+            </label>
+
+            <input id="profesion" type="text" maxlength="100" formControlName="usuario_profesion">
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="rol">
+              Rol
+            </label>
+
+            <select id="rol" formControlName="usuario_rol">
+
+              @for (
+              rol of roles;
+              track rol
+              ) {
+
+              <option [value]="rol">
+                {{ rol }}
+              </option>
+
+              }
+
+            </select>
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="estadoEditor">
+              Estado
+            </label>
+
+            <select id="estadoEditor" formControlName="estado">
+
+              <option [ngValue]="true">
+                Activo
+              </option>
+
+              <option [ngValue]="false">
+                Inactivo
+              </option>
+
+            </select>
+
+          </div>
 
         </div>
 
 
-        <!-- ============================================= -->
-        <!-- PASSWORD -->
-        <!-- ============================================= -->
+        @if (
+        usuarioSeleccionado &&
+        esMiUsuario(usuarioSeleccionado)
+        ) {
 
-        @if (mostrarPassword) {
+        <div class="security-note">
 
-          <form
-            [formGroup]="passwordForm"
-            (ngSubmit)="guardarPassword()"
-          >
+          Tu rol de administrador y el estado de tu cuenta
+          están bloqueados desde esta consola.
 
-            <div class="security-note">
-              Establece una nueva contraseña para el usuario seleccionado.
-            </div>
-
-
-            <div class="form-field">
-
-              <label for="password">
-                Nueva contraseña
-              </label>
-
-              <input
-                id="password"
-                type="password"
-                formControlName="usuario_password_nueva"
-              >
-
-              @if (
-                passwordForm.controls.usuario_password_nueva.touched &&
-                passwordForm.controls.usuario_password_nueva.invalid
-              ) {
-
-                <small class="field-error">
-                  La contraseña debe tener al menos 6 caracteres.
-                </small>
-
-              }
-
-            </div>
-
-
-            <div class="form-field">
-
-              <label for="confirmPassword">
-                Confirmar contraseña
-              </label>
-
-              <input
-                id="confirmPassword"
-                type="password"
-                formControlName="confirmar_password"
-              >
-
-            </div>
-
-
-            <div class="form-actions">
-
-              <button
-                type="button"
-                class="btn secondary"
-                (click)="cerrarCambiarPassword()"
-              >
-                Cancelar
-              </button>
-
-              <button
-                type="submit"
-                class="btn primary"
-                [disabled]="cambiandoPassword"
-              >
-                {{
-                  cambiandoPassword
-                    ? 'Actualizando...'
-                    : 'Cambiar contraseña'
-                }}
-              </button>
-
-            </div>
-
-          </form>
-
-
-        } @else {
-
-
-          <!-- =========================================== -->
-          <!-- DATOS -->
-          <!-- =========================================== -->
-
-          <form
-            [formGroup]="usuarioForm"
-            (ngSubmit)="guardarUsuario()"
-          >
-
-            <div class="form-grid">
-
-              <div class="form-field">
-
-                <label for="nombre">
-                  Nombre
-                </label>
-
-                <input
-                  id="nombre"
-                  type="text"
-                  maxlength="50"
-                  formControlName="usuario_nombre"
-                >
-
-                @if (
-                  usuarioForm.controls.usuario_nombre.touched &&
-                  usuarioForm.controls.usuario_nombre.invalid
-                ) {
-
-                  <small class="field-error">
-                    El nombre es obligatorio y no puede superar 50 caracteres.
-                  </small>
-
-                }
-
-              </div>
-
-
-              <div class="form-field">
-
-                <label for="apellido">
-                  Apellido
-                </label>
-
-                <input
-                  id="apellido"
-                  type="text"
-                  maxlength="50"
-                  formControlName="usuario_apellido"
-                >
-
-                @if (
-                  usuarioForm.controls.usuario_apellido.touched &&
-                  usuarioForm.controls.usuario_apellido.invalid
-                ) {
-
-                  <small class="field-error">
-                    El apellido es obligatorio y no puede superar 50 caracteres.
-                  </small>
-
-                }
-
-              </div>
-
-
-              <div class="form-field full">
-
-                <label for="correo">
-                  Correo electrónico
-                </label>
-
-                <input
-                  id="correo"
-                  type="email"
-                  maxlength="100"
-                  formControlName="usuario_correo"
-                >
-
-                @if (
-                  usuarioForm.controls.usuario_correo.touched &&
-                  usuarioForm.controls.usuario_correo.invalid
-                ) {
-
-                  <small class="field-error">
-                    Debes introducir un correo válido.
-                  </small>
-
-                }
-
-              </div>
-
-
-              <div class="form-field">
-
-                <label for="telefono">
-                  Teléfono
-                </label>
-
-                <input
-                  id="telefono"
-                  type="text"
-                  maxlength="20"
-                  formControlName="usuario_telefono"
-                >
-
-              </div>
-
-
-              <div class="form-field">
-
-                <label for="dpi">
-                  DPI
-                </label>
-
-                <input
-                  id="dpi"
-                  type="text"
-                  maxlength="20"
-                  formControlName="usuario_dpi"
-                >
-
-              </div>
-
-
-              <div class="form-field full">
-
-                <label for="profesion">
-                  Profesión
-                </label>
-
-                <input
-                  id="profesion"
-                  type="text"
-                  maxlength="100"
-                  formControlName="usuario_profesion"
-                >
-
-              </div>
-
-
-              <div class="form-field">
-
-                <label for="rol">
-                  Rol
-                </label>
-
-                <select
-                  id="rol"
-                  formControlName="usuario_rol"
-                >
-
-                  @for (
-                    rol of roles;
-                    track rol
-                  ) {
-
-                    <option [value]="rol">
-                      {{ rol }}
-                    </option>
-
-                  }
-
-                </select>
-
-              </div>
-
-
-              <div class="form-field">
-
-                <label for="estadoEditor">
-                  Estado
-                </label>
-
-                <select
-                  id="estadoEditor"
-                  formControlName="estado"
-                >
-
-                  <option [ngValue]="true">
-                    Activo
-                  </option>
-
-                  <option [ngValue]="false">
-                    Inactivo
-                  </option>
-
-                </select>
-
-              </div>
-
-            </div>
-
-
-            @if (
-              usuarioSeleccionado &&
-              esMiUsuario(usuarioSeleccionado)
-            ) {
-
-              <div class="security-note">
-
-                Tu rol de administrador y el estado de tu cuenta
-                están bloqueados desde esta consola.
-
-              </div>
-
-            }
-
-
-            <div class="form-actions">
-
-              <button
-                type="button"
-                class="btn secondary"
-                (click)="cerrarFormulario()"
-              >
-                Cancelar
-              </button>
-
-              <button
-                type="submit"
-                class="btn primary"
-                [disabled]="guardando"
-              >
-                {{
-                  guardando
-                    ? 'Guardando...'
-                    : 'Guardar cambios'
-                }}
-              </button>
-
-            </div>
-
-          </form>
+        </div>
 
         }
 
-      </section>
+
+        <div class="form-actions">
+
+          <button type="button" class="btn secondary" (click)="cerrarFormulario()">
+            Cancelar
+          </button>
+
+          <button type="submit" class="btn primary" [disabled]="guardando">
+            {{
+            guardando
+            ? 'Guardando...'
+            : 'Guardar cambios'
+            }}
+          </button>
+
+        </div>
+
+      </form>
+
+      }
+
+    </section>
 
     }
 

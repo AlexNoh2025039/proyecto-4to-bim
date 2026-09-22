@@ -1,25 +1,52 @@
-import { Component,OnInit,inject} from '@angular/core';
-import {FormBuilder,ReactiveFormsModule,Validators} from '@angular/forms';
+import {
+  Component,
+  OnInit,
+  ChangeDetectorRef,
+  inject
+} from '@angular/core';
+
+import {
+  FormBuilder,
+  ReactiveFormsModule,
+  Validators
+} from '@angular/forms';
+
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import {ActualizarUsuarioRequest,CambiarPasswordRequest,Usuario} from './../../core/models/auth.model';
-import { UsuarioService } from '../../core/services/usuario.service';
-import { AuthService } from '../../core/services/auth.service';
+
+import {
+  ActualizarUsuarioRequest,
+  CambiarPasswordRequest,
+  Usuario
+} from './../../core/models/auth.model';
+
+import {
+  UsuarioService
+} from '../../core/services/usuario.service';
+
+import {
+  AuthService
+} from '../../core/services/auth.service';
+
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule,ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
-
 export class ProfileComponent implements OnInit {
+
   private readonly fb = inject(FormBuilder);
   private readonly usuarioService = inject(UsuarioService);
-  private readonly authService =inject(AuthService);
-  private readonly router =inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   usuario: Usuario | null = null;
 
@@ -33,83 +60,116 @@ export class ProfileComponent implements OnInit {
 
   fotoPreview: string | null = null;
 
-  readonly perfilForm =
-    this.fb.nonNullable.group({
+  /**
+   * Indica si la foto actual ya fue guardada en el servidor.
+   *
+   * false = mostrar botón Guardar foto
+   * true  = ocultar botón Guardar foto
+   */
+  fotoGuardada = false;
 
-      usuario_nombre: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(50)
-        ]
-      ],
 
-      usuario_apellido: [
-        '',
-        [
-          Validators.required,
-          Validators.maxLength(50)
-        ]
-      ],
+  // =====================================================
+  // FORMULARIO DE PERFIL
+  // =====================================================
 
-      usuario_correo: [
-        '',
-        [
-          Validators.required,
-          Validators.email,
-          Validators.maxLength(100)
-        ]
-      ],
+  readonly perfilForm = this.fb.nonNullable.group({
 
-      usuario_telefono: [
-        '',
-        [
-          Validators.maxLength(20)
-        ]
-      ],
-
-      usuario_dpi: [
-        '',
-        [
-          Validators.maxLength(20)
-        ]
-      ],
-
-      usuario_profesion: [
-        '',
-        [
-          Validators.maxLength(100)
-        ]
+    usuario_nombre: [
+      '',
+      [
+        Validators.required,
+        Validators.maxLength(50)
       ]
-    });
+    ],
 
-  readonly passwordForm =
-    this.fb.nonNullable.group({
-
-      usuario_password_actual: [
-        '',
-        Validators.required
-      ],
-
-      usuario_password_nueva: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(6)
-        ]
-      ],
-
-      confirmar_password: [
-        '',
-        [
-          Validators.required
-        ]
+    usuario_apellido: [
+      '',
+      [
+        Validators.required,
+        Validators.maxLength(50)
       ]
-    });
+    ],
+
+    usuario_correo: [
+      '',
+      [
+        Validators.required,
+        Validators.email,
+        Validators.maxLength(100)
+      ]
+    ],
+
+    usuario_telefono: [
+      '',
+      [
+        Validators.maxLength(20)
+      ]
+    ],
+
+    usuario_dpi: [
+      '',
+      [
+        Validators.maxLength(20)
+      ]
+    ],
+
+    usuario_profesion: [
+      '',
+      [
+        Validators.maxLength(100)
+      ]
+    ]
+  });
+
+
+  // =====================================================
+  // FORMULARIO PASSWORD
+  // =====================================================
+
+  readonly passwordForm = this.fb.nonNullable.group({
+
+    usuario_password_actual: [
+      '',
+      Validators.required
+    ],
+
+    usuario_password_nueva: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(6)
+      ]
+    ],
+
+    confirmar_password: [
+      '',
+      Validators.required
+    ]
+  });
+
+
+  // =====================================================
+  // INIT
+  // =====================================================
 
   ngOnInit(): void {
     this.cargarPerfil();
   }
+
+
+  // =====================================================
+  // HOME
+  // =====================================================
+
+  irAHome(): void {
+    this.router.navigate(['/home']);
+  }
+
+
+  // =====================================================
+  // CARGAR PERFIL
+  // =====================================================
 
   cargarPerfil(): void {
 
@@ -119,8 +179,7 @@ export class ProfileComponent implements OnInit {
 
         next: (response) => {
 
-          this.usuario =
-            response.usuario;
+          this.usuario = response.usuario;
 
           this.perfilForm.patchValue({
 
@@ -143,8 +202,22 @@ export class ProfileComponent implements OnInit {
               this.usuario.usuario_profesion ?? ''
           });
 
+
           this.fotoPreview =
             this.usuario.usuario_perfil ?? null;
+
+          /**
+           * Si el usuario ya tiene una foto en el servidor,
+           * significa que ya está guardada.
+           */
+          this.fotoGuardada =
+            !!this.usuario.usuario_perfil;
+
+
+          /**
+           * Forzar actualización visual.
+           */
+          this.cdr.detectChanges();
         },
 
         error: (error) => {
@@ -152,9 +225,16 @@ export class ProfileComponent implements OnInit {
           this.error =
             error?.error?.message ||
             'No se pudo cargar el perfil.';
+
+          this.cdr.detectChanges();
         }
       });
   }
+
+
+  // =====================================================
+  // GUARDAR PERFIL
+  // =====================================================
 
   guardarPerfil(): void {
 
@@ -194,13 +274,18 @@ export class ProfileComponent implements OnInit {
         value.usuario_profesion.trim() || null
     };
 
+
     this.guardandoPerfil = true;
+
 
     this.usuarioService
       .actualizarMiPerfil(data)
       .pipe(
         finalize(() => {
+
           this.guardandoPerfil = false;
+
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
@@ -209,6 +294,7 @@ export class ProfileComponent implements OnInit {
 
           this.usuario =
             response.usuario;
+
 
           try {
 
@@ -225,9 +311,21 @@ export class ProfileComponent implements OnInit {
             );
           }
 
+
           this.mensaje =
             response.message ||
             'Perfil actualizado correctamente.';
+
+
+          /**
+           * Volvemos a consultar el perfil para
+           * garantizar que la información mostrada
+           * sea la que realmente está en el backend.
+           */
+          this.cargarPerfil();
+
+
+          this.cdr.detectChanges();
         },
 
         error: (error) => {
@@ -235,9 +333,12 @@ export class ProfileComponent implements OnInit {
           this.error =
             error?.error?.message ||
             'No se pudo actualizar el perfil.';
+
+          this.cdr.detectChanges();
         }
       });
   }
+
 
   // =====================================================
   // FOTO
@@ -255,8 +356,10 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
+
     this.mensaje = '';
     this.error = '';
+
 
     if (!file.type.startsWith('image/')) {
 
@@ -268,6 +371,7 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
+
     if (file.size > 5 * 1024 * 1024) {
 
       this.error =
@@ -278,27 +382,57 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
+
     const reader =
       new FileReader();
+
 
     reader.onload = () => {
 
       const result =
         reader.result;
 
+
       if (typeof result === 'string') {
 
         this.fotoPreview = result;
+
+        /**
+         * Al seleccionar una nueva imagen,
+         * todavía NO está guardada.
+         *
+         * Por eso vuelve a aparecer
+         * el botón "Guardar foto".
+         */
+        this.fotoGuardada = false;
+
+        this.cdr.detectChanges();
       }
     };
 
+
+    reader.onerror = () => {
+
+      this.error =
+        'No se pudo leer la imagen.';
+
+      this.cdr.detectChanges();
+    };
+
+
     reader.readAsDataURL(file);
   }
+
+
+  // =====================================================
+  // GUARDAR FOTO
+  // =====================================================
 
   guardarFoto(): void {
 
     this.mensaje = '';
     this.error = '';
+
 
     if (!this.fotoPreview) {
 
@@ -308,13 +442,18 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
+
     this.guardandoFoto = true;
+
 
     this.usuarioService
       .actualizarFotoPerfil(this.fotoPreview)
       .pipe(
         finalize(() => {
+
           this.guardandoFoto = false;
+
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
@@ -324,13 +463,22 @@ export class ProfileComponent implements OnInit {
           this.usuario =
             response.usuario;
 
+
+          /**
+           * Utilizamos la foto devuelta por el backend.
+           */
           this.fotoPreview =
             response.usuario.usuario_perfil ?? null;
 
-          /*
-           * No guardamos la imagen Base64
-           * dentro de la sesión.
+
+          /**
+           * MARCAR COMO GUARDADA
+           *
+           * Esto hace desaparecer el botón.
            */
+          this.fotoGuardada = true;
+
+
           try {
 
             this.authService.updateCurrentUsuario({
@@ -346,9 +494,23 @@ export class ProfileComponent implements OnInit {
             );
           }
 
+
           this.mensaje =
             response.message ||
             'Foto de perfil actualizada correctamente.';
+
+
+          /**
+           * Volvemos a consultar el perfil para sincronizar
+           * completamente la información con el backend.
+           */
+          this.cargarPerfil();
+
+
+          /**
+           * Actualización inmediata de la interfaz.
+           */
+          this.cdr.detectChanges();
         },
 
         error: (error) => {
@@ -356,9 +518,16 @@ export class ProfileComponent implements OnInit {
           this.error =
             error?.error?.message ||
             'No se pudo actualizar la foto.';
+
+          this.cdr.detectChanges();
         }
       });
   }
+
+
+  // =====================================================
+  // ELIMINAR FOTO
+  // =====================================================
 
   eliminarFoto(): void {
 
@@ -367,11 +536,15 @@ export class ProfileComponent implements OnInit {
 
     this.guardandoFoto = true;
 
+
     this.usuarioService
       .actualizarFotoPerfil(null)
       .pipe(
         finalize(() => {
+
           this.guardandoFoto = false;
+
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
@@ -381,7 +554,18 @@ export class ProfileComponent implements OnInit {
           this.usuario =
             response.usuario;
 
+
+          /**
+           * Quitar imagen de la vista.
+           */
           this.fotoPreview = null;
+
+
+          /**
+           * Ya no existe una foto guardada.
+           */
+          this.fotoGuardada = false;
+
 
           try {
 
@@ -398,9 +582,13 @@ export class ProfileComponent implements OnInit {
             );
           }
 
+
           this.mensaje =
             response.message ||
             'Foto de perfil eliminada correctamente.';
+
+
+          this.cdr.detectChanges();
         },
 
         error: (error) => {
@@ -408,9 +596,12 @@ export class ProfileComponent implements OnInit {
           this.error =
             error?.error?.message ||
             'No se pudo eliminar la foto.';
+
+          this.cdr.detectChanges();
         }
       });
   }
+
 
   // =====================================================
   // PASSWORD
@@ -421,6 +612,7 @@ export class ProfileComponent implements OnInit {
     this.mensaje = '';
     this.error = '';
 
+
     if (this.passwordForm.invalid) {
 
       this.passwordForm.markAllAsTouched();
@@ -428,8 +620,10 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
+
     const value =
       this.passwordForm.getRawValue();
+
 
     if (
       value.usuario_password_nueva !==
@@ -442,6 +636,7 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
+
     const data: CambiarPasswordRequest = {
 
       usuario_password_actual:
@@ -451,13 +646,18 @@ export class ProfileComponent implements OnInit {
         value.usuario_password_nueva
     };
 
+
     this.cambiandoPassword = true;
+
 
     this.usuarioService
       .cambiarMiPassword(data)
       .pipe(
         finalize(() => {
+
           this.cambiandoPassword = false;
+
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
@@ -468,6 +668,8 @@ export class ProfileComponent implements OnInit {
             response.message;
 
           this.passwordForm.reset();
+
+          this.cdr.detectChanges();
         },
 
         error: (error) => {
@@ -475,9 +677,12 @@ export class ProfileComponent implements OnInit {
           this.error =
             error?.error?.message ||
             'No se pudo cambiar la contraseña.';
+
+          this.cdr.detectChanges();
         }
       });
   }
+
 
   // =====================================================
   // ELIMINAR CUENTA
@@ -490,11 +695,14 @@ export class ProfileComponent implements OnInit {
         '¿Estás seguro de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.'
       );
 
+
     if (!confirmar) {
       return;
     }
 
+
     this.eliminandoCuenta = true;
+
 
     this.usuarioService
       .eliminarMiCuenta()
@@ -516,9 +724,12 @@ export class ProfileComponent implements OnInit {
             'No se pudo eliminar la cuenta.';
 
           this.eliminandoCuenta = false;
+
+          this.cdr.detectChanges();
         }
       });
   }
+
 
   // =====================================================
   // HELPERS
@@ -530,13 +741,16 @@ export class ProfileComponent implements OnInit {
       return '?';
     }
 
+
     const nombre =
       this.usuario.usuario_nombre
         ?.charAt(0) || '';
 
+
     const apellido =
       this.usuario.usuario_apellido
         ?.charAt(0) || '';
+
 
     return (
       nombre +

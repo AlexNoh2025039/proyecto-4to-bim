@@ -1,63 +1,239 @@
 <div class="curriculum-page">
 
-    <div class="card-header">
+    <!-- ENCABEZADO -->
+    <div
+        class="card-header"
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"
+    >
+
         <div>
-            <h2>Mis curriculums</h2>
-            <p>{{ curriculums.length }} curriculum(s) registrado(s).</p>
+            <h2>Gestión de Currículums</h2>
+
+            <p>
+                {{ curriculums.length }}
+                curriculum(s) registrado(s).
+            </p>
         </div>
 
-        <button type="button" class="btn secondary" (click)="cargarCurriculums()" [disabled]="cargando">
-            {{ cargando ? 'Actualizando...' : 'Actualizar lista' }}
-        </button>
+        <div style="display: flex; gap: 10px;">
+
+            <button
+                type="button"
+                class="btn secondary"
+                (click)="cargarCurriculums()"
+                [disabled]="cargando"
+            >
+                {{ cargando ? 'Actualizando...' : 'Actualizar lista' }}
+            </button>
+
+            <button
+                type="button"
+                class="btn primary"
+                (click)="irAHome()"
+            >
+                Regresar al Home
+            </button>
+
+        </div>
     </div>
 
+
+    <!-- MENSAJES -->
 
     @if (mensaje) {
-
-    <div class="alert success">
-        {{ mensaje }}
-    </div>
-
+        <div class="alert success">
+            {{ mensaje }}
+        </div>
     }
-
 
     @if (error) {
-
-    <div class="alert error">
-        {{ error }}
-    </div>
-
+        <div class="alert error">
+            {{ error }}
+        </div>
     }
 
 
+    <!-- CONTENIDO -->
     <div class="curriculum-layout">
 
-        <!-- ============================================== -->
-        <!-- FORMULARIO -->
-        <!-- ============================================== -->
+        <!-- ========================= -->
+        <!-- MIS CURRICULUMS -->
+        <!-- ========================= -->
 
         <section class="card">
 
             <div class="card-header">
 
                 <div>
-                    <h2>
-                        {{
-                        editando
-                        ? 'Editar curriculum'
-                        : 'Crear curriculum'
-                        }}
-                    </h2>
+                    <h2>Mis curriculums</h2>
 
                     <p>
-                        Completa la información profesional.
+                        Revisa o gestiona tus currículums subidos.
                     </p>
                 </div>
 
             </div>
 
 
-            <form [formGroup]="curriculumForm" (ngSubmit)="guardarCurriculum()">
+            @if (cargando) {
+
+                <div class="loading">
+                    Cargando curriculums...
+                </div>
+
+            } @else if (curriculums.length === 0) {
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+                        📄
+                    </div>
+
+                    <h3>
+                        Aún no tienes curriculum
+                    </h3>
+
+                    <p>
+                        Crea tu primer curriculum en el formulario
+                        de abajo para comenzar.
+                    </p>
+
+                </div>
+
+            } @else {
+
+                <div class="curriculum-list">
+
+                    @for (
+                        curriculum of curriculums;
+                        track curriculum.curriculum_id
+                    ) {
+
+                        <article class="curriculum-item">
+
+                            <div class="curriculum-info">
+
+                                <h3>
+                                    {{ curriculum.curriculum_nombre }}
+                                </h3>
+
+                                <span class="category">
+                                    {{ curriculum.categoria_interes }}
+                                </span>
+
+                                <small>
+                                    Subido:
+                                    {{
+                                        curriculum.fecha_subida
+                                            | date:'dd/MM/yyyy'
+                                    }}
+                                </small>
+
+
+                                @if (curriculum.tiene_archivo) {
+
+                                    <span class="pdf-badge">
+                                        PDF disponible
+                                    </span>
+
+                                } @else {
+
+                                    <span class="no-pdf-badge">
+                                        Sin PDF
+                                    </span>
+
+                                }
+
+                            </div>
+
+
+                            <div class="item-actions">
+
+                                <button
+                                    type="button"
+                                    class="btn secondary"
+                                    (click)="editarCurriculum(curriculum)"
+                                >
+                                    Editar
+                                </button>
+
+
+                                @if (curriculum.tiene_archivo) {
+
+                                    <button
+                                        type="button"
+                                        class="btn secondary"
+                                        (click)="verPDF(curriculum)"
+                                    >
+                                        Ver PDF
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="btn secondary"
+                                        (click)="descargarPDF(curriculum)"
+                                    >
+                                        Descargar
+                                    </button>
+
+                                }
+
+
+                                <button
+                                    type="button"
+                                    class="btn danger-outline"
+                                    (click)="eliminarCurriculum(curriculum)"
+                                >
+                                    Eliminar
+                                </button>
+
+                            </div>
+
+                        </article>
+
+                    }
+
+                </div>
+
+            }
+
+        </section>
+
+
+
+        <!-- ========================= -->
+        <!-- FORMULARIO -->
+        <!-- ========================= -->
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>
+                        {{
+                            editando
+                                ? 'Editar curriculum'
+                                : 'Crear nuevo curriculum'
+                        }}
+                    </h2>
+
+                    <p>
+                        Completa la información profesional.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form
+                [formGroup]="curriculumForm"
+                (ngSubmit)="guardarCurriculum()"
+            >
+
+                <!-- NOMBRE -->
 
                 <div class="form-group">
 
@@ -65,22 +241,30 @@
                         Nombre del curriculum
                     </label>
 
-                    <input id="nombre" type="text" maxlength="100" formControlName="curriculum_nombre"
-                        placeholder="Ej. Curriculum Profesional">
+                    <input
+                        id="nombre"
+                        type="text"
+                        maxlength="100"
+                        formControlName="curriculum_nombre"
+                        placeholder="Ej. Curriculum Profesional"
+                    >
 
                     @if (
-                    curriculumForm.controls.curriculum_nombre.touched &&
-                    curriculumForm.controls.curriculum_nombre.invalid
+                        curriculumForm.controls.curriculum_nombre.touched &&
+                        curriculumForm.controls.curriculum_nombre.invalid
                     ) {
 
-                    <small class="field-error">
-                        El nombre es obligatorio y no puede superar 100 caracteres.
-                    </small>
+                        <small class="field-error">
+                            El nombre es obligatorio y no puede superar
+                            100 caracteres.
+                        </small>
 
                     }
 
                 </div>
 
+
+                <!-- CATEGORÍA -->
 
                 <div class="form-group">
 
@@ -88,22 +272,30 @@
                         Categoría de interés
                     </label>
 
-                    <input id="categoria" type="text" maxlength="100" formControlName="categoria_interes"
-                        placeholder="Ej. Desarrollo de Software">
+                    <input
+                        id="categoria"
+                        type="text"
+                        maxlength="100"
+                        formControlName="categoria_interes"
+                        placeholder="Ej. Desarrollo de Software"
+                    >
 
                     @if (
-                    curriculumForm.controls.categoria_interes.touched &&
-                    curriculumForm.controls.categoria_interes.invalid
+                        curriculumForm.controls.categoria_interes.touched &&
+                        curriculumForm.controls.categoria_interes.invalid
                     ) {
 
-                    <small class="field-error">
-                        La categoría es obligatoria y no puede superar 100 caracteres.
-                    </small>
+                        <small class="field-error">
+                            La categoría es obligatoria y no puede superar
+                            100 caracteres.
+                        </small>
 
                     }
 
                 </div>
 
+
+                <!-- HABILIDADES -->
 
                 <div class="form-group">
 
@@ -111,11 +303,17 @@
                         Habilidades
                     </label>
 
-                    <textarea id="habilidades" rows="4" formControlName="habilidades"
-                        placeholder="Describe tus habilidades..."></textarea>
+                    <textarea
+                        id="habilidades"
+                        rows="4"
+                        formControlName="habilidades"
+                        placeholder="Describe tus habilidades..."
+                    ></textarea>
 
                 </div>
 
+
+                <!-- EXPERIENCIA -->
 
                 <div class="form-group">
 
@@ -123,11 +321,17 @@
                         Experiencia
                     </label>
 
-                    <textarea id="experiencia" rows="5" formControlName="experiencia"
-                        placeholder="Describe tu experiencia laboral..."></textarea>
+                    <textarea
+                        id="experiencia"
+                        rows="5"
+                        formControlName="experiencia"
+                        placeholder="Describe tu experiencia laboral..."
+                    ></textarea>
 
                 </div>
 
+
+                <!-- FORMACIÓN -->
 
                 <div class="form-group">
 
@@ -135,11 +339,17 @@
                         Formación
                     </label>
 
-                    <textarea id="formacion" rows="5" formControlName="formacion"
-                        placeholder="Describe tus estudios y formación..."></textarea>
+                    <textarea
+                        id="formacion"
+                        rows="5"
+                        formControlName="formacion"
+                        placeholder="Describe tus estudios y formación..."
+                    ></textarea>
 
                 </div>
 
+
+                <!-- PDF -->
 
                 <div class="file-section">
 
@@ -147,31 +357,43 @@
                         Documento PDF
                     </label>
 
-                    <input #archivoInput id="archivo" type="file" accept="application/pdf" hidden
-                        (change)="seleccionarArchivo($event)">
+                    <input
+                        #archivoInput
+                        id="archivo"
+                        type="file"
+                        accept="application/pdf"
+                        hidden
+                        (change)="seleccionarArchivo($event)"
+                    >
 
-                    <button type="button" class="btn secondary" (click)="archivoInput.click()">
+
+                    <button
+                        type="button"
+                        class="btn secondary"
+                        (click)="archivoInput.click()"
+                    >
                         Seleccionar PDF
                     </button>
 
 
                     @if (nombreArchivo) {
 
-                    <div class="file-selected">
-                        📄 {{ nombreArchivo }}
-                    </div>
+                        <div class="file-selected">
+                            📄 {{ nombreArchivo }}
+                        </div>
 
                     }
 
+
                     @if (
-                    editando &&
-                    !nombreArchivo &&
-                    archivoPreview
+                        editando &&
+                        !nombreArchivo &&
+                        archivoPreview
                     ) {
 
-                    <div class="file-selected">
-                        📄 Archivo PDF actual
-                    </div>
+                        <div class="file-selected">
+                            📄 Archivo PDF actual
+                        </div>
 
                     }
 
@@ -183,158 +405,44 @@
                 </div>
 
 
+                <!-- BOTONES -->
+
                 <div class="form-actions">
 
                     @if (editando) {
 
-                    <button type="button" class="btn secondary" (click)="nuevoCurriculum()">
-                        Cancelar
-                    </button>
+                        <button
+                            type="button"
+                            class="btn secondary"
+                            (click)="nuevoCurriculum()"
+                        >
+                            Cancelar edición
+                        </button>
 
                     }
 
-                    <button type="submit" class="btn primary" [disabled]="guardando">
+
+                    <button
+                        type="submit"
+                        class="btn primary"
+                        [disabled]="guardando"
+                    >
+
                         {{
-                        guardando
-                        ? 'Guardando...'
-                        : editando
-                        ? 'Guardar cambios'
-                        : 'Crear curriculum'
+                            guardando
+                                ? 'Guardando...'
+                                : (
+                                    editando
+                                        ? 'Guardar cambios'
+                                        : 'Crear curriculum'
+                                )
                         }}
+
                     </button>
 
                 </div>
 
             </form>
-
-        </section>
-
-
-        <!-- ============================================== -->
-        <!-- LISTA -->
-        <!-- ============================================== -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <div>
-                    <h2>Mis curriculums</h2>
-
-                    <p>
-                        {{ curriculums.length }} curriculum(s) registrado(s).
-                    </p>
-                </div>
-
-            </div>
-
-            @if (cargando) {
-
-            <div class="loading">
-                Cargando curriculums...
-            </div>
-
-            } @else if (curriculums.length === 0) {
-
-            <div class="empty-state">
-
-                <div class="empty-icon">
-                    📄
-                </div>
-
-                <h3>
-                    Aún no tienes curriculum
-                </h3>
-
-                <p>
-                    Crea tu primer curriculum para comenzar.
-                </p>
-
-                <button type="button" class="btn primary" (click)="nuevoCurriculum()">
-                    Crear curriculum
-                </button>
-
-            </div>
-
-            } @else {
-
-            <div class="curriculum-list">
-
-                @for (
-                curriculum of curriculums;
-                track curriculum.curriculum_id
-                ) {
-
-                <article class="curriculum-item">
-
-                    <div class="curriculum-info">
-
-                        <h3>
-                            {{ curriculum.curriculum_nombre }}
-                        </h3>
-
-                        <span class="category">
-                            {{ curriculum.categoria_interes }}
-                        </span>
-
-                        <small>
-                            Subido:
-                            {{
-                            curriculum.fecha_subida
-                            | date:'dd/MM/yyyy'
-                            }}
-                        </small>
-
-                        @if (curriculum.tiene_archivo) {
-
-                        <span class="pdf-badge">
-                            PDF disponible
-                        </span>
-
-                        } @else {
-
-                        <span class="no-pdf-badge">
-                            Sin PDF
-                        </span>
-
-                        }
-
-                    </div>
-
-
-                    <div class="item-actions">
-
-                        <button type="button" class="btn secondary" (click)="editarCurriculum(curriculum)">
-                            Editar
-                        </button>
-
-
-                        @if (curriculum.tiene_archivo) {
-
-                        <button type="button" class="btn secondary" (click)="verPDF(curriculum)">
-                            Ver PDF
-                        </button>
-
-                        <button type="button" class="btn secondary" (click)="descargarPDF(curriculum)">
-                            Descargar
-                        </button>
-
-                        }
-
-
-                        <button type="button" class="btn danger-outline" (click)="eliminarCurriculum(curriculum)">
-                            Eliminar
-                        </button>
-
-                    </div>
-
-                </article>
-
-                }
-
-            </div>
-
-            }
 
         </section>
 

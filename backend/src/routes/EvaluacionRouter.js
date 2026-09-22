@@ -6,32 +6,35 @@ const router = Router();
 
 router.use(requireAuth);
 
-function validateEvaluacion({ evaluacion_nombre, categoria, empresa_id, pregunta_id }) {
-    if (!evaluacion_nombre || typeof evaluacion_nombre !== 'string' || evaluacion_nombre.trim() === '' || evaluacion_nombre.length > 100){
-        return 'El nombre de la evalución no es valido';
-    }
+function validateEvaluacion({ evaluacion_nombre, categoria, empresa_id }) {
+  if (
+    !evaluacion_nombre ||
+    typeof evaluacion_nombre !== 'string' ||
+    evaluacion_nombre.trim() === '' ||
+    evaluacion_nombre.length > 100
+  ) {
+    return 'El nombre de la evaluación es obligatorio y no debe superar los 100 caracteres';
+  }
 
-    if (!categoria || typeof categoria !== 'string' || categoria.trim() === '' || categoria.length > 100){
-        return 'El nombre de la evalución no es valido';
-    }
+  if (categoria && (typeof categoria !== 'string' || categoria.length > 100)) {
+    return 'La categoría debe ser un texto de máximo 100 caracteres';
+  }
 
-    if (!Number.isInteger(empresa_id) || empresa_id <= 0) {
-        return 'El id de la empresa no es valido';
-    }
+  const id = Number(empresa_id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return 'El empresa_id debe ser un número entero válido';
+  }
 
-    if (!Number.isInteger(pregunta_id) || pregunta_id <= 0){
-        return 'El id de la pregunta no es valido';
-    }
-
-    return null;
+  return null;
 }
 
 router.get('/', async (_req, res) => {
   try {
     const result = await pool.query(
-      `SELECT evaluacion_id, evaluacion_nombre, categoria, empresa_id, pregunta_id 
-       FROM Evaluacion 
-       ORDER BY evaluacion_id ASC`
+      `SELECT e.evaluacion_id, e.evaluacion_nombre, e.categoria, e.empresa_id, emp.empresa_nombre
+       FROM Evaluacion e
+       JOIN Empresa emp ON e.empresa_id = emp.empresa_id
+       ORDER BY e.evaluacion_id ASC`
     );
 
     res.json({ evaluaciones: result.rows });
@@ -45,49 +48,54 @@ router.get('/:id', async (req, res) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id) || id <= 0) {
-    return res.status(400).json({ message: 'El ID de la evaluacion no es valido' });
+    return res.status(400).json({ message: 'El ID de la evaluación no es válido' });
   }
 
   try {
     const result = await pool.query(
-      `SELECT evaluacion_id, evaluacion_nombre, categoria, empresa_id, pregunta_id 
-       FROM Evaluacion 
-       WHERE evaluacion_id = $1`,
+      `SELECT e.evaluacion_id, e.evaluacion_nombre, e.categoria, e.empresa_id, emp.empresa_nombre
+       FROM Evaluacion e
+       JOIN Empresa emp ON e.empresa_id = emp.empresa_id
+       WHERE e.evaluacion_id = $1`,
       [id]
     );
 
     if (!result.rows[0]) {
-      return res.status(404).json({ message: 'Evaluacion no encontrada' });
+      return res.status(404).json({ message: 'Evaluación no encontrada' });
     }
 
     res.json({ evaluacion: result.rows[0] });
   } catch (error) {
-    console.error('Error consultando evaluacion:', error);
-    res.status(500).json({ message: 'No se pudo consultar la evaluacion' });
+    console.error('Error consultando evaluación:', error);
+    res.status(500).json({ message: 'No se pudo consultar la evaluación' });
   }
 });
 
 router.post('/', async (req, res) => {
-  const { evaluacion_nombre, categoria, empresa_id, pregunta_id } = req.body;
+  const { evaluacion_nombre, categoria, empresa_id } = req.body;
 
-  const validationError = validateEvaluacion({ evaluacion_nombre, categoria, empresa_id, pregunta_id });
-
+  const validationError = validateEvaluacion({ evaluacion_nombre, categoria, empresa_id });
   if (validationError) {
     return res.status(400).json({ message: validationError });
   }
 
   try {
+    const empresaExiste = await pool.query('SELECT empresa_id FROM Empresa WHERE empresa_id = $1', [empresa_id]);
+    if (!empresaExiste.rows[0]) {
+      return res.status(400).json({ message: 'La empresa especificada no existe' });
+    }
+
     const result = await pool.query(
-      `INSERT INTO Evaluacion (evaluacion_nombre, categoria, empresa_id, pregunta_id)
-       VALUES ($1, $2, $3, $4)
-       RETURNING evaluacion_id, evaluacion_nombre, categoria, empresa_id, pregunta_id`,
-      [evaluacion_nombre.trim(), categoria.trim(), empresa_id, pregunta_id]
+      `INSERT INTO Evaluacion (evaluacion_nombre, categoria, empresa_id)
+       VALUES ($1, $2, $3)
+       RETURNING evaluacion_id, evaluacion_nombre, categoria, empresa_id`,
+      [evaluacion_nombre.trim(), categoria ? categoria.trim() : null, empresa_id]
     );
 
     res.status(201).json({ evaluacion: result.rows[0] });
   } catch (error) {
-    console.error('Error creando evaluacion:', error);
-    res.status(500).json({ message: 'No se pudo crear la evaluacion' });
+    console.error('Error creando evaluación:', error);
+    res.status(500).json({ message: 'No se pudo crear la evaluación' });
   }
 });
 
@@ -95,34 +103,38 @@ router.put('/:id', async (req, res) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id) || id <= 0) {
-    return res.status(400).json({ message: 'El ID de la evaluacion no es valido' });
+    return res.status(400).json({ message: 'El ID de la evaluación no es válido' });
   }
 
-  const { evaluacion_nombre, categoria, empresa_id, pregunta_id } = req.body;
+  const { evaluacion_nombre, categoria, empresa_id } = req.body;
 
-  const validationError = validateEvaluacion({ evaluacion_nombre, categoria, empresa_id, pregunta_id });
-
+  const validationError = validateEvaluacion({ evaluacion_nombre, categoria, empresa_id });
   if (validationError) {
     return res.status(400).json({ message: validationError });
   }
 
   try {
+    const empresaExiste = await pool.query('SELECT empresa_id FROM Empresa WHERE empresa_id = $1', [empresa_id]);
+    if (!empresaExiste.rows[0]) {
+      return res.status(400).json({ message: 'La empresa especificada no existe' });
+    }
+
     const result = await pool.query(
       `UPDATE Evaluacion
-       SET evaluacion_nombre = $1, categoria = $2, empresa_id = $3, pregunta_id = $4
-       WHERE evaluacion_id = $5
-       RETURNING evaluacion_id, evaluacion_nombre, categoria, empresa_id, pregunta_id`,
-      [evaluacion_nombre.trim(), categoria.trim(), empresa_id, pregunta_id, id]
+       SET evaluacion_nombre = $1, categoria = $2, empresa_id = $3
+       WHERE evaluacion_id = $4
+       RETURNING evaluacion_id, evaluacion_nombre, categoria, empresa_id`,
+      [evaluacion_nombre.trim(), categoria ? categoria.trim() : null, empresa_id, id]
     );
 
     if (!result.rows[0]) {
-      return res.status(404).json({ message: 'Evaluacion no encontrada' });
+      return res.status(404).json({ message: 'Evaluación no encontrada' });
     }
 
     res.json({ evaluacion: result.rows[0] });
   } catch (error) {
-    console.error('Error actualizando evaluacion:', error);
-    res.status(500).json({ message: 'No se pudo actualizar la evaluacion' });
+    console.error('Error actualizando evaluación:', error);
+    res.status(500).json({ message: 'No se pudo actualizar la evaluación' });
   }
 });
 
@@ -130,7 +142,7 @@ router.delete('/:id', async (req, res) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id) || id <= 0) {
-    return res.status(400).json({ message: 'El ID de la evaluacion no es valido' });
+    return res.status(400).json({ message: 'El ID de la evaluación no es válido' });
   }
 
   try {
@@ -140,13 +152,13 @@ router.delete('/:id', async (req, res) => {
     );
 
     if (!result.rows[0]) {
-      return res.status(404).json({ message: 'Evaluacion no encontrada' });
+      return res.status(404).json({ message: 'Evaluación no encontrada' });
     }
 
-    res.json({ message: 'Evaluacion eliminada correctamente' });
+    res.json({ message: 'Evaluación eliminada correctamente' });
   } catch (error) {
-    console.error('Error eliminando evaluacion:', error);
-    res.status(500).json({ message: 'No se pudo eliminar la evaluacion' });
+    console.error('Error eliminando evaluación:', error);
+    res.status(500).json({ message: 'No se pudo eliminar la evaluación' });
   }
 });
 

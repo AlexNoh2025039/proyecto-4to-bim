@@ -38,8 +38,8 @@ import {
     FormsModule,
     ReactiveFormsModule
   ],
-  templateUrl: './admin-users.component.html',
-  styleUrl: './admin-users.component.css'
+  templateUrl: './admin-users-form.component.html',
+  styleUrl: './admin-users-form.component.css'
 })
 export class AdminUsersComponent implements OnInit {
 
@@ -364,7 +364,7 @@ export class AdminUsersComponent implements OnInit {
         value.usuario_telefono.trim() || null,
 
       usuario_dpi:
-        value.usuario_dpi.trim() || null,
+        value.usuario_dpi.trim(),
 
       usuario_profesion:
         value.usuario_profesion.trim() || null,

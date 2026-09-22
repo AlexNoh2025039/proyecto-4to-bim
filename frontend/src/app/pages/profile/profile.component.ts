@@ -188,7 +188,7 @@ export class ProfileComponent implements OnInit {
         value.usuario_telefono.trim() || null,
 
       usuario_dpi:
-        value.usuario_dpi.trim() || null,
+        value.usuario_dpi.trim(),
 
       usuario_profesion:
         value.usuario_profesion.trim() || null

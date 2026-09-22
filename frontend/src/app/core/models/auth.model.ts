@@ -17,7 +17,7 @@ export interface Usuario {
   usuario_perfil?: string | null;
 
   usuario_telefono: string | null;
-  usuario_dpi: string | null;
+  usuario_dpi: string;
   usuario_profesion: string | null;
 
   usuario_rol: RolUsuario;

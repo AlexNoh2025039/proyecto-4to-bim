@@ -1,62 +1,367 @@
-<form [formGroup]="vacanteForm" (ngSubmit)="onSubmit()" class="form-container">
-  <h2>{{ vacanteToEdit ? 'Editar Vacante' : 'Nueva Vacante' }}</h2>
+<div class="admin-page">
 
-  <div class="form-group">
-    <label for="vacante_nombre">Nombre de la Vacante *</label>
-    <input id="vacante_nombre" type="text" formControlName="vacante_nombre" placeholder="Ej. Desarrollador Frontend Senior" />
-    <span class="error" *ngIf="vacanteForm.get('vacante_nombre')?.touched && vacanteForm.get('vacante_nombre')?.invalid">
-      El nombre de la vacante es obligatorio.
-    </span>
-  </div>
-
-  <div class="form-row">
-    <div class="form-group">
-      <label for="tipo_jornada">Tipo de Jornada *</label>
-      <select id="tipo_jornada" formControlName="tipo_jornada" class="form-control">
-        <option value="Tiempo Completo">Tiempo Completo</option>
-        <option value="Medio Tiempo">Medio Tiempo</option>
-        <option value="Freelance">Freelance</option>
-        <option value="Temporal">Temporal</option>
-      </select>
+  <div class="page-header">
+    <div>
+      <h1>Gestión de Vacantes</h1>
+      <p>
+        Administra la publicación de puestos de trabajo y requerimientos de contratación.
+      </p>
     </div>
+    <button type="button" class="btn primary" (click)="abrirFormularioCrear()">
+      + Publicar Vacante
+    </button>
+  </div>
 
-    <div class="form-group">
-      <label for="salario">Salario (Q)</label>
-      <input id="salario" type="number" formControlName="salario" placeholder="Ej. 5000" />
+  @if (mensaje) {
+    <div class="alert success">
+      {{ mensaje }}
     </div>
-  </div>
+  }
 
-  <div class="form-row">
-    <div class="form-group">
-      <label for="categoria">Categoría</label>
-      <input id="categoria" type="text" formControlName="categoria" placeholder="Ej. Tecnología / IT" />
+  @if (error) {
+    <div class="alert error">
+      {{ error }}
     </div>
+  }
 
-    <div class="form-group">
-      <label for="ubicacion">Ubicación</label>
-      <input id="ubicacion" type="text" formControlName="ubicacion" placeholder="Ej. Ciudad de Guatemala / Remoto" />
+  <section class="card filters-card">
+    <div class="filters-grid">
+
+      <div class="filter-field">
+        <label for="busqueda">
+          Buscar
+        </label>
+        <input
+          id="busqueda"
+          type="text"
+          [(ngModel)]="busqueda"
+          placeholder="Título, categoría o ubicación"
+        >
+      </div>
+
+      <div class="filter-field">
+        <label for="jornada">
+          Jornada
+        </label>
+        <select id="jornada" [(ngModel)]="filtroJornada">
+          <option value="">Todas las jornadas</option>
+          @for (jornada of jornadas; track jornada) {
+            <option [value]="jornada">{{ jornada }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="estado">
+          Estado
+        </label>
+        <select id="estado" [(ngModel)]="filtroEstado">
+          <option value="">Todos</option>
+          <option value="true">Activas</option>
+          <option value="false">Inactivas</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button
+          type="button"
+          class="btn secondary"
+          (click)="limpiarFiltros()"
+        >
+          Limpiar
+        </button>
+      </div>
+
     </div>
+  </section>
+
+  <div class="content-grid">
+
+    <section class="card users-card">
+
+      <div class="card-header">
+        <div>
+          <h2>Vacantes publicadas</h2>
+          <p>
+            Mostrando
+            {{ vacantesFiltradas.length }}
+            de
+            {{ vacantes.length }}
+            vacantes.
+          </p>
+        </div>
+      </div>
+
+      @if (cargando) {
+        <div class="loading">
+          Cargando vacantes...
+        </div>
+      } @else if (vacantesFiltradas.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            💼
+          </div>
+          <h3>
+            No se encontraron vacantes
+          </h3>
+          <p>
+            Prueba ajustando los filtros de búsqueda o publica un nuevo puesto.
+          </p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Puesto</th>
+                <th>Empresa</th>
+                <th>Jornada</th>
+                <th>Salario</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (vacante of vacantesFiltradas; track vacante.vacante_id) {
+                <tr [class.selected-row]="vacanteSeleccionada?.vacante_id === vacante.vacante_id">
+                  <td>
+                    #{{ vacante.vacante_id }}
+                  </td>
+
+                  <td>
+                    <div class="user-cell">
+                      <div>
+                        <strong>{{ vacante.vacante_nombre }}</strong>
+                        @if (vacante.categoria) {
+                          <p class="sub-text">
+                            {{ vacante.categoria }} - {{ vacante.ubicacion || 'Remoto' }}
+                          </p>
+                        }
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    {{ obtenerNombreEmpresa(vacante.empresa_id) }}
+                  </td>
+
+                  <td>
+                    {{ vacante.tipo_jornada || 'N/A' }}
+                  </td>
+
+                  <td>
+                    {{ vacante.salario ? ('Q' + (vacante.salario | number:'1.2-2')) : 'No especificado' }}
+                  </td>
+
+                  <td>
+                    @if (vacante.estado) {
+                      <span class="status active">Activa</span>
+                    } @else {
+                      <span class="status inactive">Inactiva</span>
+                    }
+                  </td>
+
+                  <td>
+                    <div class="actions">
+                      <button
+                        type="button"
+                        class="icon-action"
+                        title="Editar"
+                        (click)="editarVacante(vacante)"
+                      >
+                        ✏️
+                      </button>
+
+                      <button
+                        type="button"
+                        class="icon-action delete"
+                        title="Eliminar"
+                        [disabled]="eliminando"
+                        (click)="eliminarVacante(vacante)"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </section>
+
+    @if (mostrarFormulario) {
+      <section class="card editor-card">
+
+        <div class="card-header editor-header">
+          <div>
+            <h2>
+              {{ modoEdicion ? 'Editar vacante' : 'Nueva vacante' }}
+            </h2>
+            @if (vacanteSeleccionada && modoEdicion) {
+              <p>{{ vacanteSeleccionada.vacante_nombre }}</p>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="cerrarFormulario()"
+          >
+            ×
+          </button>
+        </div>
+
+        <form [formGroup]="vacanteForm" (ngSubmit)="guardarVacante()">
+          <div class="form-grid">
+
+            <div class="form-field full">
+              <label for="vacante_nombre">
+                Título de la Vacante *
+              </label>
+              <input
+                id="vacante_nombre"
+                type="text"
+                maxlength="150"
+                formControlName="vacante_nombre"
+                placeholder="Ej. Desarrollador Frontend Senior"
+              >
+              @if (
+                vacanteForm.controls.vacante_nombre.touched &&
+                vacanteForm.controls.vacante_nombre.invalid
+              ) {
+                <small class="field-error">
+                  El título de la vacante es obligatorio.
+                </small>
+              }
+            </div>
+
+            @if (esAdmin) {
+              <div class="form-field full">
+                <label for="empresa_id">
+                  Empresa Perteneciente *
+                </label>
+                <select id="empresa_id" formControlName="empresa_id">
+                  @for (emp of empresas; track emp.empresa_id) {
+                    <option [value]="emp.empresa_id">
+                      {{ emp.empresa_nombre }}
+                    </option>
+                  }
+                </select>
+              </div>
+            }
+
+            <div class="form-field">
+              <label for="tipo_jornada">
+                Tipo de Jornada *
+              </label>
+              <select id="tipo_jornada" formControlName="tipo_jornada">
+                @for (jornada of jornadas; track jornada) {
+                  <option [value]="jornada">{{ jornada }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="salario">
+                Salario (Q)
+              </label>
+              <input
+                id="salario"
+                type="number"
+                formControlName="salario"
+                placeholder="Ej. 7500"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="categoria">
+                Categoría
+              </label>
+              <input
+                id="categoria"
+                type="text"
+                maxlength="100"
+                formControlName="categoria"
+                placeholder="Ej. Tecnología / IT"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="ubicacion">
+                Ubicación
+              </label>
+              <input
+                id="ubicacion"
+                type="text"
+                maxlength="100"
+                formControlName="ubicacion"
+                placeholder="Ej. Ciudad de Guatemala / Remoto"
+              >
+            </div>
+
+            <div class="form-field full">
+              <label for="habilidades_requeridas">
+                Habilidades Requeridas
+              </label>
+              <textarea
+                id="habilidades_requeridas"
+                rows="2"
+                formControlName="habilidades_requeridas"
+                placeholder="Ej. Angular, TypeScript, RxJS, Spring Boot"
+              ></textarea>
+            </div>
+
+            <div class="form-field full">
+              <label for="vacante_descripcion">
+                Descripción del Puesto
+              </label>
+              <textarea
+                id="vacante_descripcion"
+                rows="3"
+                formControlName="vacante_descripcion"
+                placeholder="Detalles del puesto, responsabilidades y beneficios..."
+              ></textarea>
+            </div>
+
+            <div class="form-field">
+              <label for="estado">
+                Estado
+              </label>
+              <select id="estado" formControlName="estado">
+                <option [ngValue]="true">Activa</option>
+                <option [ngValue]="false">Inactiva</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn secondary"
+              (click)="cerrarFormulario()"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="submit"
+              class="btn primary"
+              [disabled]="guardando || vacanteForm.invalid"
+            >
+              {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar cambios' : 'Publicar vacante') }}
+            </button>
+          </div>
+        </form>
+
+      </section>
+    }
+
   </div>
 
-  <div class="form-group">
-    <label for="habilidades_requeridas">Habilidades Requeridas</label>
-    <textarea id="habilidades_requeridas" formControlName="habilidades_requeridas" rows="2" placeholder="Ej. Angular, TypeScript, RxJS, CSS"></textarea>
-  </div>
-
-  <div class="form-group">
-    <label for="vacante_descripcion">Descripción del Puesto</label>
-    <textarea id="vacante_descripcion" formControlName="vacante_descripcion" rows="4" placeholder="Detalles de las responsabilidades y beneficios..."></textarea>
-  </div>
-
-  <div class="form-group checkbox-group">
-    <label>
-      <input type="checkbox" formControlName="estado" />
-      Vacante Activa (Disponible)
-    </label>
-  </div>
-
-  <div class="form-actions">
-    <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
-    <button type="submit" class="btn btn-primary" [disabled]="vacanteForm.invalid">Guardar Vacante</button>
-  </div>
-</form>
+</div>

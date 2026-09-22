@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import { Component } from '@angular/core';
-
-@Component({
-  imports: [],
-  selector: 'app-admin-vacancies-form',
-  styleUrl: './admin-vacancies-form.css',
-  templateUrl: './admin-vacancies-form.html',
-})
-export class AdminVacanciesForm {}
-=======
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -26,13 +15,13 @@ export interface Empresa {
 }
 
 @Component({
-  selector: 'app-admin-vacancies-form',
+  selector: 'app-companies-vacancies-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './admin-vacancies-form.html',
-  styleUrls: ['./admin-vacancies-form.css']
+  templateUrl: './companies-vacancies-form.html',
+  styleUrls: ['./companies-vacancies-form.css']
 })
-export class AdminVacanciesFormComponent implements OnInit {
+export class CompaniesVacanciesFormComponent implements OnInit {
   @Input() vacanteToEdit: VacanteService | null = null;
 
   @Input() empresasList: Empresa[] = [];
@@ -78,4 +67,3 @@ export class AdminVacanciesFormComponent implements OnInit {
     this.cancel.emit();
   }
 }
->>>>>>> b24d88345a03181cacb5d7e9b09288bf6491a786

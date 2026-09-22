@@ -20,15 +20,15 @@ import {
   RolUsuario,
   ActualizarUsuarioAdminRequest,
   CambiarPasswordAdminRequest
-} from '../../core/models/auth.model';
+} from '../../../../core/models/auth.model';
 
 import {
   UsuarioService
-} from '../../core/services/usuario.service';
+} from '../../../../core/services/usuario.service';
 
 import {
   AuthService
-} from '../../core/services/auth.service';
+} from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-users',

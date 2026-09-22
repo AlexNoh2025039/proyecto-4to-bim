@@ -27,7 +27,7 @@ export class RegisterComponent {
     usuario_password: ['', [Validators.required, Validators.minLength(6)]],
     usuario_rol: ['Candidato' as RolUsuario, Validators.required], // Tipado exacto según tu modelo
     usuario_telefono: ['', Validators.maxLength(20)],
-    usuario_dpi: ['', Validators.maxLength(20)],
+    usuario_dpi: ['', Validators.maxLength(13)],
     usuario_profesion: ['', Validators.maxLength(100)]
   });
 
@@ -41,8 +41,9 @@ export class RegisterComponent {
       next: () => {
         this.router.navigate(['/login']);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isLoading.set(false);
+        console.error('Error detallado de registro:', err);
         this.errorMessage.set(err.error?.message || 'Hubo un error al registrar el usuario.');
       }
     });

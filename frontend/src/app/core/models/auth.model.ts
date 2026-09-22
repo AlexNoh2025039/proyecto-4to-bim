@@ -29,9 +29,9 @@ export interface RegisterRequest {
     usuario_correo: string;
     usuario_password: string;
     usuario_rol: RolUsuario;
+    usuario_dpi: string;
     usuario_telefono?: string;
-    usuario_dpi?: string;
-    usuario_profesion?: string;
+     usuario_profesion?: string;
 }
 
 export interface LoginResponse {

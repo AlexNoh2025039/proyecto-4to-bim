@@ -5,9 +5,9 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
     LoginRequest,
-    LoginResponse, 
-    RegisterRequest, 
-    RegisterResponse, 
+    LoginResponse,
+    RegisterRequest,
+    RegisterResponse,
     Usuario
 } from '../models/auth.model';
 
@@ -20,30 +20,35 @@ export class AuthService {
     private readonly tokenKey = 'auth_token';
     private readonly usuarioKey = 'auth_usuario';
 
-    readonly currentUsuario = signal<Usuario | null> (
+    readonly currentUsuario = signal<Usuario | null>(
         this.getStoredUsario()
     );
 
     constructor() {
-        if(!this.isAuthenticated()) {
+        if (!this.isAuthenticated()) {
             this.clearSession();
         }
     }
 
     login(credentials: LoginRequest): Observable<LoginResponse> {
-        const body: LoginRequest = {usuario_correo: credentials.usuario_correo.trim(), usuario_password: credentials.usuario_password };
+        const body: LoginRequest = {
+            usuario_correo: credentials.usuario_correo.trim(),
+            usuario_password: credentials.usuario_password
+        };
 
         return this.http
-        .post<LoginResponse>(
-            `${environment.apiUrl}/auth/login`, body
-        )
-        .pipe(
-            tap((response) => {this.saveSession(response);
-            })
-        );
+            .post<LoginResponse>(
+                `${environment.apiUrl}/usuarios/login`,
+                body
+            )
+            .pipe(
+                tap((response: LoginResponse) => {
+                    this.saveSession(response);
+                })
+            );
     }
 
-    register(data: RegisterRequest): Observable <RegisterResponse> {
+    register(data: RegisterRequest): Observable<RegisterResponse> {
         const body: RegisterRequest = {
             usuario_nombre: data.usuario_nombre.trim(),
             usuario_apellido: data.usuario_apellido.trim(),
@@ -51,13 +56,13 @@ export class AuthService {
             usuario_password: data.usuario_password,
             usuario_rol: data.usuario_rol,
             usuario_telefono: data.usuario_telefono?.trim(),
-            usuario_dpi: data.usuario_dpi?.trim(),
+            usuario_dpi: data.usuario_dpi.trim(),
             usuario_profesion: data.usuario_profesion?.trim(),
         };
 
-        return this.http
-        .post<RegisterResponse>(
-            `${environment.apiUrl}/auth/register`, body
+        return this.http.post<RegisterResponse>(
+            `${environment.apiUrl}/usuarios`,
+            body
         );
     }
 
@@ -68,7 +73,7 @@ export class AuthService {
     isAuthenticated(): boolean {
         const token = this.getToken();
 
-        if(!token){
+        if (!token) {
             return false;
         }
 
@@ -98,7 +103,7 @@ export class AuthService {
     private getStoredUsario(): Usuario | null {
         const storedUsuario = localStorage.getItem(this.usuarioKey);
 
-        if(!storedUsuario) {
+        if (!storedUsuario) {
             return null;
         }
 
@@ -114,13 +119,13 @@ export class AuthService {
         try {
             const payloadPart = token.split('.')[1];
 
-            if(!payloadPart) {
+            if (!payloadPart) {
                 return true;
             }
 
             const normalizedBase64 = payloadPart
-            .replace(/-/g, '+')
-            .replace(/_/g, '/');
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
 
             const paddedBase64 = normalizedBase64.padEnd(
                 Math.ceil(normalizedBase64.length / 4) * 4,
@@ -129,9 +134,9 @@ export class AuthService {
 
             const payload = JSON.parse(
                 atob(paddedBase64)
-            ) as { exp?: number};
+            ) as { exp?: number };
 
-            if(!payload.exp) {
+            if (!payload.exp) {
                 return true;
             }
 
@@ -143,7 +148,6 @@ export class AuthService {
 
     private saveSession(response: LoginResponse): void {
         localStorage.setItem(this.tokenKey, response.token);
-
         this.updateCurrentUsuario(response.usuario);
     }
 }

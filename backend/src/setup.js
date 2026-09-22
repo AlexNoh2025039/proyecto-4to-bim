@@ -47,7 +47,7 @@ async function main() {
       usuario_nombre VARCHAR(50) NOT NULL,
       usuario_apellido VARCHAR(50) NOT NULL,
       usuario_correo VARCHAR(100) NOT NULL UNIQUE,
-      usuario_contrasena VARCHAR(255) NOT NULL,
+      usuario_password VARCHAR(255) NOT NULL,
       usuario_perfil BYTEA,
       usuario_telefono VARCHAR(20),
       usuario_dpi VARCHAR(20) UNIQUE,

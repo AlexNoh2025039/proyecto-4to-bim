@@ -46,14 +46,6 @@ app.get('/api/health', (_req, res) => {
 
 const port = process.env.PORT || 3000;
 
-export const server = app.listen(port, () => {
+export const server = app.listen(port, '0.0.0.0', () => {
   console.log(`Servidor TalentBridge ejecutándose en http://localhost:${port}`);
-});
-
-app.get('/api/ping', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    message: '¡Conexión establecida con éxito, sujeto de pruebas!', 
-    timestamp: new Date().toISOString() 
-  });
 });

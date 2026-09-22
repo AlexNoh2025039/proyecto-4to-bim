@@ -1,0 +1,47 @@
+<form [formGroup]="companyForm" (ngSubmit)="onSubmit()" class="form-container">
+  <h2>{{ empresaToEdit ? 'Editar Empresa' : 'Nueva Empresa' }}</h2>
+
+  <div class="form-group">
+    <label for="empresa_nombre">Nombre de la Empresa *</label>
+    <input id="empresa_nombre" type="text" formControlName="empresa_nombre" placeholder="Ej. Tech Solutions" />
+    <span class="error" *ngIf="companyForm.get('empresa_nombre')?.touched && companyForm.get('empresa_nombre')?.invalid">
+      El nombre es obligatorio (máx 100 caracteres).
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label for="empresa_correo">Correo Electrónico *</label>
+    <input id="empresa_correo" type="email" formControlName="empresa_correo" placeholder="contacto@empresa.com" />
+    <span class="error" *ngIf="companyForm.get('empresa_correo')?.touched && companyForm.get('empresa_correo')?.invalid">
+      Ingrese un correo válido.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label for="empresa_nit">NIT *</label>
+    <input id="empresa_nit" type="text" formControlName="empresa_nit" placeholder="Ej. 1234567-8" />
+    <span class="error" *ngIf="companyForm.get('empresa_nit')?.touched && companyForm.get('empresa_nit')?.invalid">
+      El NIT es requerido.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label for="empresa_telefono">Teléfono</label>
+    <input id="empresa_telefono" type="text" formControlName="empresa_telefono" placeholder="Ej. 22223333" />
+  </div>
+
+  <div class="form-group">
+    <label for="empresa_direccion">Dirección</label>
+    <input id="empresa_direccion" type="text" formControlName="empresa_direccion" placeholder="Ej. Ciudad de Guatemala" />
+  </div>
+
+  <div class="form-group">
+    <label for="empresa_descripcion">Descripción</label>
+    <textarea id="empresa_descripcion" formControlName="empresa_descripcion" rows="3" placeholder="Descripción breve de la empresa"></textarea>
+  </div>
+
+  <div class="form-actions">
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+    <button type="submit" class="btn btn-primary" [disabled]="companyForm.invalid">Guardar</button>
+  </div>
+</form>

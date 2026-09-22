@@ -1,5 +1,5 @@
 <div class="home-container" *ngIf="usuario() as user">
-  
+
   <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
   <nav class="navbar">
     <div class="navbar-brand">
@@ -8,7 +8,10 @@
     </div>
     <div class="navbar-actions">
       <a routerLink="/profile" class="btn-profile">Mi Perfil</a>
-      <button class="btn-logout" (click)="authService.logout()">Cerrar Sesión</button>
+      <button class="btn-notifications" type="button" (click)="toggleNotifications()" aria-label="Notificaciones">
+        🔔
+      </button>
+      <button class="btn-logout" (click)="onLogout()">Cerrar Sesión</button>
     </div>
   </nav>
 
@@ -62,9 +65,7 @@
           </div>
 
           <div class="jobs-grid" *ngIf="!loadingVacantes() && vacantes().length > 0">
-            <app-job-card 
-              *ngFor="let vacante of vacantes()" 
-              [vacante]="vacante">
+            <app-job-card *ngFor="let vacante of vacantes()" [vacante]="vacante">
             </app-job-card>
           </div>
         </div>
@@ -133,17 +134,15 @@
       </div>
     </section>
 
-    <!-- SECCIÓN DE NOTIFICACIONES RECIBIDAS -->
-    <section class="notifications-panel">
+    <!-- SECCIÓN DE NOTIFICACIONES (oculta hasta presionar el botón) -->
+    <section class="notifications-panel" *ngIf="showNotifications()">
       <div class="section-header">
         <h3>Notificaciones</h3>
         <span class="badge">{{ notificaciones.length }}</span>
       </div>
 
       <div class="notifications-list" *ngIf="notificaciones.length > 0; else noNotifications">
-        <app-notification-card 
-          *ngFor="let item of notificaciones" 
-          [notificacion]="item"
+        <app-notification-card *ngFor="let item of notificaciones" [notificacion]="item"
           (markRead)="toggleRead($event)">
         </app-notification-card>
       </div>

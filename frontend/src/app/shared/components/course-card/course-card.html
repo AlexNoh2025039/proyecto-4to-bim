@@ -1,1 +1,16 @@
-<p>course-card works!</p>
+<article class="course-card">
+    <div class="course-header">
+        <span class="course-category">{{ curso.categoria || 'General' }}</span>
+        <span class="course-duration">{{ curso.duracion || 'Sin duración' }}</span>
+    </div>
+
+    <h3>{{ curso.titulo }}</h3>
+
+    <p *ngIf="curso.descripcion" class="course-description">
+        {{ curso.descripcion }}
+    </p>
+
+    <div class="course-skills" *ngIf="curso.habilidades?.length">
+        <span *ngFor="let habilidad of curso.habilidades">{{ habilidad }}</span>
+    </div>
+</article>

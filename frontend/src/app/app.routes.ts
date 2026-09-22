@@ -82,7 +82,7 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard],
     children: [
       {
-        path: 'empresas/nueva',
+        path: 'empresas',
         loadComponent: () =>
           import('./pages/admin-dashboard/components/admin-companies-form/admin-companies-form').then(m => m.AdminCompaniesFormComponent)
       },
@@ -104,12 +104,7 @@ export const routes: Routes = [
       {
         path: 'usuarios',
         loadComponent: () =>
-          import('./pages/admin-dashboard/components/admin-users/admin-users.component').then(m => m.AdminUsersComponent)
-      },
-      {
-        path: 'usuarios/nuevo',
-        loadComponent: () =>
-          import('./pages/admin-dashboard/components/admin-users-form/admin-users-form').then(m => m.AdminUsersForm)
+          import('./pages/admin-dashboard/components/admin-users-form/admin-users-form.component').then(m => m.AdminUsersComponent)
       },
       {
         path: 'notificaciones',

@@ -49,7 +49,7 @@ export class AuthService {
       usuario_apellido: data.usuario_apellido.trim(),
       usuario_correo: data.usuario_correo.trim().toLowerCase(),
       usuario_password: data.usuario_password,
-      usuario_dpi: data.usuario_dpi?.trim() || undefined,
+      usuario_dpi: data.usuario_dpi.trim(),
       usuario_telefono: data.usuario_telefono?.trim() || undefined,
       usuario_profesion: data.usuario_profesion?.trim() || undefined
     };
@@ -63,7 +63,7 @@ export class AuthService {
       usuario_apellido: data.usuario_apellido.trim(),
       usuario_correo: data.usuario_correo.trim().toLowerCase(),
       usuario_password: data.usuario_password,
-      usuario_dpi: data.usuario_dpi?.trim() || undefined,
+      usuario_dpi: data.usuario_dpi?.trim(),
       usuario_telefono: data.usuario_telefono?.trim() || undefined,
       usuario_profesion: data.usuario_profesion?.trim() || undefined,
       empresa_nombre: data.empresa_nombre.trim(),

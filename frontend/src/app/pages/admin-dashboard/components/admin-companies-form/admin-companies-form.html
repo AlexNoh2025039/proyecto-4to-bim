@@ -1,47 +1,321 @@
-<form [formGroup]="companyForm" (ngSubmit)="onSubmit()" class="form-container">
-  <h2>{{ empresaToEdit ? 'Editar Empresa' : 'Nueva Empresa' }}</h2>
+<div class="admin-page">
 
-  <div class="form-group">
-    <label for="empresa_nombre">Nombre de la Empresa *</label>
-    <input id="empresa_nombre" type="text" formControlName="empresa_nombre" placeholder="Ej. Tech Solutions" />
-    <span class="error" *ngIf="companyForm.get('empresa_nombre')?.touched && companyForm.get('empresa_nombre')?.invalid">
-      El nombre es obligatorio (máx 100 caracteres).
-    </span>
+  <div class="page-header">
+    <div>
+      <h1>Administración de Empresas</h1>
+      <p>
+        Consulta y administra las empresas registradas en TalentBridge.
+      </p>
+    </div>
+    <button type="button" class="btn primary" (click)="abrirFormularioCrear()">
+      + Nueva Empresa
+    </button>
   </div>
 
-  <div class="form-group">
-    <label for="empresa_correo">Correo Electrónico *</label>
-    <input id="empresa_correo" type="email" formControlName="empresa_correo" placeholder="contacto@empresa.com" />
-    <span class="error" *ngIf="companyForm.get('empresa_correo')?.touched && companyForm.get('empresa_correo')?.invalid">
-      Ingrese un correo válido.
-    </span>
+  @if (mensaje) {
+    <div class="alert success">
+      {{ mensaje }}
+    </div>
+  }
+
+  @if (error) {
+    <div class="alert error">
+      {{ error }}
+    </div>
+  }
+
+  <section class="card filters-card">
+    <div class="filters-grid">
+
+      <div class="filter-field">
+        <label for="busqueda">
+          Buscar
+        </label>
+        <input
+          id="busqueda"
+          type="text"
+          [(ngModel)]="busqueda"
+          (ngModelChange)="aplicarFiltros()"
+          placeholder="Nombre, NIT, correo o teléfono"
+        >
+      </div>
+
+      <div class="filter-actions">
+        <button
+          type="button"
+          class="btn secondary"
+          (click)="limpiarFiltros()"
+        >
+          Limpiar
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="content-grid">
+
+    <section class="card users-card">
+
+      <div class="card-header">
+        <div>
+          <h2>Empresas registradas</h2>
+          <p>
+            Mostrando
+            {{ empresasFiltradas.length }}
+            de
+            {{ empresas.length }}
+            empresas.
+          </p>
+        </div>
+      </div>
+
+      @if (cargando) {
+        <div class="loading">
+          Cargando empresas...
+        </div>
+      } @else if (empresasFiltradas.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">
+            🏢
+          </div>
+          <h3>
+            No se encontraron empresas
+          </h3>
+          <p>
+            Prueba cambiando los términos de búsqueda o registra una nueva empresa.
+          </p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Empresa</th>
+                <th>Correo</th>
+                <th>NIT</th>
+                <th>Teléfono</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (empresa of empresasFiltradas; track empresa.empresa_id) {
+                <tr [class.selected-row]="empresaSeleccionada?.empresa_id === empresa.empresa_id">
+                  <td>
+                    #{{ empresa.empresa_id }}
+                  </td>
+
+                  <td>
+                    <div class="user-cell">
+                      <div class="avatar">
+                        {{ empresa.empresa_nombre.charAt(0).toUpperCase() }}
+                      </div>
+                      <div>
+                        <strong>{{ empresa.empresa_nombre }}</strong>
+                        @if (empresa.empresa_direccion) {
+                          <p class="sub-text">
+                            {{ empresa.empresa_direccion }}
+                          </p>
+                        }
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    {{ empresa.empresa_correo }}
+                  </td>
+
+                  <td>
+                    {{ empresa.empresa_nit }}
+                  </td>
+
+                  <td>
+                    {{ empresa.empresa_telefono || 'N/A' }}
+                  </td>
+
+                  <td>
+                    <div class="actions">
+                      <button
+                        type="button"
+                        class="icon-action"
+                        title="Editar"
+                        (click)="editarEmpresa(empresa)"
+                      >
+                        ✏️
+                      </button>
+
+                      <button
+                        type="button"
+                        class="icon-action delete"
+                        title="Eliminar"
+                        [disabled]="eliminando"
+                        (click)="eliminarEmpresa(empresa)"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </section>
+
+    @if (mostrarFormulario) {
+      <section class="card editor-card">
+
+        <div class="card-header editor-header">
+          <div>
+            <h2>
+              {{ modoEdicion ? 'Editar empresa' : 'Nueva empresa' }}
+            </h2>
+            @if (empresaSeleccionada && modoEdicion) {
+              <p>{{ empresaSeleccionada.empresa_nombre }}</p>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="cerrarFormulario()"
+          >
+            ×
+          </button>
+        </div>
+
+        <form [formGroup]="empresaForm" (ngSubmit)="guardarEmpresa()">
+          <div class="form-grid">
+
+            <div class="form-field full">
+              <label for="empresa_nombre">
+                Nombre de la Empresa *
+              </label>
+              <input
+                id="empresa_nombre"
+                type="text"
+                maxlength="100"
+                formControlName="empresa_nombre"
+                placeholder="Ej. Tech Solutions S.A."
+              >
+              @if (
+                empresaForm.controls.empresa_nombre.touched &&
+                empresaForm.controls.empresa_nombre.invalid
+              ) {
+                <small class="field-error">
+                  El nombre es obligatorio y no puede superar 100 caracteres.
+                </small>
+              }
+            </div>
+
+            <div class="form-field full">
+              <label for="empresa_correo">
+                Correo Electrónico *
+              </label>
+              <input
+                id="empresa_correo"
+                type="email"
+                maxlength="100"
+                formControlName="empresa_correo"
+                placeholder="contacto@empresa.com"
+              >
+              @if (
+                empresaForm.controls.empresa_correo.touched &&
+                empresaForm.controls.empresa_correo.invalid
+              ) {
+                <small class="field-error">
+                  Debes introducir un correo válido.
+                </small>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="empresa_nit">
+                NIT *
+              </label>
+              <input
+                id="empresa_nit"
+                type="text"
+                maxlength="20"
+                formControlName="empresa_nit"
+                placeholder="Ej. 1234567-8"
+              >
+              @if (
+                empresaForm.controls.empresa_nit.touched &&
+                empresaForm.controls.empresa_nit.invalid
+              ) {
+                <small class="field-error">
+                  El NIT es requerido.
+                </small>
+              }
+            </div>
+
+            <div class="form-field">
+              <label for="empresa_telefono">
+                Teléfono
+              </label>
+              <input
+                id="empresa_telefono"
+                type="text"
+                maxlength="20"
+                formControlName="empresa_telefono"
+                placeholder="Ej. 22223333"
+              >
+            </div>
+
+            <div class="form-field full">
+              <label for="empresa_direccion">
+                Dirección
+              </label>
+              <input
+                id="empresa_direccion"
+                type="text"
+                maxlength="200"
+                formControlName="empresa_direccion"
+                placeholder="Ej. Ciudad de Guatemala, Zona 10"
+              >
+            </div>
+
+            <div class="form-field full">
+              <label for="empresa_descripcion">
+                Descripción
+              </label>
+              <textarea
+                id="empresa_descripcion"
+                rows="3"
+                formControlName="empresa_descripcion"
+                placeholder="Breve descripción de la empresa..."
+              ></textarea>
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn secondary"
+              (click)="cerrarFormulario()"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="submit"
+              class="btn primary"
+              [disabled]="guardando || empresaForm.invalid"
+            >
+              {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar cambios' : 'Crear empresa') }}
+            </button>
+          </div>
+        </form>
+
+      </section>
+    }
+
   </div>
 
-  <div class="form-group">
-    <label for="empresa_nit">NIT *</label>
-    <input id="empresa_nit" type="text" formControlName="empresa_nit" placeholder="Ej. 1234567-8" />
-    <span class="error" *ngIf="companyForm.get('empresa_nit')?.touched && companyForm.get('empresa_nit')?.invalid">
-      El NIT es requerido.
-    </span>
-  </div>
-
-  <div class="form-group">
-    <label for="empresa_telefono">Teléfono</label>
-    <input id="empresa_telefono" type="text" formControlName="empresa_telefono" placeholder="Ej. 22223333" />
-  </div>
-
-  <div class="form-group">
-    <label for="empresa_direccion">Dirección</label>
-    <input id="empresa_direccion" type="text" formControlName="empresa_direccion" placeholder="Ej. Ciudad de Guatemala" />
-  </div>
-
-  <div class="form-group">
-    <label for="empresa_descripcion">Descripción</label>
-    <textarea id="empresa_descripcion" formControlName="empresa_descripcion" rows="3" placeholder="Descripción breve de la empresa"></textarea>
-  </div>
-
-  <div class="form-actions">
-    <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
-    <button type="submit" class="btn btn-primary" [disabled]="companyForm.invalid">Guardar</button>
-  </div>
-</form>
+</div>

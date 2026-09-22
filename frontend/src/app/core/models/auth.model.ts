@@ -8,13 +8,13 @@ export type TipoRegistro =
   | 'Empresa';
 
 export interface Usuario {
-  usuario_id?: number;
+  usuario_id: number;
 
   usuario_nombre: string;
   usuario_apellido: string;
   usuario_correo: string;
 
-  usuario_perfil?: any;
+  usuario_perfil?: string | null;
 
   usuario_telefono: string | null;
   usuario_dpi: string | null;
@@ -56,6 +56,34 @@ export interface RegisterEmpresaRequest
   empresa_direccion?: string;
 }
 
+export interface ActualizarUsuarioRequest {
+  usuario_nombre: string;
+  usuario_apellido: string;
+  usuario_correo: string;
+  usuario_telefono: string | null;
+  usuario_dpi: string | null;
+  usuario_profesion: string | null;
+}
+
+export interface CambiarPasswordRequest {
+  usuario_password_actual: string;
+  usuario_password_nueva: string;
+}
+
+export interface ActualizarUsuarioAdminRequest
+  extends ActualizarUsuarioRequest {
+  usuario_rol: RolUsuario;
+  estado?: boolean;
+}
+
+export interface CambiarEstadoUsuarioRequest {
+  estado: boolean;
+}
+
+export interface CambiarPasswordAdminRequest {
+  usuario_password_nueva: string;
+}
+
 export interface LoginResponse {
   token: string;
   usuario: Usuario;
@@ -81,6 +109,7 @@ export interface RegisterEmpresaResponse {
 }
 
 export interface UsuarioResponse {
+  message?: string;
   usuario: Usuario;
 }
 

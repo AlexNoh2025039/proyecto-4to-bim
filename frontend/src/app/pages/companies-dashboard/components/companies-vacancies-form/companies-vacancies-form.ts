@@ -15,13 +15,13 @@ export interface Empresa {
 }
 
 @Component({
-  selector: 'app-admin-vacancies-form',
+  selector: 'app-companies-vacancies-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './admin-vacancies-form.html',
-  styleUrls: ['./admin-vacancies-form.css']
+  templateUrl: './companies-vacancies-form.html',
+  styleUrls: ['./companies-vacancies-form.css']
 })
-export class AdminVacanciesFormComponent implements OnInit {
+export class CompaniesVacanciesFormComponent implements OnInit {
   @Input() vacanteToEdit: VacanteService | null = null;
 
   @Input() empresasList: Empresa[] = [];

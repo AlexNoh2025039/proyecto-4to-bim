@@ -84,7 +84,11 @@ export const routes: Routes = [
       {
         path: 'empresas/nueva',
         loadComponent: () =>
+<<<<<<< HEAD
           import('./pages/admin-dashboard/components/admin-companies-form/admin-companies-form').then(m => m.AdminCompaniesFormComponent)
+=======
+          import('./pages/admin-dashboard/components/admin-companies-form/admin-companies-form').then(m => m.AdminCompaniesForm)
+>>>>>>> f23ef34 (Home y rutas para pruebas)
       },
       {
         path: 'evaluaciones',

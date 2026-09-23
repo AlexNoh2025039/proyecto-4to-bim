@@ -15,6 +15,26 @@ const ROLES_VALIDOS = [
 ];
 const MAX_FOTO_BYTES = 5 * 1024 * 1024;
 
+router.get('/empresas-disponibles', requireRole('Administrador'), async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT usuario_id, usuario_nombre, usuario_apellido, usuario_correo
+       FROM Usuario
+       WHERE usuario_rol = 'Empresa'
+         AND usuario_id <> 1
+         AND estado = TRUE
+       ORDER BY usuario_nombre ASC`
+    );
+
+    res.json({ usuarios: result.rows });
+  } catch (error) {
+    console.error('Error listando usuarios de empresa disponibles:', error);
+    res.status(500).json({
+      message: 'No se pudieron consultar los usuarios disponibles'
+    });
+  }
+});
+
 function normalizarOpcional(value) {
   if (value === undefined || value === null) {
     return null;

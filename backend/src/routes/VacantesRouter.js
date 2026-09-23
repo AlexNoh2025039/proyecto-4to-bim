@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
-import { requireAuth } from '../middlewares/auth.js';
+import { requireAuth, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
 
 router.use(requireAuth);
+router.use(requireRole('Empresa'));
 
 function validateVacante({ vacante_nombre, salario, tipo_jornada, empresa_id }) {
   if (typeof vacante_nombre !== 'string' || vacante_nombre.trim().length === 0) {

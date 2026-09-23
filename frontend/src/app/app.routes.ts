@@ -84,7 +84,7 @@ export const routes: Routes = [
       {
         path: 'empresas',
         loadComponent: () =>
-          import('./pages/admin-dashboard/components/admin-companies-form/admin-companies-form').then(m => m.AdminCompaniesFormComponent)
+          import('./pages/admin-dashboard/components/admin-companies-form/admin-companies-form').then(m => m.AdminCompaniesComponent)
       },
       {
         path: 'evaluaciones',

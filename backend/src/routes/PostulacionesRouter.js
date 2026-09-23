@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
-import { requireAuth } from '../middlewares/auth.js';
+import { requireAuth, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
 
@@ -30,13 +30,41 @@ function validatePostulacion({ usuario_id, vacante_id, porcentaje_compatibilidad
   return null;
 }
 
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT postulacion_id, usuario_id, vacante_id, porcentaje_compatibilidad, fecha_postulacion, estado 
-       FROM Postulacion 
-       ORDER BY postulacion_id ASC`
-    );
+    const baseSelect = `
+      SELECT
+        p.postulacion_id,
+        p.usuario_id,
+        p.vacante_id,
+        p.porcentaje_compatibilidad,
+        p.fecha_postulacion,
+        p.estado,
+        v.vacante_nombre,
+        v.tipo_jornada,
+        v.ubicacion,
+        e.empresa_nombre
+      FROM Postulacion p
+      JOIN Vacante v ON v.vacante_id = p.vacante_id
+      JOIN Empresa e ON e.empresa_id = v.empresa_id
+    `;
+
+    let result;
+
+    if (req.user.usuario_rol === 'Administrador') {
+      result = await pool.query(`${baseSelect} ORDER BY p.postulacion_id ASC`);
+    } else if (req.user.usuario_rol === 'Candidato') {
+      result = await pool.query(
+        `${baseSelect} WHERE p.usuario_id = $1 ORDER BY p.postulacion_id ASC`,
+        [req.user.usuario_id]
+      );
+    } else {
+      result = await pool.query(
+        `${baseSelect} WHERE e.usuario_admin = $1 ORDER BY p.postulacion_id ASC`,
+        [req.user.usuario_id]
+      );
+    }
+
     res.json({ postulaciones: result.rows });
   } catch (error) {
     console.error('Error listando postulaciones:', error);
@@ -53,25 +81,43 @@ router.get('/:id', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT postulacion_id, usuario_id, vacante_id, porcentaje_compatibilidad, fecha_postulacion, estado 
-       FROM Postulacion 
-       WHERE postulacion_id = $1`,
+      `SELECT p.postulacion_id, p.usuario_id, p.vacante_id, p.porcentaje_compatibilidad, p.fecha_postulacion, p.estado, v.empresa_id
+       FROM Postulacion p
+       JOIN Vacante v ON v.vacante_id = p.vacante_id
+       WHERE p.postulacion_id = $1`,
       [id]
     );
 
-    if (!result.rows[0]) {
+    const postulacion = result.rows[0];
+
+    if (!postulacion) {
       return res.status(404).json({ message: 'Postulacion no encontrada' });
     }
 
-    res.json({ postulacion: result.rows[0] });
+    if (req.user.usuario_rol === 'Candidato' && postulacion.usuario_id !== req.user.usuario_id) {
+      return res.status(403).json({ message: 'No tienes permiso para consultar esta postulación' });
+    }
+
+    if (req.user.usuario_rol === 'Empresa') {
+      const miEmpresa = await pool.query('SELECT empresa_id FROM Empresa WHERE usuario_admin = $1', [req.user.usuario_id]);
+      if (miEmpresa.rows[0]?.empresa_id !== postulacion.empresa_id) {
+        return res.status(403).json({ message: 'No tienes permiso para consultar esta postulación' });
+      }
+    }
+
+    delete postulacion.empresa_id;
+    res.json({ postulacion });
   } catch (error) {
     console.error('Error consultando postulacion:', error);
     res.status(500).json({ message: 'No se pudo consultar la postulacion' });
   }
 });
 
-router.post('/', async (req, res) => {
-  const { usuario_id, vacante_id, porcentaje_compatibilidad = 0, estado = 'Pendiente' } = req.body;
+router.post('/', requireRole('Candidato'), async (req, res) => {
+  const { vacante_id, porcentaje_compatibilidad = 0 } = req.body;
+  const usuario_id = req.user.usuario_id; 
+  const estado = 'Pendiente';
+
   const validationError = validatePostulacion({ usuario_id, vacante_id, porcentaje_compatibilidad, estado });
 
   if (validationError) {
@@ -81,6 +127,26 @@ router.post('/', async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+
+    const vacanteExiste = await client.query(
+      'SELECT vacante_id FROM Vacante WHERE vacante_id = $1 AND estado = TRUE',
+      [vacante_id]
+    );
+
+    if (!vacanteExiste.rows[0]) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ message: 'La vacante especificada no existe o no está activa' });
+    }
+
+    const yaExiste = await client.query(
+      'SELECT postulacion_id FROM Postulacion WHERE usuario_id = $1 AND vacante_id = $2',
+      [usuario_id, vacante_id]
+    );
+
+    if (yaExiste.rows[0]) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ message: 'Ya te has postulado a esta vacante' });
+    }
 
     const resultPostulacion = await client.query(
       `INSERT INTO Postulacion (usuario_id, vacante_id, porcentaje_compatibilidad, estado)
@@ -115,16 +181,75 @@ router.put('/:id', async (req, res) => {
     return res.status(400).json({ message: 'El ID de la postulacion no es valido' });
   }
 
-  const { usuario_id, vacante_id, porcentaje_compatibilidad, estado } = req.body;
-  const validationError = validatePostulacion({ usuario_id, vacante_id, porcentaje_compatibilidad, estado });
-
-  if (validationError) {
-    return res.status(400).json({ message: validationError });
-  }
-
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+
+    const actual = await client.query(
+      `SELECT p.postulacion_id, p.usuario_id, p.vacante_id, p.porcentaje_compatibilidad, p.estado, v.empresa_id
+       FROM Postulacion p
+       JOIN Vacante v ON v.vacante_id = p.vacante_id
+       WHERE p.postulacion_id = $1`,
+      [id]
+    );
+
+    const postulacionActual = actual.rows[0];
+
+    if (!postulacionActual) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ message: 'Postulacion no encontrada' });
+    }
+
+    let usuario_id = postulacionActual.usuario_id;
+    let vacante_id = postulacionActual.vacante_id;
+    let porcentaje_compatibilidad = postulacionActual.porcentaje_compatibilidad;
+    let estado = postulacionActual.estado;
+
+    if (req.user.usuario_rol === 'Administrador') {
+      usuario_id = req.body.usuario_id ?? usuario_id;
+      vacante_id = req.body.vacante_id ?? vacante_id;
+      porcentaje_compatibilidad = req.body.porcentaje_compatibilidad ?? porcentaje_compatibilidad;
+      estado = req.body.estado ?? estado;
+
+    } else if (req.user.usuario_rol === 'Empresa') {
+      const miEmpresa = await client.query(
+        'SELECT empresa_id FROM Empresa WHERE usuario_admin = $1',
+        [req.user.usuario_id]
+      );
+
+      if (miEmpresa.rows[0]?.empresa_id !== postulacionActual.empresa_id) {
+        await client.query('ROLLBACK');
+        return res.status(403).json({ message: 'No tienes permiso para modificar esta postulación' });
+      }
+
+      estado = req.body.estado ?? estado;
+      porcentaje_compatibilidad = req.body.porcentaje_compatibilidad ?? porcentaje_compatibilidad;
+
+    } else if (req.user.usuario_rol === 'Candidato') {
+      if (postulacionActual.usuario_id !== req.user.usuario_id) {
+        await client.query('ROLLBACK');
+        return res.status(403).json({ message: 'No tienes permiso para modificar esta postulación' });
+      }
+
+      if (req.body.estado !== 'Rechazado') {
+        await client.query('ROLLBACK');
+        return res.status(403).json({ message: 'Como candidato solo puedes cancelar tu postulación' });
+      }
+
+      if (postulacionActual.estado === 'Aceptado') {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ message: 'No puedes cancelar una postulación ya aceptada' });
+      }
+
+      estado = 'Rechazado';
+    }
+
+    const validationError = validatePostulacion({ usuario_id, vacante_id, porcentaje_compatibilidad, estado });
+
+    if (validationError) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ message: validationError });
+    }
 
     const result = await client.query(
       `UPDATE Postulacion
@@ -133,11 +258,6 @@ router.put('/:id', async (req, res) => {
        RETURNING postulacion_id, usuario_id, vacante_id, porcentaje_compatibilidad, fecha_postulacion, estado`,
       [usuario_id, vacante_id, porcentaje_compatibilidad, estado, id]
     );
-
-    if (!result.rows[0]) {
-      await client.query('ROLLBACK');
-      return res.status(404).json({ message: 'Postulacion no encontrada' });
-    }
 
     const postulacionActualizada = result.rows[0];
 
@@ -158,7 +278,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireRole('Administrador'), async (req, res) => {
   const id = Number(req.params.id);
 
   if (!Number.isInteger(id) || id <= 0) {

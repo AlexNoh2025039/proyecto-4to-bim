@@ -1,9 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Empresa, EmpresaResponse, EmpresasResponse } from '../../../../core/models/empresa.model';
+import { Empresa, EmpresasResponse } from '../../../../core/models/empresa.model';
+import { Usuario, UsuariosResponse } from '../../../../core/models/auth.model';
 import { EmpresaService } from '../../../../core/services/empresa.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { UsuarioService } from '../../../../core/services/usuario.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-admin-companies',
@@ -15,12 +17,15 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class AdminCompaniesComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly empresaService = inject(EmpresaService);
-  private readonly authService = inject(AuthService);
+  private readonly usuarioService = inject(UsuarioService);
+  private readonly router = inject(Router);
 
   empresas: Empresa[] = [];
+  usuariosEmpresa: Usuario[] = [];
   empresaSeleccionada: Empresa | null = null;
 
   cargando = false;
+  cargandoUsuarios = false;
   guardando = false;
   eliminando = false;
 
@@ -31,6 +36,10 @@ export class AdminCompaniesComponent implements OnInit {
   error = '';
   busqueda = '';
 
+  regresarAHome(): void {
+    this.router.navigate(['/home']);
+  }
+
   readonly empresaForm = this.fb.nonNullable.group({
     empresa_nombre: ['', [Validators.required, Validators.maxLength(100)]],
     empresa_correo: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
@@ -38,11 +47,12 @@ export class AdminCompaniesComponent implements OnInit {
     empresa_telefono: ['', Validators.maxLength(20)],
     empresa_direccion: ['', Validators.maxLength(200)],
     empresa_descripcion: [''],
-    usuario_admin: [1, Validators.required]
+    usuario_admin: [0, [Validators.required, Validators.min(1)]]
   });
 
   ngOnInit(): void {
     this.cargarEmpresas();
+    this.cargarUsuariosEmpresa();
   }
 
   cargarEmpresas(): void {
@@ -57,6 +67,23 @@ export class AdminCompaniesComponent implements OnInit {
       error: (err) => {
         this.error = err?.error?.message || 'No se pudieron cargar las empresas.';
         this.cargando = false;
+      }
+    });
+  }
+
+  cargarUsuariosEmpresa(): void {
+    this.cargandoUsuarios = true;
+
+    this.usuarioService.obtenerUsuarios().subscribe({
+      next: (response: UsuariosResponse) => {
+        this.usuariosEmpresa = (response.usuarios || []).filter(
+          (u) => u.usuario_rol === 'Empresa' && u.usuario_id !== 1
+        );
+        this.cargandoUsuarios = false;
+      },
+      error: (err) => {
+        this.error = err?.error?.message || 'No se pudieron cargar los usuarios de empresa.';
+        this.cargandoUsuarios = false;
       }
     });
   }
@@ -86,8 +113,6 @@ export class AdminCompaniesComponent implements OnInit {
     this.mensaje = '';
     this.error = '';
 
-    const miId = this.authService.currentUsuario()?.usuario_id ?? 1;
-
     this.empresaForm.reset({
       empresa_nombre: '',
       empresa_correo: '',
@@ -95,8 +120,11 @@ export class AdminCompaniesComponent implements OnInit {
       empresa_telefono: '',
       empresa_direccion: '',
       empresa_descripcion: '',
-      usuario_admin: miId
+      usuario_admin: 0
     });
+  }
+
+  aplicarFiltros(): void {
   }
 
   editarEmpresa(empresa: Empresa): void {
@@ -106,6 +134,25 @@ export class AdminCompaniesComponent implements OnInit {
     this.mensaje = '';
     this.error = '';
 
+    const yaExiste = this.usuariosEmpresa.some(
+      (u) => u.usuario_id === empresa.usuario_admin
+    );
+    if (!yaExiste && empresa.usuario_admin) {
+      this.usuariosEmpresa = [
+        ...this.usuariosEmpresa,
+        {
+          usuario_id: empresa.usuario_admin,
+          usuario_nombre: `Usuario #${empresa.usuario_admin}`,
+          usuario_apellido: '',
+          usuario_correo: '',
+          usuario_telefono: null,
+          usuario_dpi: '',
+          usuario_profesion: null,
+          usuario_rol: 'Empresa'
+        } as Usuario
+      ];
+    }
+
     this.empresaForm.reset({
       empresa_nombre: empresa.empresa_nombre,
       empresa_correo: empresa.empresa_correo,
@@ -113,7 +160,7 @@ export class AdminCompaniesComponent implements OnInit {
       empresa_telefono: empresa.empresa_telefono ?? '',
       empresa_direccion: empresa.empresa_direccion ?? '',
       empresa_descripcion: empresa.empresa_descripcion ?? '',
-      usuario_admin: empresa.usuario_admin ?? 1
+      usuario_admin: empresa.usuario_admin ?? 0
     });
   }
 
@@ -128,7 +175,7 @@ export class AdminCompaniesComponent implements OnInit {
       empresa_telefono: '',
       empresa_direccion: '',
       empresa_descripcion: '',
-      usuario_admin: 1
+      usuario_admin: 0
     });
   }
 
@@ -157,19 +204,10 @@ export class AdminCompaniesComponent implements OnInit {
       };
 
       this.empresaService.putEmpresa(this.empresaSeleccionada.empresa_id, dataActualizar).subscribe({
-        next: (response: EmpresaResponse) => {
+        next: () => {
           this.mensaje = 'Empresa actualizada correctamente.';
-          const empresaActualizada = response.empresa || response;
-
-          const index = this.empresas.findIndex(
-            (item) => item.empresa_id === this.empresaSeleccionada?.empresa_id
-          );
-
-          if (index !== -1) {
-            this.empresas[index] = empresaActualizada;
-          }
-
-          this.empresaSeleccionada = empresaActualizada;
+          this.cerrarFormulario();
+          this.cargarEmpresas();
           this.guardando = false;
         },
         error: (err) => {
@@ -189,12 +227,10 @@ export class AdminCompaniesComponent implements OnInit {
       };
 
       this.empresaService.postEmpresa(dataCrear).subscribe({
-        next: (response: EmpresaResponse) => {
+        next: () => {
           this.mensaje = 'Empresa creada correctamente.';
-          const nuevaEmpresa = response.empresa || response;
-
-          this.empresas.unshift(nuevaEmpresa);
           this.cerrarFormulario();
+          this.cargarEmpresas();
           this.guardando = false;
         },
         error: (err) => {
@@ -211,7 +247,6 @@ export class AdminCompaniesComponent implements OnInit {
     const confirmar = window.confirm(
       `¿Está seguro de eliminar la empresa ${empresa.empresa_nombre}? Esto eliminará sus vacantes asociadas.`
     );
-
     if (!confirmar) return;
 
     this.mensaje = '';
@@ -220,14 +255,9 @@ export class AdminCompaniesComponent implements OnInit {
 
     this.empresaService.deleteEmpresa(empresa.empresa_id).subscribe({
       next: () => {
-        this.empresas = this.empresas.filter((item) => item.empresa_id !== empresa.empresa_id);
-
-        if (this.empresaSeleccionada?.empresa_id === empresa.empresa_id) {
-          this.cerrarFormulario();
-        }
-
         this.mensaje = 'Empresa eliminada correctamente.';
         this.eliminando = false;
+        this.cargarEmpresas();
       },
       error: (err) => {
         this.error = err?.error?.message || 'No se pudo eliminar la empresa.';

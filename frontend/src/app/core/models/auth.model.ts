@@ -115,3 +115,7 @@ export interface UsuarioResponse {
 export interface UsuariosResponse {
   usuarios: Usuario[];
 }
+
+export interface UsuariosDisponiblesResponse{
+  usuarios: Usuario[]
+}

@@ -1,115 +1,117 @@
 <div class="detail-container">
-  <div *ngIf="loading" class="state-message">
-    <p>Cargando información de la empresa...</p>
-  </div>
 
-  <div *ngIf="errorMsg" class="state-message error">
-    <p>{{ errorMsg }}</p>
-    <button (click)="errorMsg = ''" class="btn btn-secondary">Cerrar alerta</button>
-  </div>
-
-  <div *ngIf="successMsg" class="state-message success">
-    <p>{{ successMsg }}</p>
-  </div>
-
-  <div *ngIf="!loading && empresa" class="detail-content">
-    <div class="back-navigation">
-      <a routerLink="/home" class="back-link">Regresar al inicio</a>
+  @if (loading) {
+    <div class="state-message">
+      <p>Cargando información de la vacante...</p>
     </div>
+  }
 
-    <header class="detail-header">
-      <div>
-        <h1 class="title">{{ empresa.empresa_nombre }}</h1>
-        <p class="company" *ngIf="empresa.empresa_nit">NIT: {{ empresa.empresa_nit }}</p>
-      </div>
-      <div class="action-buttons">
-        <button class="btn btn-primary" (click)="openUpdateForm(empresa)">Editar Empresa</button>
-        <button class="btn btn-danger" (click)="deleteEmpresa(empresa.empresa_id)">Eliminar</button>
-      </div>
-    </header>
+  @if (!loading && errorMsg && !vacante) {
+    <div class="state-message error">
+      <p>{{ errorMsg }}</p>
+      <a routerLink="/home" class="btn btn-secondary">Volver al inicio</a>
+    </div>
+  }
 
-    <section class="section">
-      <h3>Descripción</h3>
-      <p class="description-text">{{ empresa.empresa_descripcion || 'Sin descripción disponible.' }}</p>
-    </section>
+  @if (!loading && vacante) {
+    <div class="detail-content">
 
-    <section class="section company-info">
-      <h3>Datos de Contacto</h3>
-      <div class="contact-details">
-        <p><strong>Correo:</strong> {{ empresa.empresa_correo || 'No especificado' }}</p>
-        <p><strong>Teléfono:</strong> {{ empresa.empresa_telefono || 'No especificado' }}</p>
-        <p><strong>Dirección:</strong> {{ empresa.empresa_direccion || 'No especificada' }}</p>
-      </div>
-    </section>
-  </div>
-
-  <div class="crud-actions-bar" *ngIf="activeFormMode === 'none'">
-    <button class="btn btn-success" (click)="openCreateForm()">+ Registrar Nueva Empresa</button>
-  </div>
-
-  <div class="inline-form-card" *ngIf="activeFormMode !== 'none'">
-    <h3 class="form-title">
-      {{ activeFormMode === 'create' ? 'Registrar Nueva Empresa' : 'Actualizar Datos de Empresa' }}
-    </h3>
-
-    <form [formGroup]="empresaForm" (ngSubmit)="activeFormMode === 'create' ? createEmpresa() : updateEmpresa()">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Nombre de la Empresa *</label>
-          <input type="text" formControlName="empresa_nombre" class="form-control" placeholder="Ej. Tech Solutions">
-        </div>
-
-        <div class="form-group">
-          <label>Correo Electrónico *</label>
-          <input type="email" formControlName="empresa_correo" class="form-control" placeholder="contacto@empresa.com">
-        </div>
-
-        <div class="form-group">
-          <label>Teléfono</label>
-          <input type="text" formControlName="empresa_telefono" class="form-control" placeholder="5555-5555">
-        </div>
-
-        <div class="form-group">
-          <label>NIT</label>
-          <input type="text" formControlName="empresa_nit" class="form-control" placeholder="123456-7">
-        </div>
-
-        <div class="form-group">
-          <label>Usuario Admin *</label>
-          <input type="number" formControlName="usuario_admin" class="form-control" placeholder="1">
-        </div>
-
-        <div class="form-group full-width">
-          <label>Dirección</label>
-          <input type="text" formControlName="empresa_direccion" class="form-control" placeholder="Ciudad, Zona 10">
-        </div>
-
-        <div class="form-group full-width">
-          <label>Descripción</label>
-          <textarea formControlName="empresa_descripcion" class="form-control" rows="3" placeholder="Breve descripción..."></textarea>
-        </div>
+      <div class="back-navigation">
+        <a routerLink="/home" class="back-link">← Regresar al inicio</a>
       </div>
 
-      <div class="form-buttons">
-        <button type="submit" class="btn btn-primary" [disabled]="empresaForm.invalid">
-          {{ activeFormMode === 'create' ? 'Guardar Empresa' : 'Guardar Cambios' }}
-        </button>
-        <button type="button" class="btn btn-secondary" (click)="cancelForm()">Cancelar</button>
-      </div>
-    </form>
-  </div>
-
-  <div class="general-list-section" *ngIf="empresas.length > 0">
-    <h3>Otras Empresas Registradas</h3>
-    <ul class="empresa-mini-list">
-      <li *ngFor="let emp of empresas">
-        <span>{{ emp.empresa_nombre }}</span>
+      <header class="detail-header">
         <div>
-          <a [routerLink]="['/empresas', emp.empresa_id]" class="btn-link">Ver</a>
-          <button class="btn-link edit" (click)="openUpdateForm(emp)">Editar</button>
-          <button class="btn-link delete" (click)="deleteEmpresa(emp.empresa_id)">Eliminar</button>
+          <h1 class="title">{{ vacante.vacante_nombre }}</h1>
+          @if (empresa) {
+            <p class="company">{{ empresa.empresa_nombre }}</p>
+          }
         </div>
-      </li>
-    </ul>
-  </div>
+
+        <span class="badge" [class.active]="vacante.estado" [class.inactive]="!vacante.estado">
+          {{ vacante.estado ? 'Activa' : 'Inactiva' }}
+        </span>
+      </header>
+
+      <div class="metadata-grid">
+        <div class="meta-item">
+          <span class="meta-label">Jornada</span>
+          <span class="meta-value">{{ vacante.tipo_jornada || 'No especificada' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Ubicación</span>
+          <span class="meta-value">{{ vacante.ubicacion || 'No especificada' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Categoría</span>
+          <span class="meta-value">{{ vacante.categoria || 'No especificada' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Salario</span>
+          <span class="meta-value">
+            {{ vacante.salario ? ('Q' + (vacante.salario | number:'1.2-2')) : 'No especificado' }}
+          </span>
+        </div>
+      </div>
+
+      <section class="section">
+        <h3>Descripción del puesto</h3>
+        <p class="description-text">{{ vacante.vacante_descripcion || 'Sin descripción disponible.' }}</p>
+      </section>
+
+      @if (vacante.habilidades_requeridas) {
+        <section class="section">
+          <h3>Habilidades requeridas</h3>
+          <p class="description-text">{{ vacante.habilidades_requeridas }}</p>
+        </section>
+      }
+
+      @if (empresa) {
+        <section class="section company-info">
+          <h3>Sobre la empresa</h3>
+          <p class="description-text">{{ empresa.empresa_descripcion || 'Sin descripción disponible.' }}</p>
+          <div class="contact-details">
+            <p><strong>Correo:</strong> {{ empresa.empresa_correo || 'No especificado' }}</p>
+            <p><strong>Teléfono:</strong> {{ empresa.empresa_telefono || 'No especificado' }}</p>
+            <p><strong>Dirección:</strong> {{ empresa.empresa_direccion || 'No especificada' }}</p>
+          </div>
+        </section>
+      }
+
+      @if (errorMsg) {
+        <div class="state-message error inline"><p>{{ errorMsg }}</p></div>
+      }
+      @if (successMsg) {
+        <div class="state-message success inline"><p>{{ successMsg }}</p></div>
+      }
+
+      <section class="section apply-section">
+        @if (!miPostulacion && vacante.estado) {
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="postulando"
+            (click)="postularme()"
+          >
+            {{ postulando ? 'Enviando...' : 'Postularme a esta vacante' }}
+          </button>
+        }
+
+        @if (miPostulacion) {
+          <p class="already-applied">
+            Ya te postulaste a esta vacante — estado actual: <strong>{{ miPostulacion.estado }}</strong>.
+            <a routerLink="/candidato/postulacion">Ver mis postulaciones</a>
+          </p>
+        }
+
+        @if (!vacante.estado && !miPostulacion) {
+          <p class="already-applied">
+            Esta vacante ya no está activa y no acepta nuevas postulaciones.
+          </p>
+        }
+      </section>
+
+    </div>
+  }
+
 </div>

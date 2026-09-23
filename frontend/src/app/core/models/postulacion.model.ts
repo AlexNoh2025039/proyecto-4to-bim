@@ -4,12 +4,16 @@ export interface Postulacion {
     vacante_id: number;
     porcentaje_compatibilidad: number;
     fecha_postulacion: string;
-    estado: string
-    created_at: string
+    estado: string;
+    created_at: string;
+    vacante_nombre?: string;
+    tipo_jornada?: string;
+    ubicacion?: string;
+    empresa_nombre?: string;
 }
 
 export interface PostulacionData {
-    usuario_id: number;
+    usuario_id?: number;
     vacante_id: number;
     porcentaje_compatibilidad?: number;
     estado?: string;
@@ -21,5 +25,5 @@ export interface PostulacionResponse {
 }
 
 export interface PostulacionesResponse {
-    postulacion: Postulacion[];
+    postulaciones: Postulacion[];
 }

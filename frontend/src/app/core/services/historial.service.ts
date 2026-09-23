@@ -12,7 +12,11 @@ export class HistorialService {
     private readonly apiUrl = `${environment.apiUrl}/historial`;
 
     getHistoriales(): Observable<HistorialesResponse> {
-        return this.http.get<HistorialesResponse>(`${this.apiUrl}/`);
+        return this.http.get<HistorialesResponse>(this.apiUrl);
+    }
+
+    getHistorialesPorPostulacion(postulacion_id: number): Observable<HistorialesResponse> {
+        return this.http.get<HistorialesResponse>(`${this.apiUrl}/postulacion/${postulacion_id}`);
     }
 
     getHistorial(id: number): Observable<HistorialResponse> {
@@ -20,14 +24,14 @@ export class HistorialService {
     }
 
     postHistorial(historial: HistorialData): Observable<HistorialResponse> {
-        return this.http.post<HistorialResponse>(`${this.apiUrl}/post`, historial)
+        return this.http.post<HistorialResponse>(this.apiUrl, historial);
     }
 
-    putHistorial(id: number, historial: HistorialData): Observable<HistorialResponse>{
+    putHistorial(id: number, historial: HistorialData): Observable<HistorialResponse> {
         return this.http.put<HistorialResponse>(`${this.apiUrl}/${id}`, historial);
     }
 
-    deleteHistorial(id:number): Observable<{message: string}> {
-        return this.http.delete<{message: string}>(`${this.apiUrl}/${id}`)
+    deleteHistorial(id: number): Observable<{message: string}> {
+        return this.http.delete<{message: string}>(`${this.apiUrl}/${id}`);
     }
 }

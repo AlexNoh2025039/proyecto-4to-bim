@@ -1,166 +1,115 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Vacante, VacanteResponse } from '../../core/models/vacante.model';
+import { Empresa, EmpresaResponse } from '../../core/models/empresa.model';
+import { Postulacion, PostulacionesResponse } from '../../core/models/postulacion.model';
+import { VacanteService } from '../../core/services/vacante.service';
 import { EmpresaService } from '../../core/services/empresa.service';
-import { Empresa } from '../../core/models/empresa.model';
+import { PostulacionService } from '../../core/services/postulacion.service';
 
 @Component({
   selector: 'app-job-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './job-detail.html',
   styleUrl: './job-detail.css'
 })
 export class JobDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly vacanteService = inject(VacanteService);
   private readonly empresaService = inject(EmpresaService);
-  private readonly fb = inject(FormBuilder);
+  private readonly postulacionService = inject(PostulacionService);
 
-  empresas: Empresa[] = [];
+  vacante: Vacante | null = null;
   empresa: Empresa | null = null;
-  
-  loading: boolean = true;
-  errorMsg: string = '';
-  successMsg: string = '';
+  miPostulacion: Postulacion | null = null;
 
-  activeFormMode: 'none' | 'create' | 'update' = 'none';
-  selectedEmpresaId: number | null = null;
-
-  empresaForm: FormGroup = this.fb.group({
-    empresa_nombre: ['', Validators.required],
-    empresa_descripcion: [''],
-    empresa_correo: ['', [Validators.required, Validators.email]],
-    empresa_telefono: [''],
-    empresa_nit: [''],
-    empresa_direccion: [''],
-    usuario_admin: [1, Validators.required]
-  });
+  loading = true;
+  postulando = false;
+  errorMsg = '';
+  successMsg = '';
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    
-    if (idParam) {
-      const id = Number(idParam);
-      if (id) {
-        this.getEmpresaDetail(id);
-      } else {
-        this.errorMsg = 'ID de empresa no válido.';
-        this.loading = false;
-      }
-    } else {
+    const id = Number(idParam);
+
+    if (!idParam || !Number.isInteger(id) || id <= 0) {
+      this.errorMsg = 'ID de vacante no válido.';
       this.loading = false;
+      return;
     }
-    
-    this.loadAllEmpresas();
+
+    this.cargarVacante(id);
   }
 
-  loadAllEmpresas(): void {
-    this.empresaService.getEmpresas().subscribe({
-      next: (res: any) => {
-        this.empresas = res.empresas || res; 
-      },
-      error: (err) => {
-        console.error('Error al listar empresas', err);
-      }
-    });
-  }
+  cargarVacante(id: number): void {
+    this.loading = true;
+    this.errorMsg = '';
 
-  getEmpresaDetail(id: number): void {
-    this.empresaService.getEmpresaById(id).subscribe({
-      next: (res: any) => {
-        this.empresa = res.empresa || res;
-        this.loading = false;
+    this.vacanteService.getVacanteById(id).subscribe({
+      next: (res: VacanteResponse) => {
+        this.vacante = res.vacante;
+        this.cargarEmpresa(this.vacante.empresa_id);
+        this.verificarPostulacionExistente(id);
       },
       error: (err) => {
-        console.error('Error al cargar detalle de empresa', err);
-        this.errorMsg = 'No se encontró la empresa solicitada.';
+        console.error('Error al cargar la vacante', err);
+        this.errorMsg = err?.error?.message || 'No se encontró la vacante solicitada.';
         this.loading = false;
       }
     });
   }
 
-  openCreateForm(): void {
-    this.activeFormMode = 'create';
-    this.empresaForm.reset({ usuario_admin: 1 });
-    this.successMsg = '';
-  }
-
-  createEmpresa(): void {
-    if (this.empresaForm.invalid) return;
-
-    this.empresaService.postEmpresa(this.empresaForm.value).subscribe({
-      next: () => {
-        this.successMsg = 'Empresa creada exitosamente.';
-        this.loadAllEmpresas();
-        this.activeFormMode = 'none';
-        this.empresaForm.reset();
+  cargarEmpresa(empresa_id: number): void {
+    this.empresaService.getEmpresaById(empresa_id).subscribe({
+      next: (res: EmpresaResponse) => {
+        this.empresa = res.empresa;
+        this.loading = false;
       },
       error: (err) => {
-        console.error('Error al crear empresa', err);
-        this.errorMsg = 'No se pudo crear la empresa.';
+        console.error('Error al cargar la empresa', err);
+        this.loading = false;
       }
     });
   }
 
-  openUpdateForm(emp: Empresa): void {
-    this.activeFormMode = 'update';
-    this.selectedEmpresaId = emp.empresa_id || null;
-    this.successMsg = '';
-    
-    this.empresaForm.patchValue({
-      empresa_nombre: emp.empresa_nombre,
-      empresa_descripcion: emp.empresa_descripcion,
-      empresa_correo: emp.empresa_correo,
-      empresa_telefono: emp.empresa_telefono,
-      empresa_nit: emp.empresa_nit,
-      empresa_direccion: emp.empresa_direccion,
-      usuario_admin: emp.usuario_admin ?? 1
-    });
-  }
-
-  updateEmpresa(): void {
-    if (this.empresaForm.invalid || !this.selectedEmpresaId) return;
-
-    this.empresaService.putEmpresa(this.selectedEmpresaId, this.empresaForm.value).subscribe({
-      next: () => {
-        this.successMsg = 'Empresa actualizada exitosamente.';
-        this.loadAllEmpresas();
-        if (this.empresa && this.empresa.empresa_id === this.selectedEmpresaId) {
-          this.getEmpresaDetail(this.selectedEmpresaId);
-        }
-        this.activeFormMode = 'none';
-        this.selectedEmpresaId = null;
+  verificarPostulacionExistente(vacante_id: number): void {
+    this.postulacionService.getPostulaciones().subscribe({
+      next: (res: PostulacionesResponse) => {
+        const propias = res.postulaciones || [];
+        this.miPostulacion = propias.find(p => p.vacante_id === vacante_id) || null;
       },
       error: (err) => {
-        console.error('Error al actualizar empresa', err);
-        this.errorMsg = 'No se pudo actualizar la empresa.';
+        console.error('Error al verificar postulaciones existentes', err);
       }
     });
   }
 
-  deleteEmpresa(id: number | undefined): void {
-    if (!id) return;
-    if (confirm('¿Estás seguro de que deseas eliminar esta empresa?')) {
-      this.empresaService.deleteEmpresa(id).subscribe({
-        next: () => {
-          this.successMsg = 'Empresa eliminada correctamente.';
-          this.loadAllEmpresas();
-          if (this.empresa && this.empresa.empresa_id === id) {
-            this.router.navigate(['/home']);
-          }
-        },
-        error: (err) => {
-          console.error('Error al eliminar empresa', err);
-          this.errorMsg = 'No se pudo eliminar la empresa.';
-        }
-      });
+  postularme(): void {
+    if (!this.vacante?.vacante_id || this.postulando || this.miPostulacion) {
+      return;
     }
+
+    this.errorMsg = '';
+    this.successMsg = '';
+    this.postulando = true;
+
+    this.postulacionService.postPostulacion({ vacante_id: this.vacante.vacante_id }).subscribe({
+      next: (res) => {
+        this.miPostulacion = res.postulacion;
+        this.successMsg = 'Te has postulado correctamente a esta vacante.';
+        this.postulando = false;
+      },
+      error: (err) => {
+        this.errorMsg = err?.error?.message || 'No se pudo registrar tu postulación.';
+        this.postulando = false;
+      }
+    });
   }
 
-  cancelForm(): void {
-    this.activeFormMode = 'none';
-    this.empresaForm.reset();
+  volver(): void {
+    this.router.navigate(['/home']);
   }
 }

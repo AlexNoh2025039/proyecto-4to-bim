@@ -21,6 +21,7 @@ import {
   CambiarPasswordAdminRequest,
   CambiarPasswordRequest,
   UsuarioResponse,
+  UsuariosDisponiblesResponse,
   UsuariosResponse
 } from '../../core/models/auth.model';
 
@@ -34,6 +35,10 @@ export class UsuarioService {
 
   private readonly apiUrl =
     `${environment.apiUrl}/usuarios`;
+
+   getEmpresasDisponibles(): Observable<UsuariosDisponiblesResponse> {
+    return this.http.get<UsuariosDisponiblesResponse>(`${this.apiUrl}/empresas-disponibles`)
+   }
 
   obtenerMiPerfil():
     Observable<UsuarioResponse> {

@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
-import { requireAuth, requireRole } from '../middlewares/auth.js';
+import { requireAuth } from '../middlewares/auth.js';
 
 const router = Router();
 
 router.use(requireAuth);
-router.use(requireRole('Administrador'));
 
 function validateHistorial({ descripcion, postulacion_id }) {
   if (typeof descripcion !== 'string' || !descripcion.trim()) {
@@ -95,15 +94,14 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    
-const postulacionExiste = await pool.query(
-  'SELECT postulacion_id FROM Postulacion WHERE postulacion_id = $1',
-  [postulacion_id]
-);
+    const postulacionExiste = await pool.query(
+      'SELECT postulacion_id FROM Postulacion WHERE postulacion_id = $1',
+      [postulacion_id]
+    );
 
-if (!postulacionExiste.rows[0]) {
-  return res.status(400).json({ message: 'La postulación especificada no existe' });
-}
+    if (!postulacionExiste.rows[0]) {
+      return res.status(400).json({ message: 'La postulación especificada no existe' });
+    }
 
     const result = await pool.query(
       `INSERT INTO Historial (descripcion, postulacion_id)

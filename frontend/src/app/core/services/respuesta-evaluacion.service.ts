@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 import { RespuestaEvaluacion, RespuestaEvaluacionResponse } from '../models/respuesta-evaluacion.model';
 
 @Injectable({
@@ -9,7 +10,7 @@ import { RespuestaEvaluacion, RespuestaEvaluacionResponse } from '../models/resp
 })
 export class RespuestaEvaluacionService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/respuestas-evaluacion'; 
+  private readonly apiUrl = `${environment.apiUrl}/respuestas-evaluacion`;
 
   getRespuestas(): Observable<RespuestaEvaluacion[]> {
     return this.http.get<RespuestaEvaluacionResponse>(this.apiUrl).pipe(

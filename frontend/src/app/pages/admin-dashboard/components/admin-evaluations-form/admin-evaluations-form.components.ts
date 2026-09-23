@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router'; // Directiva de ruteo agregada
 import { Empresa } from '../../../../core/models/empresa.model';
 import { Evaluacion } from '../../../../core/models/evaluacion.model';
 import { EmpresaService } from '../../../../core/services/empresa.service';
@@ -9,7 +10,7 @@ import { EvaluacionService } from '../../../../core/services/evaluacion.service'
 @Component({
   selector: 'app-admin-evaluations-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   styleUrl: './admin-evaluations-form.css',
   templateUrl: './admin-evaluations-form.html',
 })
@@ -51,7 +52,6 @@ export class AdminEvaluationsForm implements OnInit {
 
   loadEmpresas(): void {
     this.loadingEmpresas = true;
-
     this.empresaService.getEmpresas().subscribe({
       next: (res) => {
         this.empresas = Array.isArray(res.empresas) ? res.empresas : [];

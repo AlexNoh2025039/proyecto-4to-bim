@@ -53,7 +53,7 @@ router.get('/:id', async (req, res) => {
 
   try {
     const result = await pool.query('SELECT * FROM Vacante WHERE vacante_id = $1', [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontró la vacante solicitada' });
     }
@@ -134,7 +134,7 @@ router.delete('/:id', async (req, res) => {
 
   try {
     const result = await pool.query('DELETE FROM Vacante WHERE vacante_id = $1 RETURNING vacante_id', [id]);
-    
+
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'No se encontró la vacante a eliminar' });
     }

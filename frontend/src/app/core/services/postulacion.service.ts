@@ -20,7 +20,7 @@ export class PostulacionService {
     }
 
     postPostulacion(postulacion: PostulacionData): Observable<PostulacionResponse> {
-        return this.http.post<PostulacionResponse>(`${this.apiUrl}/post`, postulacion)
+        return this.http.post<PostulacionResponse>(this.apiUrl, postulacion)
     }
 
     putPostulacion(id: number, postulacion: PostulacionData): Observable<PostulacionResponse> {

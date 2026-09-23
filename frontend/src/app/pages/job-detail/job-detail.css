@@ -142,3 +142,21 @@
   background-color: #e5e7eb;
   color: #374151;
 }
+
+.already-applied {
+  margin-top: 12px;
+  color: #4b5563;
+}
+
+.state-message.inline {
+  padding: 12px 0;
+  text-align: left;
+}
+
+.state-message.success {
+  color: #047857;
+}
+
+.apply-section {
+  margin-top: 24px;
+}

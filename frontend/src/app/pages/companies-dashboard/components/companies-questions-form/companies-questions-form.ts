@@ -1,18 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BancoPreguntas } from '../../../../core/models/banco-preguntas.model';
 import { BancoPreguntasService } from '../../../../core/services/banco-preguntas.service';
 
 @Component({
-  selector: 'app-admin-questions-form',
+  selector: 'app-companies-questions-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  styleUrl: './admin-questions-form.css',
-  templateUrl: './admin-questions-form.html',
+  styleUrl: './companies-questions-form.css',
+  templateUrl: './companies-questions-form.html',
 })
-export class AdminQuestionsForm implements OnInit {
-  @Input() preguntaToEdit: BancoPreguntas | null = null;
+export class CompaniesQuestionsForm {
   @Output() savePregunta = new EventEmitter<BancoPreguntas>();
   @Output() cancel = new EventEmitter<void>();
 
@@ -23,40 +22,19 @@ export class AdminQuestionsForm implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly bancoPreguntasService = inject(BancoPreguntasService);
 
-  ngOnInit(): void {
+  constructor() {
     this.initForm();
-
-    if (this.preguntaToEdit) {
-      this.patchForm(this.preguntaToEdit);
-    }
   }
 
   private initForm(): void {
     this.questionForm = this.fb.group({
-      pregunta_id: [null],
       pregunta: ['', [Validators.required, Validators.maxLength(255)]],
       categoria: ['', [Validators.required, Validators.maxLength(100)]],
       opcion_1: ['', [Validators.required]],
       opcion_2: ['', [Validators.required]],
       opcion_3: ['', [Validators.required]],
       opcion_4: ['', [Validators.required]],
-      respuesta_correcta: ['', [Validators.required, Validators.maxLength(255)]],
-    });
-  }
-
-  private patchForm(pregunta: BancoPreguntas): void {
-    const opciones = Array.isArray(pregunta.opciones) ? (pregunta.opciones as string[]) : [];
-    const placeholder = [...Array(4)].map((_, index) => opciones[index] ?? '');
-
-    this.questionForm.patchValue({
-      pregunta_id: pregunta.pregunta_id ?? null,
-      pregunta: pregunta.pregunta ?? '',
-      categoria: pregunta.categoria ?? '',
-      opcion_1: placeholder[0],
-      opcion_2: placeholder[1],
-      opcion_3: placeholder[2],
-      opcion_4: placeholder[3],
-      respuesta_correcta: pregunta.respuesta_correcta ?? ''
+      respuesta_correcta: ['', [Validators.required]],
     });
   }
 
@@ -91,7 +69,6 @@ export class AdminQuestionsForm implements OnInit {
     }
 
     const payload: BancoPreguntas = {
-      pregunta_id: this.questionForm.value.pregunta_id ?? undefined,
       pregunta: this.questionForm.value.pregunta.trim(),
       categoria: this.questionForm.value.categoria.trim(),
       opciones,
@@ -101,16 +78,11 @@ export class AdminQuestionsForm implements OnInit {
     this.serverError = '';
     this.submitting = true;
 
-    const request$ = payload.pregunta_id
-      ? this.bancoPreguntasService.updatePregunta(payload.pregunta_id, payload)
-      : this.bancoPreguntasService.createPregunta(payload);
-
-    request$.subscribe({
+    this.bancoPreguntasService.createPregunta(payload).subscribe({
       next: (created) => {
         this.savePregunta.emit(created);
         this.submitting = false;
         this.questionForm.reset({
-          pregunta_id: null,
           pregunta: '',
           categoria: '',
           opcion_1: '',
@@ -123,7 +95,7 @@ export class AdminQuestionsForm implements OnInit {
       error: (err) => {
         this.submitting = false;
         this.serverError = err?.error?.message || 'No se pudo guardar la pregunta.';
-      }
+      },
     });
   }
 

@@ -1,8 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+<<<<<<< HEAD
 import { Router, RouterLink } from '@angular/router';
 
 // Servicios
+=======
+import { RouterLink } from '@angular/router';
+ 
+>>>>>>> 232774300c81998f91f2a57a142e2970a6bb7c99
 import { AuthService } from '../../core/services/auth.service';
 import { NotificacionService } from '../../core/services/notificacion.service';
 import { VacanteService } from '../../core/services/vacante.service';
@@ -10,11 +15,15 @@ import { VacanteService } from '../../core/services/vacante.service';
 // Modelos
 import { Notificacion } from '../../core/models/notificacion.model';
 import { Vacante } from '../../core/models/vacante.model';
+<<<<<<< HEAD
 
 // Componentes
 import { NotificationCardComponent } from '../../shared/components/notification-card/notification-card';
+=======
+ 
+>>>>>>> 232774300c81998f91f2a57a142e2970a6bb7c99
 import { JobCardComponent } from '../../shared/components/job-card/job-card';
-
+ 
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -31,6 +40,7 @@ export class HomeComponent implements OnInit {
   protected readonly authService = inject(AuthService);
   private readonly notificacionService = inject(NotificacionService);
   private readonly vacanteService = inject(VacanteService);
+<<<<<<< HEAD
   private readonly router = inject(Router);
 
   readonly usuario = this.authService.currentUsuario;
@@ -40,10 +50,16 @@ export class HomeComponent implements OnInit {
   readonly showNotifications = signal(false);
 
   // Estado para vacantes
+=======
+ 
+  readonly usuario = this.authService.currentUsuario;
+ 
+>>>>>>> 232774300c81998f91f2a57a142e2970a6bb7c99
   readonly vacantes = signal<Vacante[]>([]);
   readonly loadingVacantes = signal<boolean>(false);
-
+ 
   ngOnInit(): void {
+<<<<<<< HEAD
     const user = this.usuario();
 
     if (user?.usuario_id) {
@@ -104,11 +120,21 @@ export class HomeComponent implements OnInit {
       });
   }
 
+=======
+    const role = this.usuario()?.usuario_rol;
+ 
+    if (role === 'Candidato') {
+      this.cargarVacantes();
+    }
+  }
+ 
+>>>>>>> 232774300c81998f91f2a57a142e2970a6bb7c99
   private cargarVacantes(): void {
     this.loadingVacantes.set(true);
     this.vacanteService.getVacantes().subscribe({
-      next: (data) => {
-        this.vacantes.set(data.vacantes);
+      next: (data: any) => {
+        const lista = Array.isArray(data) ? data : (data.vacantes || []);
+        this.vacantes.set(lista);
         this.loadingVacantes.set(false);
       },
       error: (err) => {

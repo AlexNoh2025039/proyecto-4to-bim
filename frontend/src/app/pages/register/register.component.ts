@@ -77,7 +77,7 @@ export class RegisterComponent {
         usuario_apellido: values.usuario_apellido,
         usuario_correo: values.usuario_correo,
         usuario_password: values.usuario_password,
-        usuario_dpi: values.usuario_dpi || undefined,
+        usuario_dpi: values.usuario_dpi,
         usuario_telefono: values.usuario_telefono || undefined,
         usuario_profesion: values.usuario_profesion || undefined
       }).subscribe({
@@ -98,7 +98,7 @@ export class RegisterComponent {
       usuario_apellido: values.usuario_apellido,
       usuario_correo: values.usuario_correo,
       usuario_password: values.usuario_password,
-      usuario_dpi: values.usuario_dpi || undefined,
+      usuario_dpi: values.usuario_dpi,
       usuario_telefono: values.usuario_telefono || undefined,
       usuario_profesion: values.usuario_profesion || undefined,
       empresa_nombre: values.empresa_nombre,

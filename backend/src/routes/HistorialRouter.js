@@ -94,6 +94,15 @@ router.post('/', async (req, res) => {
   }
 
   try {
+    const postulacionExiste = await pool.query(
+      'SELECT postulacion_id FROM Postulacion WHERE postulacion_id = $1',
+      [postulacion_id]
+    );
+
+    if (!postulacionExiste.rows[0]) {
+      return res.status(400).json({ message: 'La postulación especificada no existe' });
+    }
+
     const result = await pool.query(
       `INSERT INTO Historial (descripcion, postulacion_id)
        VALUES ($1, $2)

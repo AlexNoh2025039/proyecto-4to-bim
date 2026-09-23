@@ -1,1 +1,27 @@
-<p>companies-evaluations works!</p>
+<section class="evaluations-shell">
+    <div class="header-row">
+        <div>
+            <p class="eyebrow">Empresa</p>
+            <h2>Evaluaciones</h2>
+        </div>
+        <a class="primary-btn" routerLink="/empresa/evaluaciones/nueva">Nueva evaluación</a>
+    </div>
+
+    <div class="status-box" *ngIf="loading">Cargando evaluaciones...</div>
+    <div class="status-box error" *ngIf="error">{{ error }}</div>
+
+    <div class="grid" *ngIf="!loading && !error">
+        <article class="evaluation-card" *ngFor="let evaluacion of evaluaciones">
+            <div class="meta-row">
+                <span class="tag">{{ evaluacion.categoria || 'General' }}</span>
+            </div>
+            <h3>{{ evaluacion.evaluacion_nombre }}</h3>
+            <p><strong>Empresa:</strong> {{ getEmpresaNombre(evaluacion.empresa_id) }}</p>
+            <p *ngIf="evaluacion.empresa_nombre"><strong>Nombre empresa:</strong> {{ evaluacion.empresa_nombre }}</p>
+        </article>
+
+        <div class="empty-state" *ngIf="evaluaciones.length === 0">
+            Aún no tienes evaluaciones creadas para tu empresa.
+        </div>
+    </div>
+</section>

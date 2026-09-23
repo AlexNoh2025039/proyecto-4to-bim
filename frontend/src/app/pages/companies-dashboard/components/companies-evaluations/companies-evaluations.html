@@ -4,8 +4,10 @@
             <p class="eyebrow">Empresa</p>
             <h2>Evaluaciones</h2>
         </div>
-        <!-- Navegación directa al formulario de creación -->
-        <a class="primary-btn" routerLink="/empresa/evaluaciones/nueva">Nueva evaluación</a>
+        <div class="header-actions">
+            <a class="btn btn-secondary" routerLink="/home">Volver al inicio</a>
+            <a class="primary-btn" routerLink="/empresa/evaluaciones/nueva">Nueva evaluación</a>
+        </div>
     </div>
 
     <div class="status-box" *ngIf="loading">Cargando evaluaciones...</div>

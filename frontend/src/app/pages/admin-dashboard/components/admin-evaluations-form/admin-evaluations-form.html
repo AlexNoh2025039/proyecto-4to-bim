@@ -39,7 +39,7 @@
     </div>
 
     <div class="form-actions">
-        <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancelar</button>
+        <button type="button" class="btn btn-secondary" (click)="onCancel()" routerLink="/home">Cancelar</button>
         <button type="submit" class="btn btn-primary"
             [disabled]="evaluationForm.invalid || loadingEmpresas || submitting">
             {{ submitting ? 'Guardando...' : (evaluacionToEdit ? 'Guardar cambios' : 'Crear evaluación') }}

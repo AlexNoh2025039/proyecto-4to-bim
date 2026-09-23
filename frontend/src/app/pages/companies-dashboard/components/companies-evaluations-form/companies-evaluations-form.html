@@ -39,8 +39,7 @@
             </div>
 
             <div class="actions">
-                <!-- Dispara el Output cancel y también permite volver a la lista si se usa en ruta propia -->
-                <button type="button" class="btn btn-secondary" (click)="onCancel()" routerLink="/empresa/evaluaciones"
+                <button type="button" class="btn btn-secondary" (click)="onCancel()" routerLink="/home"
                     [disabled]="submitting">Cancelar</button>
                 <button type="submit" class="btn btn-primary" [disabled]="submitting">
                     {{ submitting ? 'Guardando...' : 'Guardar evaluación' }}

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { Vacante, VacanteResponse, VacantesResponse } from '../models/vacante.model';
 
 @Injectable({
@@ -8,7 +9,7 @@ import { Vacante, VacanteResponse, VacantesResponse } from '../models/vacante.mo
 })
 export class VacanteService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/vacantes';
+  private readonly apiUrl = `${environment.apiUrl}/vacantes`;
 
   getVacantes(): Observable<VacantesResponse> {
     return this.http.get<VacantesResponse>(this.apiUrl);

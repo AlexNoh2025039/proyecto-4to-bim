@@ -21,9 +21,15 @@
 }
 
 .curriculum-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 24px;
+  width: 100%;
+}
+
+.curriculum-layout > .card {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .card {
@@ -242,10 +248,6 @@
 }
 
 @media (max-width: 900px) {
-
-  .curriculum-layout {
-    grid-template-columns: 1fr;
-  }
 
   .page-header {
     flex-direction: column;

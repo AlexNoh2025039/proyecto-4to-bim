@@ -1,15 +1,21 @@
+/* Layout General */
 .admin-page {
   width: min(1400px, 94%);
   margin: 40px auto;
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
   margin-bottom: 25px;
 }
 
 .page-header h1 {
   margin: 0;
   font-size: 2rem;
+  color: #111827;
 }
 
 .page-header p {
@@ -17,8 +23,16 @@
   color: #6b7280;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Tarjetas y Contenedores */
 .card {
   background: #ffffff;
+  color: #333333;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   padding: 24px;
@@ -44,6 +58,7 @@
 
 .filter-field label {
   font-weight: 600;
+  color: #333333;
 }
 
 .filter-field input,
@@ -55,12 +70,13 @@
   border-radius: 10px;
   font: inherit;
   background: #ffffff;
+  color: #333333;
 }
 
 .filter-field input:focus,
 .filter-field select:focus {
   outline: none;
-  border-color: #6366f1;
+  border-color: #4f46e5;
 }
 
 .filter-actions {
@@ -92,6 +108,7 @@
 
 .card-header h2 {
   margin: 0;
+  color: #111827;
 }
 
 .card-header p {
@@ -99,6 +116,7 @@
   margin: 7px 0 0;
 }
 
+/* Tabla */
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -108,6 +126,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   min-width: 920px;
+  color: #333333;
 }
 
 thead {
@@ -118,7 +137,7 @@ th {
   text-align: left;
   padding: 13px 14px;
   font-size: 0.82rem;
-  color: #6b7280;
+  color: #6b7280 !important;
   font-weight: 700;
 }
 
@@ -126,6 +145,7 @@ td {
   padding: 14px;
   border-top: 1px solid #e5e7eb;
   vertical-align: middle;
+  color: #1f2937 !important;
 }
 
 tbody tr:hover,
@@ -137,6 +157,12 @@ tbody tr:hover,
   display: flex;
   align-items: center;
   gap: 11px;
+  color: #1f2937 !important;
+}
+
+.user-cell strong {
+  color: #111827 !important;
+  font-weight: 700;
 }
 
 .avatar {
@@ -148,7 +174,7 @@ tbody tr:hover,
   justify-content: center;
   align-items: center;
   background: #eef2ff;
-  color: #3730a3;
+  color: #3730a3 !important;
   font-size: 0.85rem;
   font-weight: 700;
 }
@@ -158,7 +184,7 @@ tbody tr:hover,
   margin-left: 7px;
   padding: 3px 7px;
   background: #ecfdf5;
-  color: #047857;
+  color: #047857 !important;
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 700;
@@ -175,27 +201,27 @@ tbody tr:hover,
 
 .role-badge.admin {
   background: #fef3c7;
-  color: #92400e;
+  color: #92400e !important;
 }
 
 .role-badge.empresa {
   background: #eff6ff;
-  color: #1d4ed8;
+  color: #1d4ed8 !important;
 }
 
 .role-badge.candidato {
   background: #eef2ff;
-  color: #3730a3;
+  color: #3730a3 !important;
 }
 
 .status.active {
   background: #ecfdf5;
-  color: #047857;
+  color: #047857 !important;
 }
 
 .status.inactive {
   background: #fef2f2;
-  color: #b91c1c;
+  color: #b91c1c !important;
 }
 
 .actions {
@@ -226,9 +252,12 @@ tbody tr:hover,
   cursor: not-allowed;
 }
 
+/* Formulario / Editor */
 .editor-card {
   position: sticky;
   top: 20px;
+  background: #ffffff !important;
+  color: #333333 !important;
 }
 
 .editor-header {
@@ -266,6 +295,7 @@ tbody tr:hover,
 
 .form-field label {
   font-weight: 600;
+  color: #333333;
 }
 
 .form-field input,
@@ -276,6 +306,7 @@ tbody tr:hover,
   border: 1px solid #d1d5db;
   border-radius: 10px;
   background: #ffffff;
+  color: #333333;
   font: inherit;
 }
 
@@ -302,7 +333,7 @@ tbody tr:hover,
   margin: 18px 0;
   border-radius: 10px;
   background: #f9fafb;
-  color: #6b7280;
+  color: #4b5563 !important;
   font-size: 0.85rem;
   line-height: 1.5;
 }
@@ -357,6 +388,7 @@ tbody tr:hover,
 .empty-state {
   padding: 50px 20px;
   text-align: center;
+  color: #6b7280;
 }
 
 .empty-icon {
@@ -365,6 +397,7 @@ tbody tr:hover,
 
 .empty-state h3 {
   margin-bottom: 7px;
+  color: #111827;
 }
 
 .empty-state p {
@@ -372,7 +405,6 @@ tbody tr:hover,
 }
 
 @media (max-width: 1100px) {
-
   .filters-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -391,6 +423,14 @@ tbody tr:hover,
 }
 
 @media (max-width: 700px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+  }
 
   .filters-grid {
     grid-template-columns: 1fr;

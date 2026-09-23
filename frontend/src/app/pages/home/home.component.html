@@ -1,4 +1,5 @@
 <div class="home-container" *ngIf="usuario() as user">
+<<<<<<< HEAD
   
   <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
   <nav class="navbar">
@@ -156,4 +157,143 @@
     </section>
 
   </main>
+=======
+ 
+  <!-- BARRA DE NAVEGACIÓN SUPERIOR -->
+<nav class="navbar">
+<div class="navbar-brand">
+<h1>TalentBridge</h1>
+<span class="role-badge">{{ user.usuario_rol }}</span>
+</div>
+<div class="navbar-actions">
+<a routerLink="/profile" class="btn-profile">Mi Perfil</a>
+<button class="btn-logout" (click)="authService.logout()">Cerrar Sesión</button>
+</div>
+</nav>
+ 
+  <!-- CONTENIDO PRINCIPAL -->
+<main class="content">
+<header class="welcome-header">
+<h2>Bienvenido {{ user.usuario_nombre }}</h2>
+<p class="subtitle">Selecciona una opción para comenzar a navegar por la plataforma.</p>
+</header>
+ 
+    <!-- ACCIONES / RUTAS SEGÚN ROL -->
+<section class="actions-section">
+<h3>Acciones Disponibles</h3>
+ 
+      <!-- OPCIONES PARA CANDIDATO -->
+<ng-container *ngIf="user.usuario_rol === 'Candidato'">
+<div class="grid-navigation">
+<a routerLink="/candidato/curriculum" class="action-card">
+<div class="card-icon">📄</div>
+<h4>Mi Formulario CV</h4>
+<p>Edita tu información académica y profesional.</p>
+<span class="btn-navigate">Ir a Formulario &rarr;</span>
+</a>
+ 
+          <a routerLink="/curriculum" class="action-card">
+<div class="card-icon">👁️</div>
+<h4>Mi Currículum</h4>
+<p>Visualiza el formato general de tu perfil profesional.</p>
+<span class="btn-navigate">Ver Currículum &rarr;</span>
+</a>
+ 
+          <a routerLink="/candidato/postulacion" class="action-card">
+<div class="card-icon">💼</div>
+<h4>Mis Postulaciones</h4>
+<p>Consulta los empleos a los que has postulado recientemente.</p>
+<span class="btn-navigate">Ver Postulaciones &rarr;</span>
+</a>
+</div>
+ 
+        <!-- LISTADO DE VACANTES -->
+<div class="vacancies-section">
+<h3>Ofertas de Empleo Disponibles</h3>
+ 
+          <div *ngIf="loadingVacantes()" class="state-container">
+<span class="spinner"></span>
+<p>Cargando ofertas de trabajo...</p>
+</div>
+ 
+          <div *ngIf="!loadingVacantes() && vacantes().length === 0" class="state-container empty">
+<p>No hay vacantes disponibles en este momento.</p>
+</div>
+ 
+          <div class="jobs-grid" *ngIf="!loadingVacantes() && vacantes().length > 0">
+<app-job-card 
+              *ngFor="let vacante of vacantes()" 
+              [vacante]="vacante">
+</app-job-card>
+</div>
+</div>
+</ng-container>
+ 
+      <!-- OPCIONES PARA EMPRESA -->
+<div class="grid-navigation" *ngIf="user.usuario_rol === 'Empresa'">
+<a routerLink="/empresa/vacantes/nueva" class="action-card">
+<div class="card-icon">➕</div>
+<h4>Publicar Vacante</h4>
+<p>Crea una nueva oferta laboral para captar talento.</p>
+<span class="btn-navigate">Crear Vacante &rarr;</span>
+</a>
+ 
+        <a routerLink="/empresa/evaluaciones" class="action-card">
+<div class="card-icon">📊</div>
+<h4>Evaluaciones</h4>
+<p>Consulta el historial y banco de pruebas técnicas.</p>
+<span class="btn-navigate">Ver Evaluaciones &rarr;</span>
+</a>
+ 
+        <a routerLink="/empresa/evaluaciones/nueva" class="action-card">
+<div class="card-icon">📝</div>
+<h4>Nueva Evaluación</h4>
+<p>Diseña un nuevo cuestionario o evaluación para vacantes.</p>
+<span class="btn-navigate">Crear Evaluación &rarr;</span>
+</a>
+ 
+        <a routerLink="/empresa/notificaciones" class="action-card">
+<div class="card-icon">🔔</div>
+<h4>Notificaciones</h4>
+<p>Envía comunicados directos a tus candidatos asignados.</p>
+<span class="btn-navigate">Enviar Mensaje &rarr;</span>
+</a>
+</div>
+ 
+      <!-- OPCIONES PARA ADMINISTRADOR -->
+<div class="grid-navigation" *ngIf="user.usuario_rol === 'Administrador'">
+<a routerLink="/admin/usuarios" class="action-card">
+<div class="card-icon">👥</div>
+<h4>Gestión de Usuarios</h4>
+<p>Administra cuentas de candidatos y administradores.</p>
+<span class="btn-navigate">Ver Usuarios &rarr;</span>
+</a>
+ 
+        <a routerLink="/admin/empresas" class="action-card">
+<div class="card-icon">🏢</div>
+<h4>Gestion de Empresa</h4>
+<p>Administrar empresas asociadas en la plataforma.</p>
+<span class="btn-navigate">Registrar Empresa &rarr;</span>
+</a>
+ 
+        <a routerLink="/admin/evaluaciones" class="action-card">
+<div class="card-icon">📊</div>
+<h4>Tabla de Evaluaciones</h4>
+<p>Visualiza el banco y registro general de evaluaciones.</p>
+<span class="btn-navigate">Ir a Evaluaciones &rarr;</span>
+</a>
+ 
+        <a routerLink="/admin/notificaciones" class="action-card">
+<div class="card-icon">🔔</div>
+<h4>Notificaciones</h4>
+<p>Gestiona los avisos globales de la plataforma.</p>
+<span class="btn-navigate">Ver Notificaciones &rarr;</span>
+</a>
+</div>
+ 
+    </section>
+ 
+  </main>
+ 
+>>>>>>> 232774300c81998f91f2a57a142e2970a6bb7c99
 </div>

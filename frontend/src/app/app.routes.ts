@@ -104,7 +104,7 @@ export const routes: Routes = [
       {
         path: 'usuarios',
         loadComponent: () =>
-          import('./pages/admin-dashboard/components/admin-users-form/admin-users-form.component').then(m => m.AdminUsersComponent)
+          import('./pages/admin-dashboard/components/admin-users-form/admin-users-form').then(m => m.AdminUsersForm)
       },
       {
         path: 'notificaciones',

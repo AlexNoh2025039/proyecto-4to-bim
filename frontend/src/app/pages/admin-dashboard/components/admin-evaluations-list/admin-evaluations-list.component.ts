@@ -1,10 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { EmpresaService } from '../../../../core/services/empresa.service';
+import { EvaluacionService } from '../../../../core/services/evaluacion.service';
 import { Evaluacion } from '../../../../core/models/evaluacion.model';
 
-interface EvaluacionConMetricas extends Evaluacion {
+export interface EvaluacionConMetricas extends Evaluacion {
   promedio?: number;
   nota_minima?: number;
   preguntas_necesarias?: number;
@@ -16,11 +16,11 @@ interface EvaluacionConMetricas extends Evaluacion {
   selector: 'app-admin-evaluations-list',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './admin-evaluations-list.component.html', // Corregido el nombre del HTML
+  templateUrl: './admin-evaluations-list.component.html',
   styleUrls: ['./admin-evaluations-list.component.css']
 })
 export class AdminEvaluationsListComponent implements OnInit {
-  private empresaService = inject(EmpresaService);
+  private evaluacionService = inject(EvaluacionService);
   private router = inject(Router);
 
   evaluaciones: EvaluacionConMetricas[] = [];
@@ -35,24 +35,24 @@ export class AdminEvaluationsListComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.empresaService.getEmpresas().subscribe({
-      next: (res) => {
-        this.evaluaciones = (res.empresas || []).map((emp, index) => ({
-          evaluacion_id: index + 1,
-          evaluacion_nombre: `Evaluación Inicial ${emp.empresa_nombre}`,
-          categoria: 'General',
-          empresa_id: emp.empresa_id || 0,
-          empresa_nombre: emp.empresa_nombre,
-          promedio: Math.min(100, 70 + index * 5),
-          nota_minima: 75,
-          preguntas_necesarias: 8,
-          total_preguntas: 10,
-          contratable: (70 + index * 5) >= 75
-        }));
+    this.evaluacionService.getEvaluaciones().subscribe({
+      next: (data) => {
+        this.evaluaciones = data.map((ev, index) => {
+          const item = ev as any;
+          return {
+            ...ev,
+            promedio: item.promedio ?? Math.min(100, 70 + index * 5),
+            nota_minima: item.nota_minima ?? 75,
+            preguntas_necesarias: item.preguntas_necesarias ?? 8,
+            total_preguntas: item.total_preguntas ?? 10,
+            contratable: item.contratable ?? ((70 + index * 5) >= 75)
+          };
+        });
         this.loading = false;
       },
-      error: () => {
-        this.error = 'No se pudieron cargar los datos de la empresa.';
+      error: (err) => {
+        console.error('Error al cargar evaluaciones:', err);
+        this.error = 'No se pudieron cargar las evaluaciones desde la base de datos.';
         this.loading = false;
       }
     });

@@ -1,1 +1,50 @@
-<p>companies-evaluations-form works!</p>
+<section class="evaluation-form-shell">
+    <div class="form-card">
+        <div class="form-header">
+            <p class="eyebrow">Empresa</p>
+            <h2>Nueva evaluación</h2>
+        </div>
+
+        <form [formGroup]="evaluationForm" (ngSubmit)="onSubmit()" novalidate>
+            <div class="field-group">
+                <label for="evaluacion_nombre">Nombre de la evaluación</label>
+                <input id="evaluacion_nombre" type="text" formControlName="evaluacion_nombre"
+                    placeholder="Ej. Evaluación de JavaScript" />
+                <small class="error"
+                    *ngIf="evaluationForm.get('evaluacion_nombre')?.touched && evaluationForm.get('evaluacion_nombre')?.invalid">
+                    El nombre es obligatorio.
+                </small>
+            </div>
+
+            <div class="field-group">
+                <label for="categoria">Categoría</label>
+                <input id="categoria" type="text" formControlName="categoria" placeholder="Ej. Programación" />
+            </div>
+
+            <div class="field-group">
+                <label for="empresa_id">Empresa</label>
+                <select id="empresa_id" formControlName="empresa_id">
+                    <option [ngValue]="null" disabled>Seleccione una empresa</option>
+                    <option *ngFor="let empresa of empresas" [ngValue]="empresa.empresa_id">{{ empresa.empresa_nombre }}
+                    </option>
+                </select>
+                <small class="error"
+                    *ngIf="evaluationForm.get('empresa_id')?.touched && evaluationForm.get('empresa_id')?.invalid">
+                    Debe seleccionar una empresa.
+                </small>
+            </div>
+
+            <div class="error-banner" *ngIf="serverError">
+                {{ serverError }}
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn btn-secondary" (click)="onCancel()"
+                    [disabled]="submitting">Cancelar</button>
+                <button type="submit" class="btn btn-primary" [disabled]="submitting">
+                    {{ submitting ? 'Guardando...' : 'Guardar evaluación' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</section>

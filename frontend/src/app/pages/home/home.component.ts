@@ -47,6 +47,7 @@ export class HomeComponent implements OnInit {
 
   // Estado para notificaciones
   notificaciones: Notificacion[] = [];
+  readonly showNotifications = signal(false);
 
   // Estado para vacantes
 =======
@@ -73,6 +74,10 @@ export class HomeComponent implements OnInit {
   onLogout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  toggleNotifications(): void {
+    this.showNotifications.set(!this.showNotifications());
   }
 
   loadNotificaciones(usuarioId: number): void {

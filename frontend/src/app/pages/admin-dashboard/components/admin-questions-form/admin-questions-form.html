@@ -1,1 +1,75 @@
-<p>admin-questions-form works!</p>
+<section class="question-form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h2>{{ preguntaToEdit ? 'Editar pregunta' : 'Nueva pregunta' }}</h2>
+            <p>Define la pregunta del banco, sus opciones y la respuesta correcta.</p>
+        </div>
+
+        <form [formGroup]="questionForm" (ngSubmit)="onSubmit()" novalidate>
+            <div class="field-group">
+                <label for="pregunta">Pregunta</label>
+                <textarea id="pregunta" formControlName="pregunta" rows="3"
+                    placeholder="Escribe la pregunta"></textarea>
+                <small class="error"
+                    *ngIf="questionForm.get('pregunta')?.touched && questionForm.get('pregunta')?.invalid">
+                    La pregunta es obligatoria.
+                </small>
+            </div>
+
+            <div class="field-group">
+                <label for="categoria">Categoría</label>
+                <input id="categoria" formControlName="categoria" type="text"
+                    placeholder="Ej. JavaScript, SQL, Habilidades blandas" />
+                <small class="error"
+                    *ngIf="questionForm.get('categoria')?.touched && questionForm.get('categoria')?.invalid">
+                    La categoría es obligatoria.
+                </small>
+            </div>
+
+            <div class="options-grid">
+                <div class="field-group">
+                    <label for="opcion_1">Opción 1</label>
+                    <input id="opcion_1" formControlName="opcion_1" type="text" placeholder="Opción 1" />
+                </div>
+
+                <div class="field-group">
+                    <label for="opcion_2">Opción 2</label>
+                    <input id="opcion_2" formControlName="opcion_2" type="text" placeholder="Opción 2" />
+                </div>
+
+                <div class="field-group">
+                    <label for="opcion_3">Opción 3</label>
+                    <input id="opcion_3" formControlName="opcion_3" type="text" placeholder="Opción 3" />
+                </div>
+
+                <div class="field-group">
+                    <label for="opcion_4">Opción 4</label>
+                    <input id="opcion_4" formControlName="opcion_4" type="text" placeholder="Opción 4" />
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label for="respuesta_correcta">Respuesta correcta</label>
+                <input id="respuesta_correcta" formControlName="respuesta_correcta" type="text"
+                    placeholder="Escribe la respuesta exacta" />
+                <small class="error"
+                    *ngIf="questionForm.get('respuesta_correcta')?.touched && questionForm.get('respuesta_correcta')?.invalid">
+                    Debes indicar la respuesta correcta.
+                </small>
+            </div>
+
+            <div class="error-banner" *ngIf="serverError">
+                {{ serverError }}
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="submitting">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="submitting">
+                    {{ submitting ? 'Guardando...' : (preguntaToEdit ? 'Guardar cambios' : 'Guardar pregunta') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</section>

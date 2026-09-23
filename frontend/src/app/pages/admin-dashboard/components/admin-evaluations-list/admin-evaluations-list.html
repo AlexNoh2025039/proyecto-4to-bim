@@ -1,1 +1,58 @@
-<p>admin-evaluations-list works!</p>
+<section class="assessment-list-container">
+    <div class="section-header">
+        <div>
+            <p class="eyebrow">Administración</p>
+            <h2>Lista de evaluaciones</h2>
+        </div>
+        <button type="button" class="btn btn-primary" (click)="loadEvaluaciones()">
+            Actualizar
+        </button>
+    </div>
+
+    <div *ngIf="loading" class="state-box">
+        Cargando evaluaciones...
+    </div>
+
+    <div *ngIf="error" class="state-box error">
+        {{ error }}
+    </div>
+
+    <div *ngIf="!loading && !error" class="assessment-grid">
+        <article *ngFor="let evaluacion of evaluaciones" class="assessment-card">
+            <div class="assessment-header">
+                <div>
+                    <span class="assessment-label">Evaluación</span>
+                    <h3>{{ evaluacion.evaluacion_nombre }}</h3>
+                </div>
+
+                <span class="status-badge" [class.ok]="evaluacion.contratable" [class.bad]="!evaluacion.contratable">
+                    {{ getStatusText(evaluacion) }}
+                </span>
+            </div>
+
+            <div class="meta-row">
+                <span><strong>Categoría:</strong> {{ evaluacion.categoria || 'General' }}</span>
+                <span><strong>Empresa:</strong> {{ evaluacion.empresa_nombre || 'Sin empresa' }}</span>
+            </div>
+
+            <div class="score-grid">
+                <div>
+                    <span>Promedio</span>
+                    <strong>{{ evaluacion.promedio }}%</strong>
+                </div>
+                <div>
+                    <span>Necesita</span>
+                    <strong>{{ evaluacion.nota_minima }}%</strong>
+                </div>
+                <div>
+                    <span>Preguntas</span>
+                    <strong>{{ evaluacion.preguntas_necesarias }}/{{ evaluacion.total_preguntas }}</strong>
+                </div>
+            </div>
+
+            <div class="progress-bar" aria-label="Promedio de evaluación">
+                <span [style.width.%]="evaluacion.promedio"></span>
+            </div>
+        </article>
+    </div>
+</section>

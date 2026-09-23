@@ -1,1 +1,37 @@
-<p>take-evaluation works!</p>
+<section class="take-evaluation-page">
+    <div class="welcome-card">
+        <p class="eyebrow">Evaluación guiada</p>
+        <h2>Hola, {{ candidateName }}</h2>
+        <p>
+            Si estás aquí es porque queremos reforzar tus habilidades antes de continuar con el proceso.
+        </p>
+        <p class="description">
+            {{ description }}
+        </p>
+    </div>
+
+    <div class="evaluation-summary">
+        <div class="summary-item">
+            <label>Evaluación</label>
+            <strong>{{ evaluationName }}</strong>
+        </div>
+
+        <div class="summary-item">
+            <label>Preguntas</label>
+            <strong>{{ totalQuestions }}</strong>
+        </div>
+
+        <div class="summary-item">
+            <label>Nota mínima</label>
+            <strong>{{ requiredScore }}%</strong>
+        </div>
+    </div>
+
+    <div class="callout">
+        <p>Te pedimos responder con atención cada pregunta para mejorar tu nivel y aumentar tus posibilidades de
+            contratación.</p>
+        <button type="button" class="btn btn-primary" (click)="onStart()">
+            Iniciar evaluación
+        </button>
+    </div>
+</section>

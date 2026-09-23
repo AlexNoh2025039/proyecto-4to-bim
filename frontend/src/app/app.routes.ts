@@ -89,12 +89,12 @@ export const routes: Routes = [
       {
         path: 'evaluaciones',
         loadComponent: () =>
-          import('./pages/admin-dashboard/components/admin-evaluations-list/admin-evaluations-list').then(m => m.AdminEvaluationsList)
+          import('./pages/admin-dashboard/components/admin-evaluations-list/admin-evaluations-list.component').then(m => m.AdminEvaluationsList)
       },
       {
         path: 'evaluaciones/nueva',
         loadComponent: () =>
-          import('./pages/admin-dashboard/components/admin-evaluations-form/admin-evaluations-form').then(m => m.AdminEvaluationsForm)
+          import('./pages/admin-dashboard/components/admin-evaluations-form/admin-evaluations-form.component').then(m => m.AdminEvaluationsForm)
       },
       {
         path: 'preguntas/nueva',
@@ -137,22 +137,22 @@ export const routes: Routes = [
       {
         path: 'evaluaciones',
         loadComponent: () =>
-          import('./pages/companies-dashboard/components/companies-evaluations/companies-evaluations').then(m => m.CompaniesEvaluations)
+          import('./pages/companies-dashboard/components/companies-evaluations/companies-evaluations.component').then(m => m.CompaniesEvaluations)
       },
       {
         path: 'evaluaciones/nueva',
         loadComponent: () =>
-          import('./pages/companies-dashboard/components/companies-evaluations-form/companies-evaluations-form').then(m => m.CompaniesEvaluationsForm)
+          import('./pages/companies-dashboard/components/companies-evaluations-form/companies-evaluations-form.component').then(m => m.CompaniesEvaluationsForm)
       },
       {
         path: 'preguntas/nueva',
         loadComponent: () =>
-          import('./pages/companies-dashboard/components/companies-questions-form/companies-questions-form').then(m => m.CompaniesQuestionsForm)
+          import('./pages/companies-dashboard/components/companies-questions-form/companies-questions-form.component').then(m => m.CompaniesQuestionsForm)
       },
       {
         path: 'vacantes/nueva',
         loadComponent: () =>
-          import('./pages/companies-dashboard/components/companies-vacancies-form/companies-vacancies-form').then(m => m.CompaniesVacanciesFormComponent)
+          import('./pages/companies-dashboard/components/companies-vacancies-form/companies-vacancies-form.component').then(m => m.CompaniesVacanciesFormComponent)
       },
       {
         path: 'notificaciones',

@@ -2,6 +2,9 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
+process.env.JWT_SECRET ||= 'talentbridge-dev-secret-change-me';
+process.env.PORT ||= '3000';
+
 import usuarioRoutes from './routes/UsuarioRouter.js';
 import empresaRoutes from './routes/EmpresaRouter.js';
 import curriculumRoutes from './routes/CurriculumRouter.js';
@@ -40,8 +43,8 @@ app.use('/api/respuestas-evaluacion', respuestaEvaluacionRoutes);
 app.use('/api/notificaciones', notificacionRoutes);
 
 app.get('/api/health', (_req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     service: 'TalentBridge-Backend'
   });
 });

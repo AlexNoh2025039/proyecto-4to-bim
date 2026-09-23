@@ -1,1 +1,17 @@
-<p>compatibility-badge works!</p>
+<div class="compatibility-card">
+    <div class="compatibility-header">
+        <span class="compatibility-label">{{ label }}</span>
+        <strong [class.is-compatible]="compatible" [class.is-rejected]="!compatible">
+            {{ normalizedValue }}%
+        </strong>
+    </div>
+
+    <div class="progress-bar" aria-label="Compatibilidad">
+        <span [style.width.%]="normalizedValue" [class.is-compatible]="compatible"
+            [class.is-rejected]="!compatible"></span>
+    </div>
+
+    <p class="compatibility-result">
+        {{ compatible ? 'Sí, te contrataríamos.' : 'No cumple el nivel requerido.' }}
+    </p>
+</div>

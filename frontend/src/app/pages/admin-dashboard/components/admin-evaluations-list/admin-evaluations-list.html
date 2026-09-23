@@ -4,9 +4,14 @@
             <p class="eyebrow">Administración</p>
             <h2>Lista de evaluaciones</h2>
         </div>
-        <button type="button" class="btn btn-primary" (click)="loadEvaluaciones()">
-            Actualizar
-        </button>
+        <div class="header-actions">
+            <button type="button" class="btn btn-secondary" (click)="loadEvaluaciones()">
+                Actualizar
+            </button>
+            <a class="btn btn-primary" routerLink="/admin/evaluaciones/nueva">
+                + Crear evaluación
+            </a>
+        </div>
     </div>
 
     <div *ngIf="loading" class="state-box">

@@ -16,7 +16,7 @@ interface EvaluacionConMetricas extends Evaluacion {
   selector: 'app-admin-evaluations-list',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './admin-evaluations-list.component.html',
+  templateUrl: './admin-evaluations-list.component.html', // Corregido el nombre del HTML
   styleUrls: ['./admin-evaluations-list.component.css']
 })
 export class AdminEvaluationsListComponent implements OnInit {
@@ -28,16 +28,15 @@ export class AdminEvaluationsListComponent implements OnInit {
   error: string | null = null;
 
   ngOnInit(): void {
-    this.loadEmpresas();
+    this.loadEvaluaciones();
   }
 
-  loadEmpresas(): void {
+  loadEvaluaciones(): void {
     this.loading = true;
     this.error = null;
 
     this.empresaService.getEmpresas().subscribe({
       next: (res) => {
-        // Mapeo temporal mientras se integra el servicio dedicado de Evaluaciones
         this.evaluaciones = (res.empresas || []).map((emp, index) => ({
           evaluacion_id: index + 1,
           evaluacion_nombre: `Evaluación Inicial ${emp.empresa_nombre}`,

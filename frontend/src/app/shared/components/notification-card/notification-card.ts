@@ -12,10 +12,10 @@ import { Notificacion } from '../../../core/models/notificacion.model';
 export class NotificationCardComponent {
   @Input({ required: true }) notificacion!: Notificacion;
 
-  @Output() markRead = new EventEmitter<Notificacion>();
+  @Output() toggleRead = new EventEmitter<Notificacion>();
 
   onToggleRead(): void {
-    this.markRead.emit({
+    this.toggleRead.emit({
       ...this.notificacion,
       estado: !this.notificacion.estado
     });

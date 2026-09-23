@@ -89,7 +89,7 @@ export const routes: Routes = [
       {
         path: 'evaluaciones',
         loadComponent: () =>
-          import('./pages/admin-dashboard/components/admin-evaluations-list/admin-evaluations-list.component').then(m => m.AdminEvaluationsList)
+          import('./pages/admin-dashboard/components/admin-evaluations-list/admin-evaluations-list.component').then(m => m.AdminEvaluationsListComponent)
       },
       {
         path: 'evaluaciones/nueva',
@@ -132,17 +132,17 @@ export const routes: Routes = [
       {
         path: 'evaluaciones',
         loadComponent: () =>
-          import('./pages/companies-dashboard/components/companies-evaluations/companies-evaluations.component').then(m => m.CompaniesEvaluations)
+          import('./pages/companies-dashboard/components/companies-evaluations/companies-evaluations').then(m => m.CompaniesEvaluations)
       },
       {
         path: 'evaluaciones/nueva',
         loadComponent: () =>
-          import('./pages/companies-dashboard/components/companies-evaluations-form/companies-evaluations-form.component').then(m => m.CompaniesEvaluationsForm)
+          import('./pages/companies-dashboard/components/companies-evaluations-form/companies-evaluations-form').then(m => m.CompaniesEvaluationsForm)
       },
       {
         path: 'preguntas/nueva',
         loadComponent: () =>
-          import('./pages/companies-dashboard/components/companies-questions-form/companies-questions-form.component').then(m => m.CompaniesQuestionsForm)
+          import('./pages/companies-dashboard/components/companies-questions-form/companies-questions-form').then(m => m.CompaniesQuestionsForm)
       },
       {
         path: 'vacantes/nueva',

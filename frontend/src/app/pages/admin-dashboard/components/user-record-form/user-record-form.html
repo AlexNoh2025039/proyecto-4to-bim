@@ -1,344 +1,71 @@
-<<<<<<< HEAD
-<div class="admin-page">
-
-  <div class="page-header">
-    <div>
-      <h1>Expediente de candidatos</h1>
-      <p>Consulta las postulaciones de cada candidato y su historial de seguimiento.</p>
+<section class="user-record-container">
+  <div class="record-card">
+    <div class="record-header">
+      <h2>Registro del usuario</h2>
+      <p>Actualiza los datos personales del usuario.</p>
     </div>
-    <button type="button" class="btn secondary" (click)="regresarAHome()">
-      ⬅ Volver a Inicio
-    </button>
-  </div>
 
-  @if (mensaje) {
-    <div class="alert success">{{ mensaje }}</div>
-  }
-  @if (error) {
-    <div class="alert error">{{ error }}</div>
-  }
-
-  <!-- Breadcrumb -->
-  <div class="breadcrumb">
-    <span
-      class="crumb"
-      [class.active]="vista === 'candidatos'"
-      (click)="volverACandidatos()"
-    >
-      Candidatos
-    </span>
-
-    @if (candidatoSeleccionado) {
-      <span class="crumb-sep">›</span>
-      <span
-        class="crumb"
-        [class.active]="vista === 'postulaciones'"
-        (click)="volverAPostulaciones()"
-      >
-        {{ obtenerNombreCandidato(candidatoSeleccionado) }}
-      </span>
-    }
-
-    @if (postulacionSeleccionada) {
-      <span class="crumb-sep">›</span>
-      <span class="crumb active">
-        {{ postulacionSeleccionada.vacante_nombre || ('Vacante #' + postulacionSeleccionada.vacante_id) }}
-      </span>
-    }
-  </div>
-
-  @if (vista === 'candidatos') {
-
-    <section class="card filters-card">
-      <div class="filters-grid">
-        <div class="form-field">
-          <label for="busqueda">Buscar</label>
-          <input
-            id="busqueda"
-            type="text"
-            [(ngModel)]="busqueda"
-            placeholder="Nombre, correo o DPI"
-          >
+    <form [formGroup]="userForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="row two-columns">
+        <div class="field-group">
+          <label for="usuario_nombre">Nombre</label>
+          <input id="usuario_nombre" formControlName="usuario_nombre" type="text" placeholder="Nombre" />
+          <small class="error"
+            *ngIf="userForm.get('usuario_nombre')?.touched && userForm.get('usuario_nombre')?.invalid">
+            El nombre es obligatorio.
+          </small>
         </div>
-      </div>
-    </section>
 
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <h2>Candidatos registrados</h2>
-          <p>Mostrando {{ candidatosFiltrados.length }} de {{ candidatos.length }} candidatos.</p>
+        <div class="field-group">
+          <label for="usuario_apellido">Apellido</label>
+          <input id="usuario_apellido" formControlName="usuario_apellido" type="text" placeholder="Apellido" />
+          <small class="error"
+            *ngIf="userForm.get('usuario_apellido')?.touched && userForm.get('usuario_apellido')?.invalid">
+            El apellido es obligatorio.
+          </small>
         </div>
       </div>
 
-      @if (cargandoCandidatos) {
-        <div class="loading">Cargando candidatos...</div>
-      } @else if (candidatosFiltrados.length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">🧑‍💼</div>
-          <h3>No se encontraron candidatos</h3>
-          <p>Prueba cambiando los términos de búsqueda.</p>
+      <div class="row two-columns">
+        <div class="field-group">
+          <label for="usuario_correo">Correo</label>
+          <input id="usuario_correo" formControlName="usuario_correo" type="email" placeholder="correo@ejemplo.com" />
+          <small class="error"
+            *ngIf="userForm.get('usuario_correo')?.touched && userForm.get('usuario_correo')?.invalid">
+            Ingrese un correo válido.
+          </small>
         </div>
-      } @else {
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Candidato</th>
-                <th>Correo</th>
-                <th>DPI</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (candidato of candidatosFiltrados; track candidato.usuario_id) {
-                <tr>
-                  <td>#{{ candidato.usuario_id }}</td>
-                  <td>
-                    <div class="user-cell">
-                      <div class="avatar">
-                        {{ candidato.usuario_nombre.charAt(0) }}{{ candidato.usuario_apellido.charAt(0) }}
-                      </div>
-                      <strong>{{ obtenerNombreCandidato(candidato) }}</strong>
-                    </div>
-                  </td>
-                  <td>{{ candidato.usuario_correo }}</td>
-                  <td>{{ candidato.usuario_dpi || 'N/A' }}</td>
-                  <td>
-                    <button type="button" class="btn primary small" (click)="verExpediente(candidato)">
-                      Ver expediente
-                    </button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
+
+        <div class="field-group">
+          <label for="usuario_profesion">Profesión</label>
+          <input id="usuario_profesion" formControlName="usuario_profesion" type="text" placeholder="Profesión" />
         </div>
-      }
-    </section>
+      </div>
 
-  }
-
-  @if (vista === 'postulaciones' && candidatoSeleccionado) {
-
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <h2>Postulaciones de {{ obtenerNombreCandidato(candidatoSeleccionado) }}</h2>
-          <p>{{ postulaciones.length }} postulaciones registradas.</p>
+      <div class="row two-columns">
+        <div class="field-group">
+          <label for="usuario_telefono">Teléfono</label>
+          <input id="usuario_telefono" formControlName="usuario_telefono" type="text" placeholder="Teléfono" />
         </div>
-        <button type="button" class="btn secondary" (click)="volverACandidatos()">
-          ⬅ Ver otros candidatos
+
+        <div class="field-group">
+          <label for="usuario_dpi">DPI</label>
+          <input id="usuario_dpi" formControlName="usuario_dpi" type="text" placeholder="DPI" />
+        </div>
+      </div>
+
+      <div class="error-banner" *ngIf="serverError">
+        {{ serverError }}
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="submitting">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="submitting">
+          {{ submitting ? 'Guardando...' : 'Guardar registro' }}
         </button>
       </div>
-
-      @if (cargandoPostulaciones) {
-        <div class="loading">Cargando postulaciones...</div>
-      } @else if (postulaciones.length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">📋</div>
-          <h3>Este candidato aún no tiene postulaciones</h3>
-        </div>
-      } @else {
-        <div class="table-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Vacante</th>
-                <th>Empresa</th>
-                <th>Jornada</th>
-                <th>Fecha</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (postulacion of postulaciones; track postulacion.postulacion_id) {
-                <tr>
-                  <td><strong>{{ postulacion.vacante_nombre || ('Vacante #' + postulacion.vacante_id) }}</strong></td>
-                  <td>{{ postulacion.empresa_nombre || 'N/A' }}</td>
-                  <td>{{ postulacion.tipo_jornada || 'N/A' }}</td>
-                  <td>{{ postulacion.fecha_postulacion | date:'dd/MM/yyyy' }}</td>
-                  <td>
-                    <span class="status"
-                      [class.pendiente]="postulacion.estado === 'Pendiente'"
-                      [class.revision]="postulacion.estado === 'En Revision'"
-                      [class.aceptado]="postulacion.estado === 'Aceptado'"
-                      [class.rechazado]="postulacion.estado === 'Rechazado'">
-                      {{ postulacion.estado }}
-                    </span>
-                  </td>
-                  <td>
-                    <button type="button" class="btn primary small" (click)="verHistorialPostulacion(postulacion)">
-                      Ver historial
-                    </button>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-    </section>
-
-  }
-
-  @if (vista === 'historial' && postulacionSeleccionada) {
-
-    <section class="card">
-      <div class="card-header">
-        <div>
-          <h2>Historial — {{ postulacionSeleccionada.vacante_nombre || ('Vacante #' + postulacionSeleccionada.vacante_id) }}</h2>
-          <p>{{ historial.length }} entradas registradas.</p>
-        </div>
-        <div class="header-actions">
-          <button type="button" class="btn secondary" (click)="volverAPostulaciones()">
-            ⬅ Ver postulaciones
-          </button>
-          <button type="button" class="btn primary" (click)="abrirFormularioCrear()">
-            + Agregar entrada
-          </button>
-        </div>
-      </div>
-
-      @if (mostrarFormulario) {
-        <form class="inline-form" [formGroup]="historialForm" (ngSubmit)="guardarEntrada()">
-          <div class="form-field full">
-            <label for="descripcion">
-              {{ modoEdicion ? 'Editar descripción' : 'Nueva entrada de historial' }}
-            </label>
-            <textarea
-              id="descripcion"
-              rows="2"
-              maxlength="255"
-              formControlName="descripcion"
-              placeholder="Ej. Entrevista realizada, candidato avanza a segunda ronda..."
-            ></textarea>
-            @if (historialForm.controls.descripcion.touched && historialForm.controls.descripcion.invalid) {
-              <small class="field-error">La descripción es obligatoria (máx. 255 caracteres).</small>
-            }
-          </div>
-          <div class="form-actions">
-            <button type="button" class="btn secondary" (click)="cerrarFormulario()">Cancelar</button>
-            <button type="submit" class="btn primary" [disabled]="guardando || historialForm.invalid">
-              {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar cambios' : 'Agregar entrada') }}
-            </button>
-          </div>
-        </form>
-      }
-
-      @if (cargandoHistorial) {
-        <div class="loading">Cargando historial...</div>
-      } @else if (historial.length === 0) {
-        <div class="empty-state">
-          <div class="empty-icon">🕓</div>
-          <h3>Sin entradas de historial todavía</h3>
-          <p>Agrega la primera entrada para esta postulación.</p>
-        </div>
-      } @else {
-        <ul class="timeline">
-          @for (entrada of historial; track entrada.historial_id) {
-            <li class="timeline-item">
-              <div class="timeline-content">
-                <p class="timeline-fecha">{{ entrada.fecha | date:'dd/MM/yyyy HH:mm' }}</p>
-                <p class="timeline-descripcion">{{ entrada.descripcion }}</p>
-              </div>
-              <div class="actions">
-                <button type="button" class="icon-action" title="Editar" (click)="editarEntrada(entrada)">✏️</button>
-                <button
-                  type="button"
-                  class="icon-action delete"
-                  title="Eliminar"
-                  [disabled]="eliminando"
-                  (click)="eliminarEntrada(entrada)"
-                >
-                  🗑️
-                </button>
-              </div>
-            </li>
-          }
-        </ul>
-      }
-    </section>
-
-  }
-
-</div>
-=======
-<section class="user-record-container">
-    <div class="record-card">
-        <div class="record-header">
-            <h2>Registro del usuario</h2>
-            <p>Actualiza los datos personales del usuario.</p>
-        </div>
-
-        <form [formGroup]="userForm" (ngSubmit)="onSubmit()" novalidate>
-            <div class="row two-columns">
-                <div class="field-group">
-                    <label for="usuario_nombre">Nombre</label>
-                    <input id="usuario_nombre" formControlName="usuario_nombre" type="text" placeholder="Nombre" />
-                    <small class="error"
-                        *ngIf="userForm.get('usuario_nombre')?.touched && userForm.get('usuario_nombre')?.invalid">
-                        El nombre es obligatorio.
-                    </small>
-                </div>
-
-                <div class="field-group">
-                    <label for="usuario_apellido">Apellido</label>
-                    <input id="usuario_apellido" formControlName="usuario_apellido" type="text"
-                        placeholder="Apellido" />
-                    <small class="error"
-                        *ngIf="userForm.get('usuario_apellido')?.touched && userForm.get('usuario_apellido')?.invalid">
-                        El apellido es obligatorio.
-                    </small>
-                </div>
-            </div>
-
-            <div class="row two-columns">
-                <div class="field-group">
-                    <label for="usuario_correo">Correo</label>
-                    <input id="usuario_correo" formControlName="usuario_correo" type="email"
-                        placeholder="correo@ejemplo.com" />
-                    <small class="error"
-                        *ngIf="userForm.get('usuario_correo')?.touched && userForm.get('usuario_correo')?.invalid">
-                        Ingrese un correo válido.
-                    </small>
-                </div>
-
-                <div class="field-group">
-                    <label for="usuario_profesion">Profesión</label>
-                    <input id="usuario_profesion" formControlName="usuario_profesion" type="text"
-                        placeholder="Profesión" />
-                </div>
-            </div>
-
-            <div class="row two-columns">
-                <div class="field-group">
-                    <label for="usuario_telefono">Teléfono</label>
-                    <input id="usuario_telefono" formControlName="usuario_telefono" type="text"
-                        placeholder="Teléfono" />
-                </div>
-
-                <div class="field-group">
-                    <label for="usuario_dpi">DPI</label>
-                    <input id="usuario_dpi" formControlName="usuario_dpi" type="text" placeholder="DPI" />
-                </div>
-            </div>
-
-            <div class="error-banner" *ngIf="serverError">
-                {{ serverError }}
-            </div>
-
-            <div class="actions">
-                <button type="button" class="btn btn-secondary" (click)="onCancel()" [disabled]="submitting">
-                    Cancelar
-                </button>
-                <button type="submit" class="btn btn-primary" [disabled]="submitting">
-                    {{ submitting ? 'Guardando...' : 'Guardar registro' }}
-                </button>
-            </div>
-        </form>
-    </div>
+    </form>
+  </div>
 </section>
->>>>>>> 03a0a289c2148b1972ddbdaa02d9ab8d6552fc2f

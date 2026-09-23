@@ -14,6 +14,7 @@ import { Vacante } from '../../core/models/vacante.model';
 // Componentes
 import { NotificationCardComponent } from '../../shared/components/notification-card/notification-card';
 import { JobCardComponent } from '../../shared/components/job-card/job-card';
+import { NotificationsForm } from '../companies-dashboard/components/notifications-form/notifications-form';
 
 @Component({
   selector: 'app-home',
@@ -22,7 +23,8 @@ import { JobCardComponent } from '../../shared/components/job-card/job-card';
     CommonModule,
     RouterLink,
     NotificationCardComponent,
-    JobCardComponent
+    JobCardComponent,
+    NotificationsForm
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
@@ -35,11 +37,11 @@ export class HomeComponent implements OnInit {
 
   readonly usuario = this.authService.currentUsuario;
 
-  // Estado para notificaciones
+  // Notificaciones
   notificaciones: Notificacion[] = [];
   readonly showNotifications = signal(false);
 
-  // Estado para vacantes
+  // Vacantes
   readonly vacantes = signal<Vacante[]>([]);
   readonly loadingVacantes = signal<boolean>(false);
 

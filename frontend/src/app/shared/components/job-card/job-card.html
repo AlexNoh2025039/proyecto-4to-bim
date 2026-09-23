@@ -33,6 +33,11 @@
       Ver detalle
     </a>
 
+    <!-- BOTÓN DE POSTULACIÓN PARA EL CANDIDATO -->
+    <button *ngIf="!isCompanyOwner" (click)="onPostularme()" [disabled]="postulando" class="btn btn-secondary">
+      {{ postulando ? 'Enviando...' : 'Postularme' }}
+    </button>
+
     <div *ngIf="isCompanyOwner" class="owner-actions">
       <button (click)="onEdit()" class="btn btn-secondary">Editar</button>
       <button (click)="onDelete()" class="btn btn-danger">Eliminar</button>

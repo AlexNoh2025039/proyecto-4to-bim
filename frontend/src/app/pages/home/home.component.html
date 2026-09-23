@@ -1,38 +1,33 @@
-<div class="home-container">
+<div class="home-container" *ngIf="usuario() as user">
+
+  <!-- NAVBAR SUPERIOR -->
   <nav class="navbar">
     <div class="navbar-brand">
-      <h1>Panel Principal</h1>
-      <span class="role-badge" *ngIf="usuario() as user">{{ user.usuario_rol }}</span>
+      <h1>TalentBridge</h1>
+      <span class="role-badge">{{ user.usuario_rol }}</span>
     </div>
     <div class="navbar-actions">
+      <button (click)="toggleNotifications()" class="btn-icon" title="Notificaciones">
+        🔔 <span class="badge" *ngIf="notificaciones.length > 0">{{ notificaciones.length }}</span>
+      </button>
       <a routerLink="/profile" class="btn-profile">Mi Perfil</a>
       <button (click)="onLogout()" class="btn-logout">Cerrar Sesión</button>
     </div>
   </nav>
 
+  <!-- CONTENIDO PRINCIPAL -->
   <main class="content">
+
     <header class="welcome-header">
-      <h2 *ngIf="usuario() as user">Bienvenido, {{ user.usuario_nombre }} {{ user.usuario_apellido }}</h2>
-      <p class="subtitle">Gestiona tus notificaciones y vacantes disponibles.</p>
+      <h2>¡Bienvenido, {{ user.usuario_nombre }} {{ user.usuario_apellido }}!</h2>
+      <p class="subtitle">Gestiona tus vacantes, postulaciones y cuestionarios desde tu panel central.</p>
     </header>
 
-    <section class="actions-section">
-      <h3>Acciones Rápidas</h3>
-      <div class="grid-navigation">
-        <button (click)="toggleNotifications()" class="action-card">
-          <span class="card-icon">🔔</span>
-          <h4>Notificaciones</h4>
-          <p>Ver mis notificaciones pendientes y leídas.</p>
-          <span class="btn-navigate">Ver más &rarr;</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- Panel de Notificaciones -->
+    <!-- PANEL DESPLEGABLE DE NOTIFICACIONES RECIBIDAS -->
     <section class="notifications-panel" *ngIf="showNotifications()">
       <div class="section-header">
-        <h3>Notificaciones</h3>
-        <span class="badge">{{ notificaciones.length }}</span>
+        <h3>Tus Notificaciones y Avisos</h3>
+        <span class="badge-count">{{ notificaciones.length }}</span>
       </div>
 
       <div class="notifications-list" *ngIf="notificaciones.length > 0; else noNotifs">
@@ -42,26 +37,146 @@
       </div>
 
       <ng-template #noNotifs>
-        <div class="empty-state">No tienes notificaciones registradas.</div>
+        <div class="empty-state">No tienes notificaciones o avisos pendientes.</div>
       </ng-template>
     </section>
 
-    <!-- Sección de Vacantes -->
-    <section class="vacancies-section" *ngIf="usuario()?.usuario_rol === 'Candidato'">
-      <h3>Vacantes Disponibles</h3>
+    <!-- ACCIONES DE CANDIDATO -->
+    <section class="actions-section" *ngIf="user.usuario_rol === 'Candidato'">
+      <h3>Acciones Rápidas</h3>
+      <div class="grid-navigation">
 
-      <div *ngIf="loadingVacantes()" class="state-container">
-        <div class="spinner"></div>
-        <p>Cargando vacantes...</p>
+        <!-- FORMULARIO DE CV -->
+        <a routerLink="/candidato/curriculum" class="action-card">
+          <div class="card-icon">📄</div>
+          <h4>Formulario de CV</h4>
+          <p>Actualiza tus datos para mejorar tu compatibilidad con las vacantes.</p>
+          <span class="btn-navigate">Editar Datos &rarr;</span>
+        </a>
+
+        <!-- MI CURRÍCULUM -->
+        <a routerLink="/curriculum" class="action-card">
+          <div class="card-icon">👁️</div>
+          <h4>Mi Currículum</h4>
+          <p>Visualiza el formato final de tu perfil profesional.</p>
+          <span class="btn-navigate">Ver Currículum &rarr;</span>
+        </a>
+
+        <!-- MIS POSTULACIONES -->
+        <a routerLink="/candidato/postulacion" class="action-card">
+          <div class="card-icon">💼</div>
+          <h4>Mis Postulaciones</h4>
+          <p>Revisa el estado de las postulaciones que has realizado.</p>
+          <span class="btn-navigate">Ver Postulaciones &rarr;</span>
+        </a>
+
+        <!-- REALIZAR CUESTIONARIO -->
+        <a routerLink="/take-evaluation/1" class="action-card">
+          <div class="card-icon">📝</div>
+          <h4>Realizar Cuestionario</h4>
+          <p>Inicia las evaluaciones y pruebas técnicas asignadas por las empresas.</p>
+          <span class="btn-navigate">Iniciar Cuestionario &rarr;</span>
+        </a>
+
+        <!-- EMPRESAS ALIADAS (NUEVO PARA CANDIDATO) -->
+        <a routerLink="/admin/empresas" class="action-card">
+          <div class="card-icon">🏢</div>
+          <h4>Empresas Aliadas</h4>
+          <p>Explora el directorio de empresas registradas y conoce sus vacantes.</p>
+          <span class="btn-navigate">Ver Empresas &rarr;</span>
+        </a>
+
       </div>
 
-      <div *ngIf="!loadingVacantes() && vacantes().length > 0" class="jobs-grid">
-        <app-job-card *ngFor="let vacante of vacantes()" [vacante]="vacante"></app-job-card>
-      </div>
+      <!-- SECCIÓN DE VACANTES PARA CANDIDATO -->
+      <div class="vacancies-section">
+        <h3>Vacantes Disponibles</h3>
 
-      <div *ngIf="!loadingVacantes() && vacantes().length === 0" class="state-container">
-        <p>No hay vacantes disponibles en este momento.</p>
+        <div *ngIf="loadingVacantes()" class="state-container">
+          <div class="spinner"></div>
+          <p>Cargando empleos disponibles...</p>
+        </div>
+
+        <div *ngIf="!loadingVacantes() && vacantes().length === 0" class="state-container empty">
+          <p>No hay vacantes disponibles en este momento.</p>
+        </div>
+
+        <div class="jobs-grid" *ngIf="!loadingVacantes() && vacantes().length > 0">
+          <app-job-card *ngFor="let vacante of vacantes()" [vacante]="vacante"></app-job-card>
+        </div>
       </div>
     </section>
+
+    <!-- ACCIONES DE EMPRESA -->
+    <section class="actions-section" *ngIf="user.usuario_rol === 'Empresa'">
+      <h3>Gestión de Empresa</h3>
+      <div class="grid-navigation">
+
+        <a routerLink="/empresa/vacantes/nueva" class="action-card">
+          <div class="card-icon">➕</div>
+          <h4>Publicar Vacante</h4>
+          <p>Crea una nueva oferta laboral para captar candidatos.</p>
+          <span class="btn-navigate">Crear Vacante &rarr;</span>
+        </a>
+
+        <a routerLink="/empresa/evaluaciones" class="action-card">
+          <div class="card-icon">📊</div>
+          <h4>Evaluaciones</h4>
+          <p>Consulta el historial y banco de pruebas técnicas.</p>
+          <span class="btn-navigate">Ver Banco &rarr;</span>
+        </a>
+
+        <a routerLink="/empresa/evaluaciones/nueva" class="action-card">
+          <div class="card-icon">📝</div>
+          <h4>Nueva Evaluación</h4>
+          <p>Diseña un nuevo cuestionario técnico para tus vacantes.</p>
+          <span class="btn-navigate">Crear Evaluación &rarr;</span>
+        </a>
+
+      </div>
+
+      <!-- FORMULARIO DIRECTO PARA ENVIAR NOTIFICACIONES DESDE EL DASHBOARD DE LA EMPRESA -->
+      <div class="company-notif-section">
+        <h3>Enviar Notificación / Requisito a Candidato</h3>
+        <app-notifications-form></app-notifications-form>
+      </div>
+    </section>
+
+    <!-- ACCIONES DE ADMINISTRADOR -->
+    <section class="actions-section" *ngIf="user.usuario_rol === 'Administrador'">
+      <h3>Panel de Administración</h3>
+      <div class="grid-navigation">
+
+        <a routerLink="/admin/usuarios" class="action-card">
+          <div class="card-icon">👥</div>
+          <h4>Gestión de Usuarios</h4>
+          <p>Administra cuentas de candidatos y administradores.</p>
+          <span class="btn-navigate">Administrar &rarr;</span>
+        </a>
+
+        <a routerLink="/admin/empresas" class="action-card">
+          <div class="card-icon">🏢</div>
+          <h4>Gestión de Empresas</h4>
+          <p>Registra y administra empresas aliadas.</p>
+          <span class="btn-navigate">Ver Empresas &rarr;</span>
+        </a>
+
+        <a routerLink="/admin/evaluaciones" class="action-card">
+          <div class="card-icon">📊</div>
+          <h4>Tabla de Evaluaciones</h4>
+          <p>Visualiza el repositorio global de pruebas técnicas.</p>
+          <span class="btn-navigate">Ir a Evaluaciones &rarr;</span>
+        </a>
+
+        <a routerLink="/admin/notificaciones" class="action-card">
+          <div class="card-icon">🔔</div>
+          <h4>Notificaciones Globales</h4>
+          <p>Gestiona avisos y mensajes del sistema.</p>
+          <span class="btn-navigate">Administrar Avisos &rarr;</span>
+        </a>
+
+      </div>
+    </section>
+
   </main>
 </div>

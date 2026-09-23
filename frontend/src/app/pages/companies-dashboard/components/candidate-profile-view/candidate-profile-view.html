@@ -1,1 +1,41 @@
-<p>candidate-profile-view works!</p>
+<section class="profile-shell">
+    <div class="profile-card" *ngIf="candidate; else emptyState">
+        <div class="profile-header">
+            <div>
+                <p class="eyebrow">Candidato</p>
+                <h2>{{ candidate.usuario_nombre }} {{ candidate.usuario_apellido }}</h2>
+            </div>
+            <span class="role-badge">{{ candidate.usuario_rol }}</span>
+        </div>
+
+        <div class="info-grid">
+            <div><strong>Correo:</strong> {{ candidate.usuario_correo }}</div>
+            <div><strong>Teléfono:</strong> {{ candidate.usuario_telefono || 'No registrado' }}</div>
+            <div><strong>DPI:</strong> {{ candidate.usuario_dpi || 'No registrado' }}</div>
+            <div><strong>Profesión:</strong> {{ candidate.usuario_profesion || 'No registrada' }}</div>
+        </div>
+
+        <div class="curriculum-section" *ngIf="curriculums.length > 0; else noCurriculums">
+            <h3>Currículums</h3>
+            <div class="curriculum-card" *ngFor="let curriculum of curriculums">
+                <h4>{{ curriculum.curriculum_nombre }}</h4>
+                <p><strong>Categoría:</strong> {{ curriculum.categoria_interes }}</p>
+                <p><strong>Habilidades:</strong> {{ curriculum.habilidades || 'No especificadas' }}</p>
+                <p><strong>Experiencia:</strong> {{ curriculum.experiencia || 'No especificada' }}</p>
+                <p><strong>Formación:</strong> {{ curriculum.formacion || 'No especificada' }}</p>
+            </div>
+        </div>
+
+        <ng-template #noCurriculums>
+            <div class="empty-state">Este candidato aún no tiene currículums asociados.</div>
+        </ng-template>
+    </div>
+
+    <ng-template #emptyState>
+        <div class="empty-state">
+            <span *ngIf="loading">Cargando perfil...</span>
+            <span *ngIf="!loading && error">{{ error }}</span>
+            <span *ngIf="!loading && !error">No se encontró información del candidato.</span>
+        </div>
+    </ng-template>
+</section>

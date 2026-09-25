@@ -3,13 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { BancoPreguntas, BancoPreguntasResponse } from '../models/banco-preguntas.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BancoPreguntasService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3000/api/banco-preguntas'; 
+  private readonly apiUrl = `${environment.apiUrl}/banco-preguntas`;
   
   getPreguntas(): Observable<BancoPreguntas[]> {
     return this.http.get<BancoPreguntasResponse>(this.apiUrl).pipe(

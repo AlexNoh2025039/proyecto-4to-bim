@@ -1,61 +1,62 @@
-<section class="assessment-list-container">
-    <div class="section-header">
+<div class="assessment-list-container">
+  <div class="section-header">
+    <div>
+      <p class="eyebrow">Administración</p>
+      <h2>Evaluaciones y candidatos</h2>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn secondary" (click)="goHome()">Volver al inicio</button>
+      <button class="btn" routerLink="/admin/preguntas/nueva">+ Agregar Pregunta</button>
+      <button class="btn" routerLink="/admin/evaluaciones/nueva">+ Nueva Evaluación</button>
+      <button class="btn" (click)="loadRanking()">Actualizar</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="state-box">Cargando ranking...</div>
+
+  <div *ngIf="errorMessage" class="state-box error">{{ errorMessage }}</div>
+
+  <div *ngIf="!loading && !errorMessage" class="assessment-grid">
+
+    <div class="assessment-card" *ngFor="let item of ranking">
+      <div class="assessment-header">
         <div>
-            <p class="eyebrow">Administración</p>
-            <h2>Lista de evaluaciones</h2>
+          <span class="assessment-label">{{ item.evaluacion_nombre }}</span>
+          <h3>{{ item.usuario_nombre }} {{ item.usuario_apellido }}</h3>
         </div>
-        <div class="header-actions">
-            <a class="btn btn-secondary" routerLink="/home">Volver al inicio</a>
-            <button type="button" class="btn btn-secondary" (click)="loadEvaluaciones()">
-                Actualizar
-            </button>
+        <span class="status-badge" [class.ok]="esAprobado(item)" [class.bad]="!esAprobado(item)">
+          {{ esAprobado(item) ? 'Contratable' : 'Pendiente' }}
+        </span>
+      </div>
+
+      <div class="meta-row">
+        <span>{{ item.usuario_correo }}</span>
+        <span>{{ item.usuario_telefono || 'Sin teléfono' }}</span>
+      </div>
+
+      <div class="score-grid">
+        <div>
+          <span>Promedio</span>
+          <strong>{{ item.promedio }}%</strong>
         </div>
+        <div>
+          <span>Preguntas</span>
+          <strong>{{ item.total_preguntas }}</strong>
+        </div>
+        <div>
+          <span>Nota mínima</span>
+          <strong>70%</strong>
+        </div>
+      </div>
+
+      <div class="progress-bar">
+        <span [style.width.%]="item.promedio"></span>
+      </div>
     </div>
 
-    <div *ngIf="loading" class="state-box">
-        Cargando evaluaciones...
+    <div *ngIf="ranking.length === 0" class="state-box">
+      Aún no hay candidatos que hayan respondido evaluaciones.
     </div>
 
-    <div *ngIf="error" class="state-box error">
-        {{ error }}
-    </div>
-
-    <div *ngIf="!loading && !error" class="assessment-grid">
-        <article *ngFor="let evaluacion of evaluaciones" class="assessment-card">
-            <div class="assessment-header">
-                <div>
-                    <span class="assessment-label">Evaluación</span>
-                    <h3>{{ evaluacion.evaluacion_nombre }}</h3>
-                </div>
-
-                <span class="status-badge" [class.ok]="evaluacion.contratable" [class.bad]="!evaluacion.contratable">
-                    {{ getStatusText(evaluacion) }}
-                </span>
-            </div>
-
-            <div class="meta-row">
-                <span><strong>Categoría:</strong> {{ evaluacion.categoria || 'General' }}</span>
-                <span><strong>Empresa:</strong> {{ evaluacion.empresa_nombre || 'Sin empresa' }}</span>
-            </div>
-
-            <div class="score-grid">
-                <div>
-                    <span>Promedio</span>
-                    <strong>{{ evaluacion.promedio }}%</strong>
-                </div>
-                <div>
-                    <span>Necesita</span>
-                    <strong>{{ evaluacion.nota_minima }}%</strong>
-                </div>
-                <div>
-                    <span>Preguntas</span>
-                    <strong>{{ evaluacion.preguntas_necesarias }}/{{ evaluacion.total_preguntas }}</strong>
-                </div>
-            </div>
-
-            <div class="progress-bar" aria-label="Promedio de evaluación">
-                <span [style.width.%]="evaluacion.promedio"></span>
-            </div>
-        </article>
-    </div>
-</section>
+  </div>
+</div>

@@ -6,10 +6,12 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificacionService } from '../../core/services/notificacion.service';
 import { VacanteService } from '../../core/services/vacante.service';
+import { RespuestaEvaluacionService } from '../../core/services/respuesta-evaluacion.service';
 
 // Modelos
 import { Notificacion } from '../../core/models/notificacion.model';
 import { Vacante } from '../../core/models/vacante.model';
+import { RankingEvaluacion } from '../../core/models/respuesta-evaluacion.model';
 
 // Componentes
 import { NotificationCardComponent } from '../../shared/components/notification-card/notification-card';
@@ -33,7 +35,10 @@ export class HomeComponent implements OnInit {
   protected readonly authService = inject(AuthService);
   private readonly notificacionService = inject(NotificacionService);
   private readonly vacanteService = inject(VacanteService);
+  private readonly respuestaEvaluacionService = inject(RespuestaEvaluacionService);
   private readonly router = inject(Router);
+
+  private readonly NOTA_MINIMA = 70;
 
   readonly usuario = this.authService.currentUsuario;
 
@@ -45,6 +50,11 @@ export class HomeComponent implements OnInit {
   readonly vacantes = signal<Vacante[]>([]);
   readonly loadingVacantes = signal<boolean>(false);
 
+  // Ranking de evaluaciones (Empresa)
+  readonly rankingEmpresa = signal<RankingEvaluacion[]>([]);
+  readonly loadingEvaluaciones = signal<boolean>(false);
+  readonly errorEvaluaciones = signal<string>('');
+
   ngOnInit(): void {
     const user = this.usuario();
 
@@ -54,6 +64,10 @@ export class HomeComponent implements OnInit {
 
     if (user?.usuario_rol === 'Candidato') {
       this.cargarVacantes();
+    }
+
+    if (user?.usuario_rol === 'Empresa') {
+      this.cargarRankingEmpresa();
     }
   }
 
@@ -119,5 +133,26 @@ export class HomeComponent implements OnInit {
         this.loadingVacantes.set(false);
       }
     });
+  }
+
+  private cargarRankingEmpresa(): void {
+    this.loadingEvaluaciones.set(true);
+    this.errorEvaluaciones.set('');
+
+    this.respuestaEvaluacionService.getRanking().subscribe({
+      next: (data) => {
+        this.rankingEmpresa.set(data);
+        this.loadingEvaluaciones.set(false);
+      },
+      error: (err) => {
+        console.error('Error al cargar el ranking de evaluaciones', err);
+        this.errorEvaluaciones.set(err?.error?.message || 'No se pudo cargar el ranking de evaluaciones.');
+        this.loadingEvaluaciones.set(false);
+      }
+    });
+  }
+
+  esAprobado(item: RankingEvaluacion): boolean {
+    return item.promedio >= this.NOTA_MINIMA;
   }
 }

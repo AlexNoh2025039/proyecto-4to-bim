@@ -14,13 +14,13 @@ export class EvaluacionService {
 
   getEvaluaciones(): Observable<Evaluacion[]> {
     return this.http.get<EvaluacionResponse>(this.apiUrl).pipe(
-      map(res => res.evaluaciones || [])
+      map((res: any) => res.evaluaciones || [])
     );
   }
 
   getEvaluacionById(id: number): Observable<Evaluacion> {
     return this.http.get<EvaluacionResponse>(`${this.apiUrl}/${id}`).pipe(
-      map(res => {
+      map((res: any) => {
         if (!res.evaluacion) {
           throw new Error('Evaluación no encontrada');
         }
@@ -31,13 +31,13 @@ export class EvaluacionService {
 
   createEvaluacion(evaluacion: Evaluacion): Observable<Evaluacion> {
     return this.http.post<EvaluacionResponse>(this.apiUrl, evaluacion).pipe(
-      map(res => res.evaluacion!)
+      map((res: any) => res.evaluacion!)
     );
   }
 
   updateEvaluacion(id: number, evaluacion: Evaluacion): Observable<Evaluacion> {
     return this.http.put<EvaluacionResponse>(`${this.apiUrl}/${id}`, evaluacion).pipe(
-      map(res => res.evaluacion!)
+      map((res: any) => res.evaluacion!)
     );
   }
 

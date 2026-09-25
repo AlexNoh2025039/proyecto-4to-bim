@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
-import { requireAuth } from '../middlewares/auth.js';
+import { requireAuth, requireRole } from '../middlewares/auth.js';
 
 const router = Router();
 
 router.use(requireAuth);
+router.use(requireRole('Administrador', 'Empresa'))
 
 function validateBancoPreguntas({ pregunta, opciones, respuesta_correcta, categoria }) {
   if (!pregunta || typeof pregunta !== 'string' || pregunta.trim() === '' || pregunta.length > 255) {

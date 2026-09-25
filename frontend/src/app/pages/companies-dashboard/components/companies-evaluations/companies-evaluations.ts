@@ -1,61 +1,50 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { Empresa } from '../../../../core/models/empresa.model';
-import { Evaluacion } from '../../../../core/models/evaluacion.model';
-import { EmpresaService } from '../../../../core/services/empresa.service';
-import { EvaluacionService } from '../../../../core/services/evaluacion.service';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
+import { RespuestaEvaluacionService } from '../../../../core/services/respuesta-evaluacion.service';
+import { RankingEvaluacion } from '../../../../core/models/respuesta-evaluacion.model';
 
 @Component({
   selector: 'app-companies-evaluations',
   standalone: true,
-  imports: [CommonModule],
-  styleUrl: './companies-evaluations.css',
-  templateUrl: './companies-evaluations.html',
+  imports: [CommonModule, RouterModule],
+  templateUrl: './companies-evaluations.html'
 })
 export class CompaniesEvaluations implements OnInit {
-  evaluaciones: Evaluacion[] = [];
-  empresas: Empresa[] = [];
-  loading = false;
-  error = '';
+  private readonly router = inject(Router);
+  private readonly respuestaEvaluacionService = inject(RespuestaEvaluacionService);
 
-  private readonly empresaService = inject(EmpresaService);
-  private readonly evaluacionService = inject(EvaluacionService);
+  private readonly NOTA_MINIMA = 70;
+
+  ranking: RankingEvaluacion[] = [];
+  loading = false;
+  errorMessage = '';
 
   ngOnInit(): void {
-    this.loadEmpresas();
+    this.loadRanking();
   }
 
-  loadEmpresas(): void {
-    this.empresaService.getEmpresas().subscribe({
-      next: (res) => {
-        this.empresas = Array.isArray(res.empresas) ? res.empresas : [];
-        this.loadEvaluaciones();
-      },
-      error: () => {
-        this.empresas = [];
-        this.loadEvaluaciones();
-      },
-    });
-  }
-
-  loadEvaluaciones(): void {
+  loadRanking(): void {
     this.loading = true;
-    this.error = '';
+    this.errorMessage = '';
 
-    this.evaluacionService.getEvaluaciones().subscribe({
-      next: (items) => {
-        const empresaIds = new Set((this.empresas || []).map((empresa) => empresa.empresa_id).filter((id): id is number => !!id));
-        this.evaluaciones = items.filter((item) => empresaIds.has(item.empresa_id));
+    this.respuestaEvaluacionService.getRanking().subscribe({
+      next: (data) => {
+        this.ranking = data;
         this.loading = false;
       },
-      error: () => {
-        this.error = 'No se pudieron cargar las evaluaciones.';
+      error: (err) => {
+        this.errorMessage = err?.error?.message || 'No se pudo cargar el ranking de tus evaluaciones.';
         this.loading = false;
-      },
+      }
     });
   }
 
-  getEmpresaNombre(empresaId: number): string {
-    return this.empresas.find((empresa) => empresa.empresa_id === empresaId)?.empresa_nombre ?? 'Empresa sin nombre';
+  esAprobado(item: RankingEvaluacion): boolean {
+    return item.promedio >= this.NOTA_MINIMA;
+  }
+
+  goHome(): void {
+    this.router.navigate(['/home']);
   }
 }

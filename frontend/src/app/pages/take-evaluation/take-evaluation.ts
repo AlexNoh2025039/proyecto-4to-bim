@@ -1,18 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { CandidateProfileView } from '../companies-dashboard/components/candidate-profile-view/candidate-profile-view';
 import { EvaluacionService } from '../../core/services/evaluacion.service';
+import { BancoPreguntasService } from '../../core/services/banco-preguntas.service';
+import { RespuestaEvaluacionService } from '../../core/services/respuesta-evaluacion.service';
+import { AuthService } from '../../core/services/auth.service';
 
 interface Opcion {
   texto: string;
-  esCorrecta: boolean;
 }
 
 interface Pregunta {
   id: number;
   enunciado: string;
+  respuestaCorrecta: string;
   opciones: Opcion[];
   respuestaSeleccionada?: number;
 }
@@ -25,54 +29,96 @@ interface Pregunta {
   templateUrl: './take-evaluation.html',
 })
 export class TakeEvaluation implements OnInit {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private evaluacionService = inject(EvaluacionService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly evaluacionService = inject(EvaluacionService);
+  private readonly bancoPreguntasService = inject(BancoPreguntasService);
+  private readonly respuestaEvaluacionService = inject(RespuestaEvaluacionService);
+  private readonly authService = inject(AuthService);
 
-  @Input() evaluationName: string = 'Evaluación Técnica de Reforzamiento';
-  @Input() candidateName: string = 'Candidato';
-  @Input() companyName: string = 'Tech Solutions S.A.';
-  @Input() requiredScore: number = 70;
-  @Input() totalQuestions: number = 5;
-  @Input() description: string = 'Aquí estás para reforzar tus conocimientos y demostrar tu nivel técnico.';
+  evaluationName = '';
+  candidateName = '';
+  companyName = '';
+  categoriaEvaluacion = '';
+  readonly requiredScore = 70; // debe coincidir con la nota mínima usada en el ranking
 
   estado: 'welcome' | 'quiz' | 'result' = 'welcome';
+  cargando = true;
+  errorCarga = '';
+  enviando = false;
+  errorEnvio = '';
 
   preguntas: Pregunta[] = [];
-  puntajeObtenido: number = 0;
-  porcentajeObtenido: number = 0;
-  compatibilidadEmpresa: number = 0;
-  aprobado: boolean = false;
-  candidateId: number = 1;
+  totalQuestions = 0;
+  puntajeObtenido = 0;
+  porcentajeObtenido = 0;
+  compatibilidadEmpresa = 0;
+  aprobado = false;
+
+  evaluacionIdActual = 0;
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.candidateId = Number(id);
-      this.cargarEvaluacionDesdeBackend(Number(id));
-    } else {
-      this.cargarPreguntasPrueba();
+    const idParam = this.route.snapshot.paramMap.get('id');
+    const id = Number(idParam);
+
+    if (!idParam || !Number.isInteger(id) || id <= 0) {
+      this.errorCarga = 'ID de evaluación no válido.';
+      this.cargando = false;
+      return;
     }
+
+    this.evaluacionIdActual = id;
+
+    const usuario = this.authService.currentUsuario();
+    this.candidateName = usuario ? `${usuario.usuario_nombre} ${usuario.usuario_apellido}` : 'Candidato';
+
+    this.cargarEvaluacion();
   }
 
-  private cargarEvaluacionDesdeBackend(evaluacionId: number): void {
-    this.evaluacionService.getEvaluacionById(evaluacionId).subscribe({
-      next: (evalData: any) => {
-        if (evalData) {
-          this.evaluationName = evalData.titulo || evalData.vacante_nombre || this.evaluationName;
-          this.description = evalData.descripcion || this.description;
+  private cargarEvaluacion(): void {
+    this.cargando = true;
+    this.errorCarga = '';
 
-          if (evalData.preguntas && evalData.preguntas.length > 0) {
-            this.preguntas = evalData.preguntas;
-            this.totalQuestions = this.preguntas.length;
-          } else {
-            this.cargarPreguntasPrueba();
-          }
-        }
+    this.evaluacionService.getEvaluacionById(this.evaluacionIdActual).subscribe({
+      next: (evaluacion) => {
+        this.evaluationName = evaluacion.evaluacion_nombre;
+        this.companyName = evaluacion.empresa_nombre || '';
+        this.categoriaEvaluacion = evaluacion.categoria || '';
+        this.cargarPreguntas();
       },
       error: (err) => {
-        console.error('Error al cargar la evaluación del servidor:', err);
-        this.cargarPreguntasPrueba();
+        this.errorCarga = err?.error?.message || 'No se pudo cargar la evaluación solicitada.';
+        this.cargando = false;
+      }
+    });
+  }
+
+  private cargarPreguntas(): void {
+    this.bancoPreguntasService.getPreguntas().subscribe({
+      next: (todas) => {
+        const filtradas = this.categoriaEvaluacion
+          ? todas.filter(p => p.categoria === this.categoriaEvaluacion)
+          : todas;
+
+        if (filtradas.length === 0) {
+          this.errorCarga = 'Esta evaluación todavía no tiene preguntas configuradas.';
+          this.cargando = false;
+          return;
+        }
+
+        this.preguntas = filtradas.map(p => ({
+          id: p.pregunta_id!,
+          enunciado: p.pregunta,
+          respuestaCorrecta: p.respuesta_correcta,
+          opciones: (Array.isArray(p.opciones) ? (p.opciones as string[]) : []).map(texto => ({ texto }))
+        }));
+
+        this.totalQuestions = this.preguntas.length;
+        this.cargando = false;
+      },
+      error: (err) => {
+        this.errorCarga = err?.error?.message || 'No se pudieron cargar las preguntas.';
+        this.cargando = false;
       }
     });
   }
@@ -90,85 +136,55 @@ export class TakeEvaluation implements OnInit {
   }
 
   finalizarEvaluacion(): void {
-    let correctas = 0;
+    if (!this.todasRespondidas() || this.enviando) {
+      return;
+    }
 
-    this.preguntas.forEach(p => {
-      if (p.respuestaSeleccionada !== undefined) {
-        if (p.opciones[p.respuestaSeleccionada].esCorrecta) {
-          correctas++;
-        }
-      }
+    const usuarioId = this.authService.currentUsuario()?.usuario_id;
+
+    if (!usuarioId) {
+      this.errorEnvio = 'No se pudo identificar tu sesión. Vuelve a iniciar sesión e intenta de nuevo.';
+      return;
+    }
+
+    this.enviando = true;
+    this.errorEnvio = '';
+
+    const peticiones = this.preguntas.map(p => {
+      const opcion = p.opciones[p.respuestaSeleccionada!];
+
+      return this.respuestaEvaluacionService.registrarRespuesta({
+        usuario_id: usuarioId,
+        evaluacion_id: this.evaluacionIdActual,
+        pregunta_id: p.id,
+        respuesta_usuario: opcion.texto
+      });
     });
 
-    this.puntajeObtenido = correctas;
-    this.porcentajeObtenido = Math.round((correctas / this.preguntas.length) * 100);
-    this.aprobado = this.porcentajeObtenido >= this.requiredScore;
+    forkJoin(peticiones).subscribe({
+      next: (respuestas) => {
+        const notas = respuestas.map(r => Number(r.respuesta.nota_final ?? 0));
+        const promedio = notas.reduce((acc, n) => acc + n, 0) / notas.length;
 
-    this.compatibilidadEmpresa = this.aprobado
-      ? Math.min(98, Math.round(this.porcentajeObtenido * 0.9 + 10))
-      : Math.round(this.porcentajeObtenido * 0.6);
+        this.porcentajeObtenido = Math.round(promedio);
+        this.puntajeObtenido = notas.filter(n => n >= 100).length;
+        this.aprobado = this.porcentajeObtenido >= this.requiredScore;
 
-    this.estado = 'result';
+        this.compatibilidadEmpresa = this.aprobado
+          ? Math.min(98, Math.round(this.porcentajeObtenido * 0.9 + 10))
+          : Math.round(this.porcentajeObtenido * 0.6);
+
+        this.enviando = false;
+        this.estado = 'result';
+      },
+      error: (err) => {
+        this.enviando = false;
+        this.errorEnvio = err?.error?.message || 'No se pudo guardar tu evaluación. Intenta nuevamente.';
+      }
+    });
   }
 
   volverAlHome(): void {
     this.router.navigate(['/home']);
-  }
-
-  private cargarPreguntasPrueba(): void {
-    this.preguntas = [
-      {
-        id: 1,
-        enunciado: '¿Cuál es la función principal de Angular RxJS Observables?',
-        opciones: [
-          { texto: 'Manipular directamente el DOM HTML', esCorrecta: false },
-          { texto: 'Manejar programación reactiva y flujos de datos asíncronos', esCorrecta: true },
-          { texto: 'Crear bases de datos en el cliente', esCorrecta: false },
-          { texto: 'Estilar componentes CSS', esCorrecta: false }
-        ]
-      },
-      {
-        id: 2,
-        enunciado: '¿Qué decorador se utiliza para definir un componente Standalone en Angular?',
-        opciones: [
-          { texto: '@Injectable()', esCorrecta: false },
-          { texto: '@NgModule()', esCorrecta: false },
-          { texto: '@Component({ standalone: true })', esCorrecta: true },
-          { texto: '@Directive()', esCorrecta: false }
-        ]
-      },
-      {
-        id: 3,
-        enunciado: '¿Cuál de los siguientes métodos HTTP se utiliza generalmente para actualizar un recurso existente?',
-        opciones: [
-          { texto: 'GET', esCorrecta: false },
-          { texto: 'POST', esCorrecta: false },
-          { texto: 'PUT / PATCH', esCorrecta: true },
-          { texto: 'DELETE', esCorrecta: false }
-        ]
-      },
-      {
-        id: 4,
-        enunciado: '¿Qué comando de Git se utiliza para crear y cambiarse inmediatamente a una nueva rama?',
-        opciones: [
-          { texto: 'git checkout -b <nombre-rama>', esCorrecta: true },
-          { texto: 'git branch create <nombre-rama>', esCorrecta: false },
-          { texto: 'git push origin <nombre-rama>', esCorrecta: false },
-          { texto: 'git commit -m <nombre-rama>', esCorrecta: false }
-        ]
-      },
-      {
-        id: 5,
-        enunciado: '¿Qué significa el principio de responsabilidad única (Single Responsibility Principle) en SOLID?',
-        opciones: [
-          { texto: 'Una clase debe tener una sola razón para cambiar', esCorrecta: true },
-          { texto: 'Un proyecto solo debe tener un archivo principal', esCorrecta: false },
-          { texto: 'Solo un desarrollador debe trabajar en cada archivo', esCorrecta: false },
-          { texto: 'Cada función debe tener máximo 10 líneas', esCorrecta: false }
-        ]
-      }
-    ];
-
-    this.totalQuestions = this.preguntas.length;
   }
 }

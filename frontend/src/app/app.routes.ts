@@ -89,7 +89,7 @@ export const routes: Routes = [
       {
         path: 'evaluaciones',
         loadComponent: () =>
-          import('./pages/admin-dashboard/components/admin-evaluations-list/admin-evaluations-list.component').then(m => m.AdminEvaluationsListComponent)
+          import('./pages/admin-dashboard/components/admin-evaluations-list/admin-evaluations-list.component').then(m => m.CompanyEvaluationsComponent)
       },
       {
         path: 'evaluaciones/nueva',

@@ -17,3 +17,17 @@ export interface RespuestaEvaluacionResponse {
   respuesta?: RespuestaEvaluacion;
   message?: string;
 }
+
+export interface RankingEvaluacion {
+  usuario_id: number;
+  usuario_nombre: string;
+  usuario_apellido: string;
+  usuario_correo: string;
+  usuario_telefono: string | null;
+  evaluacion_id: number;
+  evaluacion_nombre: string;
+  empresa_id: number;
+  promedio: number;
+  total_preguntas: number;
+  fecha_realizacion: string;
+}

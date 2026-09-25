@@ -1,27 +1,57 @@
-<section class="evaluations-shell">
-    <div class="header-row">
-        <div>
-            <p class="eyebrow">Empresa</p>
-            <h2>Evaluaciones</h2>
-        </div>
-        <a class="primary-btn" routerLink="/empresa/evaluaciones/nueva">Nueva evaluación</a>
+<div style="padding: 30px; color: white; background-color: #0f172a; min-height: 100vh; font-family: sans-serif;">
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 style="margin: 0;">Evaluaciones de la Empresa</h2>
+    <div>
+      <button (click)="goHome()" style="margin-right: 10px; padding: 10px 18px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+        Volver al inicio
+      </button>
+      <button routerLink="/empresa/preguntas/nueva" style="margin-right: 10px; padding: 10px 18px; background: #16a34a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-decoration: none;">
+        + Agregar Pregunta
+      </button>
     </div>
+  </div>
 
-    <div class="status-box" *ngIf="loading">Cargando evaluaciones...</div>
-    <div class="status-box error" *ngIf="error">{{ error }}</div>
+  <div *ngIf="loading" style="text-align: center; font-size: 18px; padding: 40px; color: #38bdf8;">Cargando ranking...</div>
 
-    <div class="grid" *ngIf="!loading && !error">
-        <article class="evaluation-card" *ngFor="let evaluacion of evaluaciones">
-            <div class="meta-row">
-                <span class="tag">{{ evaluacion.categoria || 'General' }}</span>
-            </div>
-            <h3>{{ evaluacion.evaluacion_nombre }}</h3>
-            <p><strong>Empresa:</strong> {{ getEmpresaNombre(evaluacion.empresa_id) }}</p>
-            <p *ngIf="evaluacion.empresa_nombre"><strong>Nombre empresa:</strong> {{ evaluacion.empresa_nombre }}</p>
-        </article>
+  <div *ngIf="errorMessage" style="background: #7f1d1d; color: #fca5a5; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: bold;">
+    {{ errorMessage }}
+  </div>
 
-        <div class="empty-state" *ngIf="evaluaciones.length === 0">
-            Aún no tienes evaluaciones creadas para tu empresa.
-        </div>
-    </div>
-</section>
+  <div *ngIf="!loading && !errorMessage" style="background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+    <h3 style="margin-bottom: 15px; color: white;">Listado de Evaluaciones y Candidatos</h3>
+
+    <table style="width: 100%; border-collapse: collapse; color: white;">
+      <thead>
+        <tr style="background: #334155; text-align: left;">
+          <th style="padding: 12px;">#</th>
+          <th style="padding: 12px;">Candidato</th>
+          <th style="padding: 12px;">Correo</th>
+          <th style="padding: 12px;">Teléfono</th>
+          <th style="padding: 12px;">Evaluación</th>
+          <th style="padding: 12px;">Promedio</th>
+          <th style="padding: 12px;">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of ranking; let i = index" style="border-bottom: 1px solid #334155;">
+          <td style="padding: 12px;">{{ i + 1 }}</td>
+          <td style="padding: 12px; font-weight: bold; color: #38bdf8;">{{ item.usuario_nombre }} {{ item.usuario_apellido }}</td>
+          <td style="padding: 12px; color: #cbd5e1;">{{ item.usuario_correo }}</td>
+          <td style="padding: 12px; color: #cbd5e1;">{{ item.usuario_telefono || 'N/A' }}</td>
+          <td style="padding: 12px;">{{ item.evaluacion_nombre }}</td>
+          <td style="padding: 12px;"><strong>{{ item.promedio }}%</strong></td>
+          <td style="padding: 12px;">
+            <span [style.color]="esAprobado(item) ? '#4ade80' : '#f87171'" style="font-weight: bold;">
+              {{ esAprobado(item) ? 'Aprobado / Contratable' : 'Pendiente / No aprobado' }}
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="ranking.length === 0">
+          <td colspan="7" style="text-align: center; padding: 30px; color: #94a3b8;">Aún no hay candidatos que hayan respondido tus evaluaciones.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

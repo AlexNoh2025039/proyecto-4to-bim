@@ -127,8 +127,49 @@
 
       </div>
 
+    <!-- TABLA DE EVALUACIONES Y CANDIDATOS PARA LA EMPRESA -->
+<div style="margin-top: 35px; background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+  <h3 style="margin-bottom: 15px; color: white;">Listado de Evaluaciones y Candidatos</h3>
+
+  <div *ngIf="loadingEvaluaciones()" style="color: #38bdf8; padding: 20px; text-align: center;">
+    Cargando datos...
+  </div>
+
+  <div *ngIf="errorEvaluaciones()" style="background: #7f1d1d; color: #fca5a5; padding: 15px; border-radius: 6px; margin-bottom: 15px; font-weight: bold;">
+    {{ errorEvaluaciones() }}
+  </div>
+
+  <table *ngIf="!loadingEvaluaciones() && !errorEvaluaciones()" style="width: 100%; border-collapse: collapse; color: white;">
+    <thead>
+      <tr style="background: #334155; text-align: left;">
+        <th style="padding: 12px;">#</th>
+        <th style="padding: 12px;">Candidato</th>
+        <th style="padding: 12px;">Correo</th>
+        <th style="padding: 12px;">Evaluación</th>
+        <th style="padding: 12px;">Promedio</th>
+        <th style="padding: 12px;">Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of rankingEmpresa(); let i = index" style="border-bottom: 1px solid #334155;">
+        <td style="padding: 12px;">{{ i + 1 }}</td>
+        <td style="padding: 12px; font-weight: bold; color: #38bdf8;">{{ item.usuario_nombre }} {{ item.usuario_apellido }}</td>
+        <td style="padding: 12px; color: #cbd5e1;">{{ item.usuario_correo }}</td>
+        <td style="padding: 12px;">{{ item.evaluacion_nombre }}</td>
+        <td style="padding: 12px;"><strong>{{ item.promedio }}%</strong></td>
+        <td style="padding: 12px;" [style.color]="esAprobado(item) ? '#4ade80' : '#f87171'">
+          <strong>{{ esAprobado(item) ? 'Aprobado / Contratable' : 'Pendiente' }}</strong>
+        </td>
+      </tr>
+      <tr *ngIf="rankingEmpresa().length === 0">
+        <td colspan="6" style="text-align: center; padding: 20px; color: #94a3b8;">No hay evaluaciones registradas.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
       <!-- FORMULARIO DIRECTO PARA ENVIAR NOTIFICACIONES DESDE EL DASHBOARD DE LA EMPRESA -->
-      <div class="company-notif-section">
+      <div class="company-notif-section" style="margin-top: 30px;">
         <h3>Enviar Notificación / Requisito a Candidato</h3>
         <app-notifications-form></app-notifications-form>
       </div>
@@ -161,11 +202,11 @@
         </a>
 
         <a routerLink="/admin/expediente-usuario" class="action-card">
-  <div class="card-icon">🗂️</div>
-  <h4>Expediente de Candidatos</h4>
-  <p>Consulta las postulaciones y el historial de seguimiento de cada candidato.</p>
-  <span class="btn-navigate">Ver Expediente &rarr;</span>
-</a>
+          <div class="card-icon">🗂️</div>
+          <h4>Expediente de Candidatos</h4>
+          <p>Consulta las postulaciones y el historial de seguimiento de cada candidato.</p>
+          <span class="btn-navigate">Ver Expediente &rarr;</span>
+        </a>
 
         <a routerLink="/admin/notificaciones" class="action-card">
           <div class="card-icon">🔔</div>

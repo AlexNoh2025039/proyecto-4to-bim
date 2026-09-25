@@ -51,6 +51,48 @@ router.get('/', async (_req, res) => {
   }
 });
 
+router.get('/ranking', async (req, res) => {
+  try {
+    let query = `
+      SELECT
+        r.usuario_id,
+        u.usuario_nombre,
+        u.usuario_apellido,
+        u.usuario_correo,
+        u.usuario_telefono,
+        r.evaluacion_id,
+        e.evaluacion_nombre,
+        e.empresa_id,
+        ROUND(AVG(r.nota_final), 2) AS promedio,
+        COUNT(*) AS total_preguntas,
+        MAX(r.fecha_realizacion) AS fecha_realizacion
+      FROM RespuestaEvaluacion r
+      JOIN Usuario u ON u.usuario_id = r.usuario_id
+      JOIN Evaluacion e ON e.evaluacion_id = r.evaluacion_id
+    `;
+
+    const params = [];
+
+    if (req.user.usuario_rol === 'Empresa') {
+      query += ` WHERE e.empresa_id = (SELECT empresa_id FROM Empresa WHERE usuario_admin = $1) `;
+      params.push(req.user.usuario_id);
+    }
+
+    query += `
+      GROUP BY r.usuario_id, u.usuario_nombre, u.usuario_apellido, u.usuario_correo, u.usuario_telefono,
+               r.evaluacion_id, e.evaluacion_nombre, e.empresa_id
+      ORDER BY promedio DESC
+    `;
+
+    const result = await pool.query(query, params);
+    res.json({ ranking: result.rows });
+  } catch (error) {
+    console.error('Error generando ranking:', error);
+    res.status(500).json({ message: 'No se pudo generar el ranking' });
+  }
+});
+
+
 router.get('/:id', async (req, res) => {
   const id = Number(req.params.id);
 

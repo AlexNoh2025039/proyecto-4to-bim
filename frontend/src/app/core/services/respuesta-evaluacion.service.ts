@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { RespuestaEvaluacion, RespuestaEvaluacionResponse } from '../models/respuesta-evaluacion.model';
+import { RespuestaEvaluacion, RespuestaEvaluacionResponse, RankingEvaluacion } from '../models/respuesta-evaluacion.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +17,12 @@ export class RespuestaEvaluacionService {
       map(res => res.respuestas || [])
     );
   }
+
+  getRanking(): Observable<RankingEvaluacion[]> {
+  return this.http.get<{ ranking: RankingEvaluacion[] }>(`${this.apiUrl}/ranking`).pipe(
+    map(res => res.ranking || [])
+  );
+}
 
   getRespuestaById(id: number): Observable<RespuestaEvaluacion> {
     return this.http.get<RespuestaEvaluacionResponse>(`${this.apiUrl}/${id}`).pipe(

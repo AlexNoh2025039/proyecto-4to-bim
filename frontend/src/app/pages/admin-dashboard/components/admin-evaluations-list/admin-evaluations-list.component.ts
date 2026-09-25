@@ -1,65 +1,50 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { EvaluacionService } from '../../../../core/services/evaluacion.service';
-import { Evaluacion } from '../../../../core/models/evaluacion.model';
-
-export interface EvaluacionConMetricas extends Evaluacion {
-  promedio?: number;
-  nota_minima?: number;
-  preguntas_necesarias?: number;
-  total_preguntas?: number;
-  contratable?: boolean;
-}
+import { RespuestaEvaluacionService } from '../../../../core/services/respuesta-evaluacion.service';
+import { RankingEvaluacion } from '../../../../core/models/respuesta-evaluacion.model';
 
 @Component({
   selector: 'app-admin-evaluations-list',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './admin-evaluations-list.component.html',
-  styleUrls: ['./admin-evaluations-list.component.css']
+  styleUrl: './admin-evaluations-list.component.css'
 })
-export class AdminEvaluationsListComponent implements OnInit {
-  private evaluacionService = inject(EvaluacionService);
-  private router = inject(Router);
+export class CompanyEvaluationsComponent implements OnInit {
+  // el resto del .ts que te di antes, sin cambios
+  private readonly router = inject(Router);
+  private readonly respuestaEvaluacionService = inject(RespuestaEvaluacionService);
 
-  evaluaciones: EvaluacionConMetricas[] = [];
+  private readonly NOTA_MINIMA = 70;
+
+  ranking: RankingEvaluacion[] = [];
   loading = false;
-  error: string | null = null;
+  errorMessage = '';
 
   ngOnInit(): void {
-    this.loadEvaluaciones();
+    this.loadRanking();
   }
 
-  loadEvaluaciones(): void {
+  loadRanking(): void {
     this.loading = true;
-    this.error = null;
+    this.errorMessage = '';
 
-    this.evaluacionService.getEvaluaciones().subscribe({
+    this.respuestaEvaluacionService.getRanking().subscribe({
       next: (data) => {
-        this.evaluaciones = data.map((ev, index) => {
-          const item = ev as any;
-          return {
-            ...ev,
-            promedio: item.promedio ?? Math.min(100, 70 + index * 5),
-            nota_minima: item.nota_minima ?? 75,
-            preguntas_necesarias: item.preguntas_necesarias ?? 8,
-            total_preguntas: item.total_preguntas ?? 10,
-            contratable: item.contratable ?? ((70 + index * 5) >= 75)
-          };
-        });
+        this.ranking = data;
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error al cargar evaluaciones:', err);
-        this.error = 'No se pudieron cargar las evaluaciones desde la base de datos.';
+        console.error('Error al cargar el ranking', err);
+        this.errorMessage = err?.error?.message || 'No se pudo cargar el ranking de evaluaciones.';
         this.loading = false;
       }
     });
   }
 
-  getStatusText(evaluacion: EvaluacionConMetricas): string {
-    return evaluacion.contratable ? 'Contratable' : 'No contratable';
+  esAprobado(item: RankingEvaluacion): boolean {
+    return item.promedio >= this.NOTA_MINIMA;
   }
 
   goHome(): void {

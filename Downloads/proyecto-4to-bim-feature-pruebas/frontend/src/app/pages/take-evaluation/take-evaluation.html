@@ -1,0 +1,111 @@
+<div class="evaluation-container">
+
+    <!-- VISTA 1: BIENVENIDA / INICIO -->
+    <section class="take-evaluation-page" *ngIf="estado === 'welcome'">
+        <div class="welcome-card">
+            <p class="eyebrow">Evaluación guiada</p>
+            <h2>Hola, {{ candidateName }}</h2>
+            <p>Si estás aquí es porque queremos reforzar tus habilidades antes de continuar con el proceso.</p>
+            <p class="description">{{ description }}</p>
+        </div>
+
+        <div class="evaluation-summary">
+            <div class="summary-item">
+                <label>Evaluación</label>
+                <strong>{{ evaluationName }}</strong>
+            </div>
+
+            <div class="summary-item">
+                <label>Preguntas</label>
+                <strong>{{ totalQuestions }}</strong>
+            </div>
+
+            <div class="summary-item">
+                <label>Nota mínima</label>
+                <strong>{{ requiredScore }}%</strong>
+            </div>
+        </div>
+
+        <div class="callout">
+            <p>Te pedimos responder con atención cada pregunta para mejorar tu nivel y aumentar tus posibilidades de
+                contratación.</p>
+            <button type="button" class="btn btn-primary" (click)="onStart()">
+                Iniciar evaluación &rarr;
+            </button>
+        </div>
+    </section>
+
+    <!-- VISTA 2: CUESTIONARIO / PREGUNTAS -->
+    <section class="quiz-page" *ngIf="estado === 'quiz'">
+        <header class="quiz-header">
+            <h2>{{ evaluationName }}</h2>
+            <span class="quiz-badge">Puntaje mínimo requerido: {{ requiredScore }}%</span>
+        </header>
+
+        <div class="questions-list">
+            <div class="question-card" *ngFor="let pregunta of preguntas; let i = index">
+                <h4 class="question-title">Pregunta {{ i + 1 }} de {{ preguntas.length }}</h4>
+                <p class="question-text">{{ pregunta.enunciado }}</p>
+
+                <div class="options-group">
+                    <label *ngFor="let opcion of pregunta.opciones; let j = index" class="option-item"
+                        [class.selected]="pregunta.respuestaSeleccionada === j">
+                        <input type="radio" [name]="'pregunta_' + i" [value]="j" (change)="seleccionarRespuesta(i, j)">
+                        <span>{{ opcion.texto }}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-footer">
+            <button type="button" class="btn btn-success" [disabled]="!todasRespondidas()"
+                (click)="finalizarEvaluacion()">
+                Finalizar y Enviar Evaluación
+            </button>
+            <p *ngIf="!todasRespondidas()" class="hint-text">Responde todas las preguntas para enviar tu examen.</p>
+        </div>
+    </section>
+
+    <!-- VISTA 3: RESULTADOS CON LA BARRA DE COMPATIBILIDAD -->
+    <section class="result-page" *ngIf="estado === 'result'">
+        <div class="result-card" [class.passed]="aprobado" [class.failed]="!aprobado">
+            <div class="result-icon">{{ aprobado ? '🎉' : '❌' }}</div>
+            <h2>{{ aprobado ? '¡Felicidades, Aprobaste!' : 'Evaluación No Superada' }}</h2>
+            <p class="result-subtitle">
+                {{ aprobado
+                ? 'Has alcanzado el puntaje mínimo requerido para este puesto.'
+                : 'No alcanzaste la nota mínima necesaria. Te recomendamos reforzar tus conocimientos.' }}
+            </p>
+
+            <!-- BARRA DE COMPATIBILIDAD CON LA EMPRESA -->
+            <div class="compatibility-container">
+                <div class="compatibility-header">
+                    <span class="compatibility-title">Compatibilidad con la empresa</span>
+                    <span class="compatibility-percentage">{{ compatibilidadEmpresa }}% Match</span>
+                </div>
+
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" [style.width.%]="compatibilidadEmpresa"></div>
+                </div>
+
+                <p class="compatibility-text" *ngIf="compatibilidadEmpresa >= 75">
+                    🔥 <strong>Nivel Alto de Match:</strong> Tus respuestas y perfil encajan adecuadamente con la
+                    empresa.
+                </p>
+                <p class="compatibility-text" *ngIf="compatibilidadEmpresa < 75">
+                    ⚡ <strong>Nivel Medio / Bajo de Match:</strong> Se sugiere reforzar las áreas con bajo puntaje.
+                </p>
+            </div>
+
+            <!-- CANDIDATE PROFILE VIEW -->
+            <div class="candidate-view-wrapper">
+                <app-candidate-profile-view></app-candidate-profile-view>
+            </div>
+
+            <button type="button" class="btn btn-primary btn-home" (click)="volverAlHome()">
+                Volver al Panel Principal
+            </button>
+        </div>
+    </section>
+
+</div>

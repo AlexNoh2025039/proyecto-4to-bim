@@ -1,0 +1,490 @@
+<div class="profile-page">
+
+  <!-- ================================================= -->
+  <!-- ENCABEZADO -->
+  <!-- ================================================= -->
+
+  <div class="profile-header">
+
+    <div>
+
+      <h1>Mi perfil</h1>
+
+      <p>
+        Administra tu información personal y la seguridad de tu cuenta.
+      </p>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="btn primary"
+      (click)="irAHome()"
+    >
+      Regresar al Home
+    </button>
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- MENSAJES -->
+  <!-- ================================================= -->
+
+  @if (mensaje) {
+
+    <div class="alert success">
+      {{ mensaje }}
+    </div>
+
+  }
+
+
+  @if (error) {
+
+    <div class="alert error">
+      {{ error }}
+    </div>
+
+  }
+
+
+  <!-- ================================================= -->
+  <!-- CONTENIDO -->
+  <!-- ================================================= -->
+
+  <div class="profile-grid">
+
+
+    <!-- =============================================== -->
+    <!-- FOTO -->
+    <!-- =============================================== -->
+
+    <section class="card photo-card">
+
+      <h2>Foto de perfil</h2>
+
+
+      <div class="photo-container">
+
+        @if (fotoPreview) {
+
+          <img
+            [src]="fotoPreview"
+            alt="Foto de perfil"
+            class="profile-photo"
+          >
+
+        } @else {
+
+          <div class="profile-placeholder">
+            {{ iniciales }}
+          </div>
+
+        }
+
+      </div>
+
+
+      <input
+        #fotoInput
+        type="file"
+        accept="image/png,image/jpeg,image/gif,image/webp"
+        hidden
+        (change)="seleccionarFoto($event)"
+      >
+
+
+      <div class="photo-actions">
+
+
+        <!-- SELECCIONAR FOTO -->
+
+        <button
+          type="button"
+          class="btn secondary"
+          (click)="fotoInput.click()"
+        >
+          Seleccionar imagen
+        </button>
+
+
+        <!--
+          GUARDAR FOTO
+
+          Solo aparece cuando:
+          1. Existe una imagen
+          2. La imagen todavía no ha sido guardada
+        -->
+
+        @if (fotoPreview && !fotoGuardada) {
+
+          <button
+            type="button"
+            class="btn primary"
+            [disabled]="guardandoFoto"
+            (click)="guardarFoto()"
+          >
+            {{
+              guardandoFoto
+                ? 'Guardando...'
+                : 'Guardar foto'
+            }}
+          </button>
+
+        }
+
+
+        <!-- ELIMINAR FOTO -->
+
+        @if (fotoPreview && fotoGuardada) {
+
+          <button
+            type="button"
+            class="btn danger-outline"
+            [disabled]="guardandoFoto"
+            (click)="eliminarFoto()"
+          >
+            {{
+              guardandoFoto
+                ? 'Eliminando...'
+                : 'Eliminar foto'
+            }}
+          </button>
+
+        }
+
+      </div>
+
+
+      <small>
+        PNG, JPG, GIF o WEBP. Máximo 5 MB.
+      </small>
+
+    </section>
+
+
+    <!-- =============================================== -->
+    <!-- DATOS PERSONALES -->
+    <!-- =============================================== -->
+
+    <section class="card">
+
+      <div class="card-title">
+
+        <div>
+
+          <h2>Información personal</h2>
+
+          <p>
+            Actualiza tus datos de contacto.
+          </p>
+
+        </div>
+
+
+        @if (usuario) {
+
+          <span class="role-badge">
+            {{ usuario.usuario_rol }}
+          </span>
+
+        }
+
+      </div>
+
+
+      <form
+        [formGroup]="perfilForm"
+        (ngSubmit)="guardarPerfil()"
+      >
+
+        <div class="form-grid">
+
+
+          <div class="form-field">
+
+            <label for="nombre">
+              Nombre
+            </label>
+
+            <input
+              id="nombre"
+              type="text"
+              formControlName="usuario_nombre"
+              maxlength="50"
+            >
+
+            @if (
+              perfilForm.controls.usuario_nombre.touched &&
+              perfilForm.controls.usuario_nombre.invalid
+            ) {
+
+              <small class="field-error">
+                El nombre es obligatorio y no puede superar 50 caracteres.
+              </small>
+
+            }
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="apellido">
+              Apellido
+            </label>
+
+            <input
+              id="apellido"
+              type="text"
+              formControlName="usuario_apellido"
+              maxlength="50"
+            >
+
+            @if (
+              perfilForm.controls.usuario_apellido.touched &&
+              perfilForm.controls.usuario_apellido.invalid
+            ) {
+
+              <small class="field-error">
+                El apellido es obligatorio y no puede superar 50 caracteres.
+              </small>
+
+            }
+
+          </div>
+
+
+          <div class="form-field full">
+
+            <label for="correo">
+              Correo electrónico
+            </label>
+
+            <input
+              id="correo"
+              type="email"
+              formControlName="usuario_correo"
+              maxlength="100"
+            >
+
+            @if (
+              perfilForm.controls.usuario_correo.touched &&
+              perfilForm.controls.usuario_correo.invalid
+            ) {
+
+              <small class="field-error">
+                Ingresa un correo electrónico válido.
+              </small>
+
+            }
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="telefono">
+              Teléfono
+            </label>
+
+            <input
+              id="telefono"
+              type="text"
+              formControlName="usuario_telefono"
+              maxlength="20"
+            >
+
+          </div>
+
+
+          <div class="form-field">
+
+            <label for="dpi">
+              DPI
+            </label>
+
+            <input
+              id="dpi"
+              type="text"
+              formControlName="usuario_dpi"
+              maxlength="20"
+            >
+
+          </div>
+
+
+          <div class="form-field full">
+
+            <label for="profesion">
+              Profesión
+            </label>
+
+            <input
+              id="profesion"
+              type="text"
+              formControlName="usuario_profesion"
+              maxlength="100"
+            >
+
+          </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button
+            type="submit"
+            class="btn primary"
+            [disabled]="guardandoPerfil"
+          >
+
+            {{
+              guardandoPerfil
+                ? 'Guardando...'
+                : 'Guardar cambios'
+            }}
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <!-- =============================================== -->
+    <!-- CONTRASEÑA -->
+    <!-- =============================================== -->
+
+    <section class="card security-card">
+
+      <h2>Seguridad</h2>
+
+      <p>
+        Cambia la contraseña de acceso a tu cuenta.
+      </p>
+
+
+      <form
+        [formGroup]="passwordForm"
+        (ngSubmit)="cambiarPassword()"
+      >
+
+        <div class="form-field">
+
+          <label for="passwordActual">
+            Contraseña actual
+          </label>
+
+          <input
+            id="passwordActual"
+            type="password"
+            formControlName="usuario_password_actual"
+          >
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label for="passwordNueva">
+            Nueva contraseña
+          </label>
+
+          <input
+            id="passwordNueva"
+            type="password"
+            formControlName="usuario_password_nueva"
+          >
+
+          @if (
+            passwordForm.controls.usuario_password_nueva.touched &&
+            passwordForm.controls.usuario_password_nueva.invalid
+          ) {
+
+            <small class="field-error">
+              La contraseña debe tener al menos 6 caracteres.
+            </small>
+
+          }
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label for="confirmarPassword">
+            Confirmar contraseña
+          </label>
+
+          <input
+            id="confirmarPassword"
+            type="password"
+            formControlName="confirmar_password"
+          >
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button
+            type="submit"
+            class="btn primary"
+            [disabled]="cambiandoPassword"
+          >
+
+            {{
+              cambiandoPassword
+                ? 'Actualizando...'
+                : 'Cambiar contraseña'
+            }}
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <!-- =============================================== -->
+    <!-- CUENTA -->
+    <!-- =============================================== -->
+
+    <section class="card danger-card">
+
+      <h2>Zona de peligro</h2>
+
+      <p>
+        Eliminar tu cuenta eliminará también los registros
+        relacionados por las reglas de eliminación de la base de datos.
+      </p>
+
+
+      <button
+        type="button"
+        class="btn danger"
+        [disabled]="eliminandoCuenta"
+        (click)="eliminarCuenta()"
+      >
+
+        {{
+          eliminandoCuenta
+            ? 'Eliminando...'
+            : 'Eliminar mi cuenta'
+        }}
+
+      </button>
+
+    </section>
+
+  </div>
+
+</div>

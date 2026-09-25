@@ -1,0 +1,74 @@
+<div class="user-page">
+
+  <div class="page-header">
+    <div>
+      <h1>Mis postulaciones</h1>
+      <p>Consulta el estado de tus postulaciones y cancela las que ya no te interesen.</p>
+    </div>
+    <a routerLink="/home" class="btn secondary">← Volver al inicio</a>
+  </div>
+
+  @if (mensaje) {
+    <div class="alert success">{{ mensaje }}</div>
+  }
+  @if (error) {
+    <div class="alert error">{{ error }}</div>
+  }
+
+  <section class="card">
+    @if (cargando) {
+      <div class="loading">Cargando tus postulaciones...</div>
+    } @else if (postulaciones.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3>Aún no tienes postulaciones</h3>
+        <p>Explora las vacantes disponibles y postúlate desde el detalle de cada una.</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Vacante</th>
+              <th>Empresa</th>
+              <th>Jornada</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of postulaciones; track p.postulacion_id) {
+              <tr>
+                <td><strong>{{ p.vacante_nombre || ('Vacante #' + p.vacante_id) }}</strong></td>
+                <td>{{ p.empresa_nombre || 'N/A' }}</td>
+                <td>{{ p.tipo_jornada || 'N/A' }}</td>
+                <td>{{ p.fecha_postulacion | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <span class="status"
+                    [class.pendiente]="p.estado === 'Pendiente'"
+                    [class.revision]="p.estado === 'En Revision'"
+                    [class.aceptado]="p.estado === 'Aceptado'"
+                    [class.rechazado]="p.estado === 'Rechazado'">
+                    {{ p.estado }}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn secondary small"
+                    [disabled]="!puedeCancelar(p) || cancelando"
+                    (click)="cancelarPostulacion(p)"
+                  >
+                    Cancelar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+</div>

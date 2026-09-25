@@ -1,0 +1,179 @@
+<div class="home-container" *ngIf="usuario() as user">
+
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <h1>TalentBridge</h1>
+      <span class="role-badge">{{ user.usuario_rol }}</span>
+    </div>
+    <div class="navbar-actions">
+      <button (click)="toggleNotifications()" class="btn-icon" title="Notificaciones">
+        🔔 <span class="badge" *ngIf="notificaciones.length > 0">{{ notificaciones.length }}</span>
+      </button>
+      <a routerLink="/profile" class="btn-profile">Mi Perfil</a>
+      <button (click)="onLogout()" class="btn-logout">Cerrar Sesión</button>
+    </div>
+  </nav>
+
+  <main class="content">
+
+    <header class="welcome-header">
+      <h2>¡Bienvenido, {{ user.usuario_nombre }} {{ user.usuario_apellido }}!</h2>
+      <p class="subtitle">Gestiona tus vacantes, postulaciones y cuestionarios desde tu panel central.</p>
+    </header>
+
+    <!-- PANEL DESPLEGABLE DE NOTIFICACIONES -->
+    <section class="notifications-panel" *ngIf="showNotifications()">
+      <div class="section-header">
+        <h3>Tus Notificaciones y Avisos</h3>
+        <span class="badge-count">{{ notificaciones.length }}</span>
+      </div>
+
+      <div class="notifications-list" *ngIf="notificaciones.length > 0; else noNotifs">
+        <app-notification-card *ngFor="let item of notificaciones" [notificacion]="item"
+          (toggleRead)="toggleRead($event)">
+        </app-notification-card>
+      </div>
+
+      <ng-template #noNotifs>
+        <div class="empty-state">No tienes notificaciones o avisos pendientes.</div>
+      </ng-template>
+    </section>
+
+    <!-- ACCIONES DE CANDIDATO -->
+    <section class="actions-section" *ngIf="user.usuario_rol === 'Candidato'">
+      <h3>Acciones Rápidas</h3>
+      <div class="grid-navigation">
+        <a routerLink="/candidato/curriculum" class="action-card">
+          <div class="card-icon">📄</div>
+          <h4>Formulario de CV</h4>
+          <p>Actualiza tus datos para mejorar tu compatibilidad.</p>
+          <span class="btn-navigate">Editar Datos &rarr;</span>
+        </a>
+        <a routerLink="/curriculum" class="action-card">
+          <div class="card-icon">👁️</div>
+          <h4>Mi Currículum</h4>
+          <p>Visualiza el formato final de tu perfil profesional.</p>
+          <span class="btn-navigate">Ver Currículum &rarr;</span>
+        </a>
+        <a routerLink="/candidato/postulacion" class="action-card">
+          <div class="card-icon">💼</div>
+          <h4>Mis Postulaciones</h4>
+          <p>Revisa el estado de tus postulaciones.</p>
+          <span class="btn-navigate">Ver Postulaciones &rarr;</span>
+        </a>
+        <a routerLink="/take-evaluation/1" class="action-card">
+          <div class="card-icon">📝</div>
+          <h4>Realizar Cuestionario</h4>
+          <p>Inicia las evaluaciones asignadas.</p>
+          <span class="btn-navigate">Iniciar &rarr;</span>
+        </a>
+      </div>
+
+      <div class="vacancies-section">
+        <h3>Vacantes Disponibles</h3>
+        <div *ngIf="loadingVacantes()" class="state-container"><div class="spinner"></div><p>Cargando empleos...</p></div>
+        <div *ngIf="!loadingVacantes() && vacantes().length === 0" class="state-container empty"><p>No hay vacantes disponibles.</p></div>
+        <div class="jobs-grid" *ngIf="!loadingVacantes() && vacantes().length > 0">
+          <app-job-card *ngFor="let vacante of vacantes()" [vacante]="vacante"></app-job-card>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACCIONES DE EMPRESA -->
+    <section class="actions-section" *ngIf="user.usuario_rol === 'Empresa'">
+      <h3>Gestión de Empresa</h3>
+      <div class="grid-navigation">
+        <a routerLink="/empresa/vacantes/nueva" class="action-card">
+          <div class="card-icon">➕</div>
+          <h4>Publicar Vacante</h4>
+          <p>Crea una nueva oferta laboral.</p>
+          <span class="btn-navigate">Crear Vacante &rarr;</span>
+        </a>
+        <a routerLink="/empresa/evaluaciones" class="action-card">
+          <div class="card-icon">📊</div>
+          <h4>Evaluaciones</h4>
+          <p>Consulta el historial y banco de pruebas.</p>
+          <span class="btn-navigate">Ver Banco &rarr;</span>
+        </a>
+        <a routerLink="/empresa/evaluaciones/nueva" class="action-card">
+          <div class="card-icon">📝</div>
+          <h4>Nueva Evaluación</h4>
+          <p>Diseña un nuevo cuestionario.</p>
+          <span class="btn-navigate">Crear &rarr;</span>
+        </a>
+      </div>
+
+      <!-- TABLA DE EVALUACIONES PARA LA EMPRESA -->
+      <div style="margin-top: 35px; background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+        <h3 style="margin-bottom: 15px; color: white;">Listado de Evaluaciones y Candidatos</h3>
+        
+        <div *ngIf="loadingEvaluaciones()" style="color: #38bdf8; padding: 20px; text-align: center;">Cargando datos...</div>
+
+        <table *ngIf="!loadingEvaluaciones()" style="width: 100%; border-collapse: collapse; color: white;">
+          <thead>
+            <tr style="background: #334155; text-align: left;">
+              <th style="padding: 12px;">ID</th>
+              <th style="padding: 12px;">Candidato</th>
+              <th style="padding: 12px;">Correo</th>
+              <th style="padding: 12px;">Evaluación</th>
+              <th style="padding: 12px;">Puntaje</th>
+              <th style="padding: 12px;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ev of evaluacionesEmpresa()" style="border-bottom: 1px solid #334155;">
+              <td style="padding: 12px;">{{ ev.evaluacion_id }}</td>
+              <td style="padding: 12px; font-weight: bold; color: #38bdf8;">{{ ev.nombre_candidato }}</td>
+              <td style="padding: 12px; color: #cbd5e1;">{{ ev.correo_candidato }}</td>
+              <td style="padding: 12px;">{{ ev.evaluacion_nombre }}</td>
+              <td style="padding: 12px;"><strong>{{ ev.promedio }}%</strong></td>
+              <td style="padding: 12px;" [style.color]="ev.contratable ? '#4ade80' : '#f87171'">
+                <strong>{{ ev.contratable ? 'Aprobado / Contratable' : 'Pendiente' }}</strong>
+              </td>
+            </tr>
+            <tr *ngIf="evaluacionesEmpresa().length === 0">
+              <td colspan="6" style="text-align: center; padding: 20px; color: #94a3b8;">No hay evaluaciones registradas.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="company-notif-section" style="margin-top: 30px;">
+        <h3>Enviar Notificación / Requisito a Candidato</h3>
+        <app-notifications-form></app-notifications-form>
+      </div>
+    </section>
+
+    <!-- ACCIONES DE ADMINISTRADOR (INTACTAS) -->
+    <section class="actions-section" *ngIf="user.usuario_rol === 'Administrador'">
+      <h3>Panel de Administración</h3>
+      <div class="grid-navigation">
+        <a routerLink="/admin/usuarios" class="action-card">
+          <div class="card-icon">👥</div>
+          <h4>Gestión de Usuarios</h4>
+          <p>Administra cuentas.</p>
+          <span class="btn-navigate">Administrar &rarr;</span>
+        </a>
+        <a routerLink="/admin/empresas" class="action-card">
+          <div class="card-icon">🏢</div>
+          <h4>Gestión de Empresas</h4>
+          <p>Administra empresas aliadas.</p>
+          <span class="btn-navigate">Ver Empresas &rarr;</span>
+        </a>
+        <a routerLink="/admin/evaluaciones" class="action-card">
+          <div class="card-icon">📊</div>
+          <h4>Tabla de Evaluaciones</h4>
+          <p>Visualiza el repositorio global.</p>
+          <span class="btn-navigate">Ir a Evaluaciones &rarr;</span>
+        </a>
+        <a routerLink="/admin/notificaciones" class="action-card">
+          <div class="card-icon">🔔</div>
+          <h4>Notificaciones Globales</h4>
+          <p>Gestiona avisos del sistema.</p>
+          <span class="btn-navigate">Administrar &rarr;</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+</div>

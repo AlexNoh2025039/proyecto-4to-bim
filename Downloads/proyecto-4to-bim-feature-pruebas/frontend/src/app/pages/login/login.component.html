@@ -1,0 +1,39 @@
+<div class="container">
+  <h2>Iniciar Sesión</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <!-- CORREO -->
+    <div>
+      <label for="correo">Correo Electrónico:</label>
+      <input id="correo" type="email" formControlName="usuario_correo" placeholder="ejemplo@correo.com">
+      <div *ngIf="loginForm.controls.usuario_correo.invalid && (loginForm.controls.usuario_correo.dirty || loginForm.controls.usuario_correo.touched)" class="alert error">
+        <small *ngIf="loginForm.controls.usuario_correo.errors?.['required']">El correo es obligatorio.</small>
+        <small *ngIf="loginForm.controls.usuario_correo.errors?.['email']">Formato de correo inválido.</small>
+        <small *ngIf="loginForm.controls.usuario_correo.errors?.['maxlength']">Máximo 100 caracteres.</small>
+      </div>
+    </div>
+
+    <!-- CONTRASEÑA -->
+    <div>
+      <label for="password">Contraseña:</label>
+      <input id="password" type="password" formControlName="usuario_password" placeholder="Mínimo 6 caracteres">
+      <div *ngIf="loginForm.controls.usuario_password.invalid && (loginForm.controls.usuario_password.dirty || loginForm.controls.usuario_password.touched)" class="alert error">
+        <small *ngIf="loginForm.controls.usuario_password.errors?.['required']">La contraseña es obligatoria.</small>
+        <small *ngIf="loginForm.controls.usuario_password.errors?.['minlength']">Debe tener al menos 6 caracteres.</small>
+      </div>
+    </div>
+
+    <!-- ERROR LOGIN -->
+    <div *ngIf="errorMessage()" class="alert error">
+      {{ errorMessage() }}
+    </div>
+
+    <!-- BOTON -->
+    <button type="submit" [disabled]="loginForm.invalid || isLoading()">
+      {{ isLoading() ? 'Ingresando...' : 'Ingresar' }}
+    </button>
+  </form>
+
+  <p>
+    ¿No tienes una cuenta? <a routerLink="/register">Regístrate aquí</a>
+  </p>
+</div>

@@ -1,41 +1,220 @@
-<section class="profile-shell">
-    <div class="profile-card" *ngIf="candidate; else emptyState">
-        <div class="profile-header">
-            <div>
-                <p class="eyebrow">Candidato</p>
-                <h2>{{ candidate.usuario_nombre }} {{ candidate.usuario_apellido }}</h2>
-            </div>
-            <span class="role-badge">{{ candidate.usuario_rol }}</span>
-        </div>
+<div class="admin-page">
 
-        <div class="info-grid">
-            <div><strong>Correo:</strong> {{ candidate.usuario_correo }}</div>
-            <div><strong>Teléfono:</strong> {{ candidate.usuario_telefono || 'No registrado' }}</div>
-            <div><strong>DPI:</strong> {{ candidate.usuario_dpi || 'No registrado' }}</div>
-            <div><strong>Profesión:</strong> {{ candidate.usuario_profesion || 'No registrada' }}</div>
-        </div>
-
-        <div class="curriculum-section" *ngIf="curriculums.length > 0; else noCurriculums">
-            <h3>Currículums</h3>
-            <div class="curriculum-card" *ngFor="let curriculum of curriculums">
-                <h4>{{ curriculum.curriculum_nombre }}</h4>
-                <p><strong>Categoría:</strong> {{ curriculum.categoria_interes }}</p>
-                <p><strong>Habilidades:</strong> {{ curriculum.habilidades || 'No especificadas' }}</p>
-                <p><strong>Experiencia:</strong> {{ curriculum.experiencia || 'No especificada' }}</p>
-                <p><strong>Formación:</strong> {{ curriculum.formacion || 'No especificada' }}</p>
-            </div>
-        </div>
-
-        <ng-template #noCurriculums>
-            <div class="empty-state">Este candidato aún no tiene currículums asociados.</div>
-        </ng-template>
+  <div class="page-header">
+    <div>
+      <h1>Candidatos y Postulaciones</h1>
+      <p>
+        Revisa los perfiles de los candidatos postulados, evalúa sus hojas de vida y gestiona su estado.
+      </p>
     </div>
+  </div>
 
-    <ng-template #emptyState>
-        <div class="empty-state">
-            <span *ngIf="loading">Cargando perfil...</span>
-            <span *ngIf="!loading && error">{{ error }}</span>
-            <span *ngIf="!loading && !error">No se encontró información del candidato.</span>
+  @if (mensaje) {
+    <div class="alert success">
+      {{ mensaje }}
+    </div>
+  }
+
+  @if (error) {
+    <div class="alert error">
+      {{ error }}
+    </div>
+  }
+
+  <section class="card filters-card">
+    <div class="filters-grid">
+
+      <div class="filter-field">
+        <label for="filtroBusqueda">Buscar</label>
+        <input
+          id="filtroBusqueda"
+          type="text"
+          [(ngModel)]="filtroBusqueda"
+          (ngModelChange)="aplicarFiltros()"
+          placeholder="Nombre del candidato o vacante..."
+        >
+      </div>
+
+      <div class="filter-field">
+        <label for="filtroEstado">Estado de Postulación</label>
+        <select id="filtroEstado" [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
+          <option value="">Todos los estados</option>
+          @for (e of estados; track e) {
+            <option [value]="e">{{ e }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="btn secondary" (click)="limpiarFiltros()">
+          Limpiar
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="content-grid">
+
+    <!-- TABLA DE POSTULACIONES / CANDIDATOS -->
+    <section class="card users-card">
+
+      <div class="card-header">
+        <div>
+          <h2>Postulaciones Recibidas</h2>
+          <p>
+            Mostrando {{ postulacionesFiltradas.length }} de {{ postulaciones.length }} postulaciones.
+          </p>
         </div>
-    </ng-template>
-</section>
+      </div>
+
+      @if (cargando) {
+        <div class="loading">
+          Cargando postulaciones de candidatos...
+        </div>
+      } @else if (postulacionesFiltradas.length === 0) {
+        <div class="empty-state">
+          <div class="empty-icon">👤</div>
+          <h3>No se encontraron candidatos</h3>
+          <p>Ajusta el filtro de búsqueda para ver más resultados.</p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Candidato</th>
+                <th>Vacante</th>
+                <th>Compatibilidad</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of postulacionesFiltradas; track p.postulacion_id) {
+                <tr [class.selected-row]="postulacionSeleccionada?.postulacion_id === p.postulacion_id">
+                  <td>#{{ p.postulacion_id }}</td>
+                  <td>
+                    <strong>{{ obtenerNombreCandidato(p.usuario_id) }}</strong>
+                  </td>
+                  <td>
+                    {{ obtenerNombreVacante(p.vacante_id) }}
+                  </td>
+                  <td>
+                    <span class="badge compatibility">
+                      {{ p.porcentaje_compatibilidad }}%
+                    </span>
+                  </td>
+                  <td>
+                    {{ p.fecha_postulacion | date:'dd/MM/yyyy' }}
+                  </td>
+                  <td>
+                    <span class="status-pill" [class]="p.estado.toLowerCase().replace(' ', '-')">
+                      {{ p.estado }}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn primary sm"
+                      (click)="verDetalleCandidato(p)"
+                    >
+                      Ver Perfil
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+    </section>
+
+    <!-- PANEL LATERAL DE DETALLE DE CANDIDATO & CV -->
+    @if (postulacionSeleccionada) {
+      <section class="card editor-card">
+
+        <div class="card-header editor-header">
+          <div>
+            <h2>Perfil del Candidato</h2>
+            <p>{{ obtenerNombreCandidato(postulacionSeleccionada.usuario_id) }}</p>
+          </div>
+          <button type="button" class="close-button" (click)="cerrarDetalle()">×</button>
+        </div>
+
+        <div class="candidate-details">
+
+          <!-- Información General del Usuario -->
+          <div class="detail-section">
+            <h3>Información General</h3>
+            @if (candidatoSeleccionado) {
+              <p><strong>Correo:</strong> {{ candidatoSeleccionado.usuario_correo }}</p>
+              <p><strong>Teléfono:</strong> {{ candidatoSeleccionado.usuario_telefono || 'No especificado' }}</p>
+              <p><strong>Profesión:</strong> {{ candidatoSeleccionado.usuario_profesion || 'No especificada' }}</p>
+            } @else {
+              <p>Candidato ID: {{ postulacionSeleccionada.usuario_id }}</p>
+            }
+          </div>
+
+          <!-- Información de la Vacante -->
+          <div class="detail-section">
+            <h3>Vacante Postulada</h3>
+            <p><strong>Título:</strong> {{ vacanteSeleccionada?.vacante_nombre || 'N/A' }}</p>
+            <p><strong>Compatibilidad Calculada:</strong> {{ postulacionSeleccionada.porcentaje_compatibilidad }}%</p>
+          </div>
+
+          <!-- Hoja de Vida / Currículum -->
+          <div class="detail-section">
+            <h3>Currículum</h3>
+            @if (curriculumSeleccionado) {
+              <p><strong>Título CV:</strong> {{ curriculumSeleccionado.curriculum_nombre }}</p>
+              <p><strong>Categoría:</strong> {{ curriculumSeleccionado.categoria_interes }}</p>
+              
+              <div class="cv-block">
+                <h4>Habilidades</h4>
+                <p>{{ curriculumSeleccionado.habilidades || 'Sin especificar' }}</p>
+              </div>
+
+              <div class="cv-block">
+                <h4>Experiencia</h4>
+                <p>{{ curriculumSeleccionado.experiencia || 'Sin especificar' }}</p>
+              </div>
+
+              <div class="cv-block">
+                <h4>Formación Académica</h4>
+                <p>{{ curriculumSeleccionado.formacion || 'Sin especificar' }}</p>
+              </div>
+            } @else {
+              <p class="sub-text">El candidato no ha adjuntado o configurado un currículum detallado en el sistema.</p>
+            }
+          </div>
+
+          <!-- Cambio de Estado -->
+          <div class="detail-section status-actions">
+            <h3>Gestionar Estado de Postulación</h3>
+            <div class="status-buttons">
+              @for (est of estados; track est) {
+                <button
+                  type="button"
+                  class="btn-status"
+                  [class.active]="postulacionSeleccionada.estado === est"
+                  [disabled]="actualizandoEstado"
+                  (click)="cambiarEstadoPostulacion(est)"
+                >
+                  {{ est }}
+                </button>
+              }
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+    }
+
+  </div>
+
+</div>

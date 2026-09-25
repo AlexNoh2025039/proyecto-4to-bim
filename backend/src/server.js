@@ -2,9 +2,6 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
-process.env.JWT_SECRET ||= 'talentbridge-dev-secret-change-me';
-process.env.PORT ||= '3000';
-
 import usuarioRoutes from './routes/UsuarioRouter.js';
 import empresaRoutes from './routes/EmpresaRouter.js';
 import curriculumRoutes from './routes/CurriculumRouter.js';

@@ -10,6 +10,7 @@ export interface Vacante {
   fecha_publicacion?: string;
   estado?: boolean;
   empresa_id: number;
+  empresa_nombre?: string;
 }
 
 export interface VacanteResponse {

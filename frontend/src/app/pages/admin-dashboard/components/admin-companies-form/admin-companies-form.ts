@@ -124,8 +124,6 @@ export class AdminCompaniesComponent implements OnInit {
     });
   }
 
-  aplicarFiltros(): void {
-  }
 
   editarEmpresa(empresa: Empresa): void {
     this.empresaSeleccionada = empresa;

@@ -1,12 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { Vacante, VacanteResponse } from '../../core/models/vacante.model';
-import { Empresa, EmpresaResponse } from '../../core/models/empresa.model';
-import { Postulacion, PostulacionesResponse } from '../../core/models/postulacion.model';
+import { finalize } from 'rxjs/operators';
 import { VacanteService } from '../../core/services/vacante.service';
-import { EmpresaService } from '../../core/services/empresa.service';
 import { PostulacionService } from '../../core/services/postulacion.service';
+import { Vacante, VacanteResponse } from '../../core/models/vacante.model';
 
 @Component({
   selector: 'app-job-detail',
@@ -17,99 +15,88 @@ import { PostulacionService } from '../../core/services/postulacion.service';
 })
 export class JobDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly detector = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
   private readonly vacanteService = inject(VacanteService);
-  private readonly empresaService = inject(EmpresaService);
   private readonly postulacionService = inject(PostulacionService);
 
   vacante: Vacante | null = null;
-  empresa: Empresa | null = null;
-  miPostulacion: Postulacion | null = null;
+  
+  loading: boolean = true;
+  postulando: boolean = false;
+  yaPostulado: boolean = false;
 
-  loading = true;
-  postulando = false;
-  errorMsg = '';
-  successMsg = '';
+  errorMsg: string = '';
+  successMsg: string = '';
 
   ngOnInit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const id = Number(idParam);
-
-    if (!idParam || !Number.isInteger(id) || id <= 0) {
-      this.errorMsg = 'ID de vacante no válido.';
-      this.loading = false;
-      return;
-    }
-
-    this.cargarVacante(id);
+ const id = Number(this.route.snapshot.paramMap.get('id'));
+ if(id){
+  this.cargarDetalleVacante(id);
+ }
   }
 
-  cargarVacante(id: number): void {
+  cargarDetalleVacante(id: number): void {
     this.loading = true;
-    this.errorMsg = '';
 
-    this.vacanteService.getVacanteById(id).subscribe({
-      next: (res: VacanteResponse) => {
-        this.vacante = res.vacante;
-        this.cargarEmpresa(this.vacante.empresa_id);
-        this.verificarPostulacionExistente(id);
-      },
-      error: (err) => {
-        console.error('Error al cargar la vacante', err);
-        this.errorMsg = err?.error?.message || 'No se encontró la vacante solicitada.';
-        this.loading = false;
-      }
-    });
-  }
+    this.vacanteService.getVacanteById(id)
+      .pipe(
+        finalize(() => {
+          this.loading = false;
+          this.detector.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (res: any) => {
 
-  cargarEmpresa(empresa_id: number): void {
-    this.empresaService.getEmpresaById(empresa_id).subscribe({
-      next: (res: EmpresaResponse) => {
-        this.empresa = res.empresa;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar la empresa', err);
-        this.loading = false;
-      }
-    });
-  }
+console.log('respuesta: ', res)
 
-  verificarPostulacionExistente(vacante_id: number): void {
-    this.postulacionService.getPostulaciones().subscribe({
-      next: (res: PostulacionesResponse) => {
-        const propias = res.postulaciones || [];
-        this.miPostulacion = propias.find(p => p.vacante_id === vacante_id) || null;
-      },
-      error: (err) => {
-        console.error('Error al verificar postulaciones existentes', err);
-      }
-    });
+         if(res && res.vacante){
+          this.vacante = res.vacante;
+         }else {
+          this.vacante = res;
+         }
+
+         this.detector.detectChanges();
+        },
+        error: (err) => {
+          console.error('Fallo HTTP: ', err);
+          this.errorMsg = 'No se pudo obtener la vacante';
+          this.detector.detectChanges();
+        }
+      });
   }
 
   postularme(): void {
-    if (!this.vacante?.vacante_id || this.postulando || this.miPostulacion) {
-      return;
-    }
+    if (!this.vacante?.vacante_id) return;
 
+    this.postulando = true;
     this.errorMsg = '';
     this.successMsg = '';
-    this.postulando = true;
 
-    this.postulacionService.postPostulacion({ vacante_id: this.vacante.vacante_id }).subscribe({
-      next: (res) => {
-        this.miPostulacion = res.postulacion;
-        this.successMsg = 'Te has postulado correctamente a esta vacante.';
-        this.postulando = false;
-      },
-      error: (err) => {
-        this.errorMsg = err?.error?.message || 'No se pudo registrar tu postulación.';
-        this.postulando = false;
-      }
-    });
-  }
+    const payload = {
+      vacante_id: Number(this.vacante.vacante_id),
+      porcentaje_compatibilidad: 0
+    };
 
-  volver(): void {
-    this.router.navigate(['/home']);
+    this.postulacionService.postPostulacion(payload)
+      .pipe(
+        finalize(() => {
+          this.postulando = false;
+          this.detector.detectChanges();
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.successMsg = 'Te has postulado exitosamente a esta oferta.';
+          this.yaPostulado = true;
+          this.detector.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error al postularse:', err);
+          this.errorMsg = err?.error?.message || 'No se pudo completar la postulacion.';
+          this.detector.detectChanges();
+        }
+      });
   }
 }

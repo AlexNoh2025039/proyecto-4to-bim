@@ -65,7 +65,7 @@ export const routes: Routes = [
   },
   {
     path: 'job-detail/:id',
-    canActivate: [authGuard, roleGuard(['Candidato'])],
+    canActivate: [authGuard, roleGuard(['Candidato', 'Administrador'])],
     loadComponent: () =>
       import('./pages/job-detail/job-detail').then(m => m.JobDetailComponent)
   },
@@ -104,7 +104,7 @@ export const routes: Routes = [
       {
         path: 'usuarios',
         loadComponent: () =>
-          import('./pages/admin-dashboard/components/admin-users-form/admin-users-form').then(m => m.AdminUsersForm)
+          import('./pages/admin-dashboard/components/admin-users-form/admin-users-form.component').then(m => m.AdminUsersComponent)
       },
       {
         path: 'notificaciones',
@@ -125,7 +125,7 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard(['Empresa'])],
     children: [
       {
-        path: 'candidato/:id',
+        path: 'candidatos',
         loadComponent: () =>
           import('./pages/companies-dashboard/components/candidate-profile-view/candidate-profile-view').then(m => m.CandidateProfileView)
       },

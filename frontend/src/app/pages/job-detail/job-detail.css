@@ -1,162 +1,159 @@
-.detail-container {
+/* Contenedor General */
+.job-detail-container {
   max-width: 900px;
-  margin: 0 auto;
-  padding: 32px 16px;
+  margin: 40px auto;
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-.state-message {
-  text-align: center;
-  padding: 48px 0;
-  font-size: 1.1rem;
-  color: #4b5563;
-}
-
-.state-message.error {
-  color: #dc2626;
-}
-
-.back-navigation {
-  margin-bottom: 20px;
+/* Encabezado */
+.job-header {
+  margin-bottom: 24px;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 16px;
 }
 
 .back-link {
-  color: #2563eb;
+  display: inline-block;
+  color: #4f46e5;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
 }
 
 .back-link:hover {
   text-decoration: underline;
 }
 
-.detail-content {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 32px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #f3f4f6;
-}
-
 .title {
-  font-size: 1.875rem;
-  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
   color: #111827;
+  margin: 0;
 }
 
-.company {
-  font-size: 1.25rem;
-  margin: 6px 0 0 0;
-  color: #4b5563;
-  font-weight: 400;
+.company-name {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin-top: 6px;
+}
+
+/* Etiquetas / Badges */
+.job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
 }
 
 .badge {
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-color: #f3f4f6;
+  color: #374151;
 }
 
-.badge.active {
-  background-color: #d1fae5;
-  color: #065f46;
+.badge.salary {
+  background-color: #ecfdf5;
+  color: #047857;
 }
 
-.badge.inactive {
-  background-color: #fee2e2;
-  color: #991b1b;
+.badge.category {
+  background-color: #eef2ff;
+  color: #3730a3;
 }
 
-.metadata-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin: 24px 0;
-  padding: 16px;
-  background-color: #f9fafb;
-  border-radius: 6px;
-}
-
-.meta-item {
+/* Cuerpo y Secciones */
+.job-body {
   display: flex;
   flex-direction: column;
-}
-
-.meta-label {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: #6b7280;
-  letter-spacing: 0.05em;
-}
-
-.meta-value {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-top: 4px;
-}
-
-.section {
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #f3f4f6;
+  gap: 24px;
 }
 
 .section h3 {
-  font-size: 1.25rem;
-  margin-bottom: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
   color: #111827;
+  margin-bottom: 8px;
 }
 
 .description-text {
   line-height: 1.6;
-  color: #374151;
+  color: #4b5563;
   white-space: pre-line;
+  margin: 0;
 }
 
-.contact-details {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  color: #4b5563;
+/* Acciones y Botones */
+.job-actions {
+  margin-top: 16px;
 }
 
 .btn {
-  padding: 8px 16px;
-  border-radius: 6px;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn.primary {
+  background-color: #4f46e5;
+  color: #ffffff;
+}
+
+.btn.primary:hover:not(:disabled) {
+  background-color: #4338ca;
+}
+
+.btn.secondary {
+  background-color: #f3f4f6;
+  color: #1f2937;
   text-decoration: none;
   display: inline-block;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mensajes de Alerta y Estados */
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 500;
   margin-top: 12px;
 }
 
-.btn-secondary {
-  background-color: #e5e7eb;
-  color: #374151;
-}
-
-.already-applied {
-  margin-top: 12px;
-  color: #4b5563;
-}
-
-.state-message.inline {
-  padding: 12px 0;
-  text-align: left;
-}
-
-.state-message.success {
+.alert.success {
+  background-color: #ecfdf5;
   color: #047857;
+  border: 1px solid #a7f3d0;
 }
 
-.apply-section {
-  margin-top: 24px;
+.alert.error {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.loading p.error {
+  color: #dc2626;
+  font-weight: 600;
+  margin-bottom: 16px;
 }

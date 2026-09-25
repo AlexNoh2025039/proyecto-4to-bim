@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { finalize } from 'rxjs/operators';
 import { Vacante, VacanteResponse, VacantesResponse } from '../../../../core/models/vacante.model';
 import { Empresa, EmpresasResponse } from '../../../../core/models/empresa.model';
 import { VacanteService } from '../../../../core/services/vacante.service';
@@ -90,22 +91,26 @@ export class CompaniesVacanciesFormComponent implements OnInit {
     this.cargando = true;
     this.error = '';
 
-    this.vacanteService.getVacantes().subscribe({
-      next: (response: VacantesResponse) => {
-        let lista = response.vacantes || response;
+    this.vacanteService.getVacantes()
+      .pipe(
+        finalize(() => {
+          this.cargando = false;
+        })
+      )
+      .subscribe({
+        next: (response: VacantesResponse) => {
+          let lista = response.vacantes || response;
 
-        if (!this.esAdmin && this.empresaIdUsuario) {
-          lista = lista.filter(v => v.empresa_id === this.empresaIdUsuario);
+          if (!this.esAdmin && this.empresaIdUsuario) {
+            lista = lista.filter(v => v.empresa_id === this.empresaIdUsuario);
+          }
+
+          this.vacantes = lista;
+        },
+        error: (err) => {
+          this.error = err?.error?.message || 'No se pudieron cargar las vacantes.';
         }
-
-        this.vacantes = lista;
-        this.cargando = false;
-      },
-      error: (err) => {
-        this.error = err?.error?.message || 'No se pudieron cargar las vacantes.';
-        this.cargando = false;
-      }
-    });
+      });
   }
 
   get vacantesFiltradas(): Vacante[] {
@@ -177,6 +182,8 @@ export class CompaniesVacanciesFormComponent implements OnInit {
     this.mostrarFormulario = false;
     this.vacanteSeleccionada = null;
 
+    const idEmpresaDefault = this.empresaIdUsuario ?? (this.empresas[0]?.empresa_id || 1);
+
     this.vacanteForm.reset({
       vacante_nombre: '',
       vacante_descripcion: '',
@@ -186,7 +193,7 @@ export class CompaniesVacanciesFormComponent implements OnInit {
       ubicacion: '',
       tipo_jornada: 'Tiempo Completo',
       estado: true,
-      empresa_id: 1
+      empresa_id: idEmpresaDefault
     });
   }
 
@@ -216,27 +223,31 @@ export class CompaniesVacanciesFormComponent implements OnInit {
         empresa_id: value.empresa_id
       };
 
-      this.vacanteService.putVacante(this.vacanteSeleccionada.vacante_id, dataActualizar).subscribe({
-        next: (response: VacanteResponse) => {
-          this.mensaje = 'Vacante actualizada correctamente.';
-          const vacanteActualizada = response.vacante || response;
+      this.vacanteService.putVacante(this.vacanteSeleccionada.vacante_id, dataActualizar)
+        .pipe(
+          finalize(() => {
+            this.guardando = false;
+          })
+        )
+        .subscribe({
+          next: (response: VacanteResponse) => {
+            this.mensaje = 'Vacante actualizada correctamente.';
+            const vacanteActualizada = response.vacante || response;
 
-          const index = this.vacantes.findIndex(
-            (item) => item.vacante_id === this.vacanteSeleccionada?.vacante_id
-          );
+            const index = this.vacantes.findIndex(
+              (item) => item.vacante_id === this.vacanteSeleccionada?.vacante_id
+            );
 
-          if (index !== -1) {
-            this.vacantes[index] = vacanteActualizada;
+            if (index !== -1) {
+              this.vacantes[index] = vacanteActualizada;
+            }
+
+            this.vacanteSeleccionada = vacanteActualizada;
+          },
+          error: (err) => {
+            this.error = err?.error?.message || 'No se pudo actualizar la vacante.';
           }
-
-          this.vacanteSeleccionada = vacanteActualizada;
-          this.guardando = false;
-        },
-        error: (err) => {
-          this.error = err?.error?.message || 'No se pudo actualizar la vacante.';
-          this.guardando = false;
-        }
-      });
+        });
     } else {
       const dataCrear: Vacante = {
         vacante_nombre: value.vacante_nombre.trim(),
@@ -250,20 +261,24 @@ export class CompaniesVacanciesFormComponent implements OnInit {
         empresa_id: value.empresa_id
       };
 
-      this.vacanteService.postVacante(dataCrear).subscribe({
-        next: (response: VacanteResponse) => {
-          this.mensaje = 'Vacante publicada correctamente.';
-          const nuevaVacante = response.vacante || response;
+      this.vacanteService.postVacante(dataCrear)
+        .pipe(
+          finalize(() => {
+            this.guardando = false;
+          })
+        )
+        .subscribe({
+          next: (response: VacanteResponse) => {
+            this.mensaje = 'Vacante publicada correctamente.';
+            const nuevaVacante = response.vacante || response;
 
-          this.vacantes.unshift(nuevaVacante);
-          this.cerrarFormulario();
-          this.guardando = false;
-        },
-        error: (err) => {
-          this.error = err?.error?.message || 'No se pudo publicar la vacante.';
-          this.guardando = false;
-        }
-      });
+            this.vacantes.unshift(nuevaVacante);
+            this.cerrarFormulario();
+          },
+          error: (err) => {
+            this.error = err?.error?.message || 'No se pudo publicar la vacante.';
+          }
+        });
     }
   }
 
@@ -271,7 +286,7 @@ export class CompaniesVacanciesFormComponent implements OnInit {
     if (!vacante.vacante_id) return;
 
     const confirmar = window.confirm(
-      `¿Está seguro de eliminar la vacante "${vacante.vacante_nombre}"?`
+      `Esta seguro de eliminar la vacante "${vacante.vacante_nombre}"?`
     );
 
     if (!confirmar) return;
@@ -280,22 +295,26 @@ export class CompaniesVacanciesFormComponent implements OnInit {
     this.error = '';
     this.eliminando = true;
 
-    this.vacanteService.deleteVacante(vacante.vacante_id).subscribe({
-      next: () => {
-        this.vacantes = this.vacantes.filter((item) => item.vacante_id !== vacante.vacante_id);
+    this.vacanteService.deleteVacante(vacante.vacante_id)
+      .pipe(
+        finalize(() => {
+          this.eliminando = false;
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.vacantes = this.vacantes.filter((item) => item.vacante_id !== vacante.vacante_id);
 
-        if (this.vacanteSeleccionada?.vacante_id === vacante.vacante_id) {
-          this.cerrarFormulario();
+          if (this.vacanteSeleccionada?.vacante_id === vacante.vacante_id) {
+            this.cerrarFormulario();
+          }
+
+          this.mensaje = 'Vacante eliminada correctamente.';
+        },
+        error: (err) => {
+          this.error = err?.error?.message || 'No se pudo eliminar la vacante.';
         }
-
-        this.mensaje = 'Vacante eliminada correctamente.';
-        this.eliminando = false;
-      },
-      error: (err) => {
-        this.error = err?.error?.message || 'No se pudo eliminar la vacante.';
-        this.eliminando = false;
-      }
-    });
+      });
   }
 
   obtenerNombreEmpresa(empresa_id: number): string {

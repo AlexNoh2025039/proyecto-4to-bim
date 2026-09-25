@@ -28,9 +28,7 @@
     <div class="filters-grid">
 
       <div class="filter-field">
-        <label for="busqueda">
-          Buscar
-        </label>
+        <label for="busqueda">Buscar</label>
         <input
           id="busqueda"
           type="text"
@@ -40,9 +38,7 @@
       </div>
 
       <div class="filter-field">
-        <label for="jornada">
-          Jornada
-        </label>
+        <label for="jornada">Jornada</label>
         <select id="jornada" [(ngModel)]="filtroJornada">
           <option value="">Todas las jornadas</option>
           @for (jornada of jornadas; track jornada) {
@@ -52,9 +48,7 @@
       </div>
 
       <div class="filter-field">
-        <label for="estado">
-          Estado
-        </label>
+        <label for="estado">Estado</label>
         <select id="estado" [(ngModel)]="filtroEstado">
           <option value="">Todos</option>
           <option value="true">Activas</option>
@@ -329,10 +323,10 @@
             </div>
 
             <div class="form-field">
-              <label for="estado">
+              <label for="form_estado">
                 Estado
               </label>
-              <select id="estado" formControlName="estado">
+              <select id="form_estado" formControlName="estado">
                 <option [ngValue]="true">Activa</option>
                 <option [ngValue]="false">Inactiva</option>
               </select>
